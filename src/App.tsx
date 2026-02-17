@@ -1,26 +1,37 @@
+import { useLayoutEffect, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
-import { toggleSidebar } from "./features/ui/uiSlice";
+import { observeAuthState } from "./services/firebase/authService";
+import { setUser } from "./features/auth/authSlice";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   const dispatch = useAppDispatch();
-  const isSidebarOpen = useAppSelector((state) => state.ui.isSidebarOpen);
+  const theme = useAppSelector((state) => state.ui.theme);
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">147RuleSmartTodo</h1>
+  // Apply theme to DOM before paint using useLayoutEffect
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
-      <button
-        onClick={() => dispatch(toggleSidebar())}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-      >
-        Toggle Sidebar
-      </button>
 
-      <p className="mt-2">
-        Sidebar Status: {isSidebarOpen ? "Open" : "Closed"}
-      </p>
-    </div>
-  );
+  useEffect(() => {
+    const unsubscribe = observeAuthState((firebaseUser) => {
+      if (firebaseUser) {
+        dispatch(
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+          })
+        );
+      } else {
+        dispatch(setUser(null));
+      }
+    });
+    return () => unsubscribe();
+  }, [dispatch]);
+
+  return <AppRoutes />;
 }
 
 export default App;
