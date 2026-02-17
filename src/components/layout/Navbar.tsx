@@ -22,7 +22,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
         </button>
 
         <h1 className="text-lg font-semibold tracking-tight">
-          147RuleSmartTodo
+          Smart Todo
         </h1>
       </div>
 
