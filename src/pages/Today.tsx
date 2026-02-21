@@ -1,17 +1,49 @@
+import { useEffect } from "react";
 import PageWrapper from "../components/layout/PageWrapper";
 import TodoCard from "../components/todos/TodoCard";
-import type { Todo } from "../types/todo";
-
-const todayTodos: Todo[] = [];
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { fetchTodos } from "../features/todos/todoThunks";
+import { isTodayDate } from "../utils/dateUtils";
 
 const Today = () => {
+  const dispatch = useAppDispatch();
+  const allTodos = useAppSelector((state) => state.todo.todos);
+  const loading = useAppSelector((state) => state.todo.loading);
+  const error = useAppSelector((state) => state.todo.error);
+  const isAuthChecked = useAppSelector(
+    (state) => state.auth.isAuthChecked
+  );
+
+  useEffect(() => {
+    if (isAuthChecked) {
+      dispatch(fetchTodos());
+    }
+  }, [isAuthChecked, dispatch]);
+
+  const todayTodos = allTodos.filter((todo) => {
+    if (todo.seriesDates && todo.seriesDates.length > 0) {
+      return todo.seriesDates.some((d) => isTodayDate(d));
+    }
+    return isTodayDate(todo.scheduledDate);
+  });
+
   return (
     <PageWrapper>
-      <h2 className="text-2xl font-semibold tracking-tight">
+      <h2 className="text-2xl font-semibold tracking-tight mb-6">
         Today's Tasks
       </h2>
 
-      {todayTodos.length === 0 ? (
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4 text-sm text-red-700 dark:text-red-100 mb-6">
+          Error loading tasks: {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] rounded-xl p-8 text-center text-gray-500 dark:text-gray-400">
+          Loading tasks...
+        </div>
+      ) : todayTodos.length === 0 ? (
         <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] rounded-xl p-8 text-center text-gray-500 dark:text-gray-400">
           No tasks scheduled for today.
         </div>

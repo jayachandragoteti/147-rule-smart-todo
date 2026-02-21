@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { Todo } from "../../types/todo";
-import { createTodo, fetchTodos } from "./todoThunks";
+import { createTodo, fetchTodos, updateTodo } from "./todoThunks";
 
 interface TodoState {
   todos: Todo[];
@@ -48,6 +48,23 @@ export const todoSlice = createSlice({
         state.error =
           (action.payload as string) || "Failed to create todo";
       });
+      // Update todo
+      builder
+        .addCase(updateTodo.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(updateTodo.fulfilled, (state, action) => {
+          state.loading = false;
+          // replace the updated todo in state
+          state.todos = state.todos.map((t) =>
+            t.id === action.payload.id ? action.payload : t
+          );
+        })
+        .addCase(updateTodo.rejected, (state, action) => {
+          state.loading = false;
+          state.error = (action.payload as string) || "Failed to update todo";
+        });
   },
 });
 

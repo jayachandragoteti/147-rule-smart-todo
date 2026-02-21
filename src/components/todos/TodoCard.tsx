@@ -25,9 +25,20 @@ const TodoCard = ({ todo }: Props) => {
 
       <div className="p-4 space-y-3">
         <div className="flex justify-between items-start">
-          <h3 className="font-semibold text-sm">
-            {todo.title}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-sm">
+              {todo.title}
+            </h3>
+            {todo.seriesDates && todo.seriesDates.length > 0 && (() => {
+              const idx = todo.seriesDates.findIndex(d => new Date(d).toISOString() === new Date(todo.scheduledDate).toISOString());
+              const label = idx === 0 ? "Orig" : (idx > 0 ? `Day ${[4,7][idx-1] || idx}` : "Series");
+              return (
+                <span className="text-[10px] px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-md">
+                  {label}
+                </span>
+              );
+            })()}
+          </div>
 
           <span className={`text-xs px-2 py-1 rounded-md ${statusStyles[todo.status]}`}>
             {todo.status}

@@ -2,6 +2,9 @@ import {
   collection,
   addDoc,
   getDocs,
+  doc,
+  updateDoc,
+  getDoc,
 } from "firebase/firestore";
 import type { Todo } from "../../types/todo";
 import { db } from "./firebase";
@@ -37,5 +40,28 @@ export const createTodoInFirestore = async (
     id: docRef.id,
     ...todo,
     createdAt,
+  };
+};
+
+export const updateTodoInFirestore = async (
+  uid: string,
+  id: string,
+  updates: Partial<NewTodo & { status?: string; apply147Rule?: boolean }>
+): Promise<Todo> => {
+  const docRef = doc(db, "users", uid, "todos", id);
+  await updateDoc(docRef, updates as any);
+
+  // return the latest document
+  const snap = await getDoc(docRef);
+  if (!snap.exists()) {
+    throw new Error("Todo not found");
+  }
+
+  const data = snap.data() as any;
+  // ensure we don't accidentally overwrite id if it's present in document data
+  const { id: _docId, ...rest } = data;
+  return {
+    id: snap.id,
+    ...(rest as Omit<Todo, "id">),
   };
 };

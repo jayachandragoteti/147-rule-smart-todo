@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { Todo } from "../../types/todo";
 import { createTodoInFirestore, fetchTodosFromFirestore } from "../../services/firebase/todoService";
+import { updateTodoInFirestore } from "../../services/firebase/todoService";
 import type { RootState } from "../../app/store";
 
 type NewTodo = Omit<Todo, "id" | "createdAt">;
@@ -43,11 +44,7 @@ export const createTodo = createAsyncThunk<
     const baseDate = new Date(todoData.scheduledDate);
     const baseISODate = baseDate.toISOString();
 
-    todosToCreate.push({
-      ...todoData,
-      scheduledDate: baseISODate,
-    });
-
+    // If applying 147 rule, create a single document that stores all series dates
     if (todoData.apply147Rule) {
       const day4 = new Date(baseDate);
       day4.setDate(baseDate.getDate() + 4);
@@ -57,12 +54,13 @@ export const createTodo = createAsyncThunk<
 
       todosToCreate.push({
         ...todoData,
-        scheduledDate: day4.toISOString(),
+        scheduledDate: baseISODate,
+        seriesDates: [baseISODate, day4.toISOString(), day7.toISOString()],
       });
-
+    } else {
       todosToCreate.push({
         ...todoData,
-        scheduledDate: day7.toISOString(),
+        scheduledDate: baseISODate,
       });
     }
 
@@ -76,6 +74,27 @@ export const createTodo = createAsyncThunk<
     return savedTodos;
   } catch (error: any) {
     console.error("Error creating todo:", error.message);
+    return thunkAPI.rejectWithValue(error.message);
+  }
+});
+
+export const updateTodo = createAsyncThunk<
+  Todo,
+  { id: string; updates: Partial<NewTodo & { status?: string; apply147Rule?: boolean }> },
+  { state: RootState }
+>("todo/updateTodo", async ({ id, updates }, thunkAPI) => {
+  try {
+    const state = thunkAPI.getState();
+    const uid = state.auth.user?.uid;
+
+    if (!uid) {
+      throw new Error("User not authenticated");
+    }
+
+    const updated = await updateTodoInFirestore(uid, id, updates);
+    return updated;
+  } catch (error: any) {
+    console.error("Error updating todo:", error.message);
     return thunkAPI.rejectWithValue(error.message);
   }
 });
