@@ -22,9 +22,13 @@ body,
   height: 100%;
 }
 
-/* DO NOT use @apply with custom utilities */
+/* Light */
 body {
-  background-color: rgb(var(--app-bg));
-  color: rgb(var(--text-primary));
-  transition: background-color 0.3s ease, color 0.3s ease;
+  @apply bg-gray-50 text-gray-900 antialiased transition-colors duration-300;
+}
+
+/* Dark */
+.dark body {
+  background-color: #0f172a;
+  color: #e5e7eb;
 }

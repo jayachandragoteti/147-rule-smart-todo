@@ -1,32 +1,30 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import Layout from "../components/layout/Layout";
+import Dashboard from "../pages/Dashboard";
+import Today from "../pages/Today";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
-import Dashboard from "../pages/Dashboard";
-import ProtectedRoute from "./ProtectedRoute";
-import Layout from "../components/layout/Layout";
-import Today from "../pages/Today";
+import TodoDetails from "../pages/TodoDetails";
+import Todos from "../pages/Todos";
+import CreateTodo from "../pages/CreateTodo";
 
-export default function AppRoutes() {
+
+const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-
-      {/* Protected Routes with Layout */}
-      <Route
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
+      <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/today" element={<Today />} />
+        <Route path="/todos" element={<Todos />} />
+        <Route path="/todo/:id" element={<TodoDetails />} />
         {/* <Route path="/learning" element={<Learning />} /> */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-
+        <Route path="/create-todo" element={<CreateTodo />} />
       </Route>
+
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
     </Routes>
   );
-}
+};
+
+export default AppRoutes;

@@ -6,7 +6,7 @@ interface SidebarProps {
 
 const Sidebar = ({ onNavigate }: SidebarProps) => {
   const linkStyle = ({ isActive }: { isActive: boolean }) =>
-    `block px-4 py-2 rounded-md text-sm font-medium transition
+    `block px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer
      ${
        isActive
          ? "bg-gray-200 dark:bg-[#1f2937]"
@@ -18,11 +18,11 @@ const Sidebar = ({ onNavigate }: SidebarProps) => {
       <NavLink to="/" className={linkStyle} onClick={onNavigate}>
         Dashboard
       </NavLink>
-
       <NavLink to="/today" className={linkStyle} onClick={onNavigate}>
         Today
       </NavLink>
-
+      <NavLink to="/create-todo" className={linkStyle} onClick={onNavigate}>Add todo</NavLink>
+      
       <NavLink to="/learning" className={linkStyle} onClick={onNavigate}>
         Learning
       </NavLink>

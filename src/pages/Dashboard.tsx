@@ -1,21 +1,19 @@
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { logoutThunk } from "../features/auth/authThunks";
+import PageWrapper from "../components/layout/PageWrapper";
 
-export default function Dashboard() {
-  const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.auth.user);
-
+const Dashboard = () => {
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-      <p className="mt-2">Welcome: {user?.email}</p>
+    <PageWrapper>
+      <h2 className="text-2xl font-semibold tracking-tight">
+        Dashboard
+      </h2>
 
-      <button
-        onClick={() => dispatch(logoutThunk())}
-        className="mt-4 bg-red-600 text-white px-4 py-2 rounded"
-      >
-        Logout
-      </button>
-    </div>
+      <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] rounded-xl p-6 transition-colors duration-300">
+        <p className="text-gray-600 dark:text-gray-400 text-sm">
+          Overview of your tasks and learning progress.
+        </p>
+      </div>
+    </PageWrapper>
   );
-}
+};
+
+export default Dashboard;
