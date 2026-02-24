@@ -18,11 +18,17 @@ export interface Todo {
   status: TodoStatus;
   actionType: TodoActionType;
   apply147Rule: boolean;
-  // Optional series identifier for 147 rule grouped todos
-  // (deprecated) seriesId and seriesIndex removed — use `seriesDates` instead
-  // If the todo represents a 147 series as a single doc, list all scheduled dates
   seriesDates?: string[];
   createdAt: string;
   scheduledDate: string; 
   dueDate?: string;
 }
+
+export type CreateTodoFormValues = {
+    scheduledDate: string;
+    title: string;
+    descriptions: { value: string }[];
+    posterImage: string;
+    links: { title: string; url: string }[];
+    apply147Rule: boolean;
+  };

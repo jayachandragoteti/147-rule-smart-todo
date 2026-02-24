@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { X } from "lucide-react";
+import { THEME_CLASSES } from "../../utils/themeUtils";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
@@ -17,13 +18,13 @@ const Layout = () => {
 
       <div className="flex flex-1">
         {/* Desktop Sidebar */}
-        <aside className="hidden md:block w-64 bg-white dark:bg-[#111827] border-r border-gray-200 dark:border-[#1f2937] transition-colors duration-300">
+        <aside className={`hidden md:block w-64 border-r ${THEME_CLASSES.surface.base} ${THEME_CLASSES.border.base}`}>
           <Sidebar />
         </aside>
 
         {/* Mobile Sidebar */}
         <div
-          className={`fixed inset-0 z-[9999] md:hidden ${
+          className={`fixed inset-0 z-9999 md:hidden ${
             isOpen ? "pointer-events-auto" : "pointer-events-none"
           }`}
         >
@@ -35,15 +36,15 @@ const Layout = () => {
           />
 
           <div
-            className={`absolute left-0 top-0 h-full w-64 bg-white dark:bg-[#111827] shadow-xl transform transition-transform duration-300 ease-in-out ${
+            className={`absolute left-0 top-0 h-full w-64 ${THEME_CLASSES.surface.base} shadow-xl transform transition-transform duration-300 ease-in-out ${
               isOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >
-            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200 dark:border-[#1f2937]">
+            <div className={`flex items-center justify-between px-4 py-4 border-b ${THEME_CLASSES.border.base}`}>
               <span className="font-semibold text-sm">Menu</span>
               <button
                 onClick={closeSidebar}
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-[#1f2937] transition cursor-pointer"
+                className={`p-2 rounded-md transition cursor-pointer ${THEME_CLASSES.surface.hover}`}
               >
                 <X size={18} />
               </button>

@@ -39,19 +39,15 @@ export const createTodo = createAsyncThunk<
     if (!uid) {
       throw new Error("User not authenticated");
     }
-
     const todosToCreate: NewTodo[] = [];
     const baseDate = new Date(todoData.scheduledDate);
     const baseISODate = baseDate.toISOString();
-
     // If applying 147 rule, create a single document that stores all series dates
     if (todoData.apply147Rule) {
       const day4 = new Date(baseDate);
       day4.setDate(baseDate.getDate() + 4);
-
       const day7 = new Date(baseDate);
       day7.setDate(baseDate.getDate() + 7);
-
       todosToCreate.push({
         ...todoData,
         scheduledDate: baseISODate,

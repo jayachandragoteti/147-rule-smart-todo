@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { THEME_CLASSES } from "../../utils/themeUtils";
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -6,11 +7,11 @@ interface SidebarProps {
 
 const Sidebar = ({ onNavigate }: SidebarProps) => {
   const linkStyle = ({ isActive }: { isActive: boolean }) =>
-    `block px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer
+    `block px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${THEME_CLASSES.text.primary}
      ${
        isActive
-         ? "bg-gray-200 dark:bg-[#1f2937]"
-         : "hover:bg-gray-100 dark:hover:bg-[#1f2937]"
+         ? `${THEME_CLASSES.surface.active}`
+         : `${THEME_CLASSES.button.hover}`
      }`;
 
   return (

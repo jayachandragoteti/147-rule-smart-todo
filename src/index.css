@@ -1,20 +1,66 @@
 @import "tailwindcss";
 
-/* Light theme */
+/* ========================================
+   GLOBAL THEME VARIABLES
+   ======================================== */
+
+/* Light Theme (Default) */
 :root {
-  --app-bg: 249 250 251;        /* gray-50 */
-  --surface: 255 255 255;       /* white */
-  --border-color: 229 231 235;  /* gray-200 */
-  --text-primary: 17 24 39;     /* gray-900 */
+  /* Backgrounds */
+  --bg-primary: 255 255 255;           /* white */
+  --bg-secondary: 249 250 251;         /* gray-50 */
+  --bg-tertiary: 243 244 246;          /* gray-100 */
+  
+  /* Surfaces & Cards */
+  --surface-primary: 255 255 255;      /* white */
+  --surface-hover: 249 250 251;        /* gray-50 */
+  
+  /* Borders */
+  --border-primary: 229 231 235;       /* gray-200 */
+  --border-secondary: 209 213 219;     /* gray-300 */
+  
+  /* Text */
+  --text-primary: 17 24 39;            /* gray-900 */
+  --text-secondary: 107 114 128;       /* gray-600 */
+  --text-tertiary: 156 163 175;        /* gray-400 */
+  
+  /* Accents */
+  --accent-primary: 59 130 246;        /* blue-500 */
+  --accent-hover: 37 99 235;           /* blue-600 */
+  
+  color-scheme: light;
 }
 
-/* Dark theme */
+/* Dark Theme */
 .dark {
-  --app-bg: 3 7 18;             /* gray-950 */
-  --surface: 17 24 39;          /* gray-900 */
-  --border-color: 31 41 55;     /* gray-800 */
-  --text-primary: 243 244 246;  /* gray-100 */
+  /* Backgrounds */
+  --bg-primary: 17 24 39;              /* gray-900 */
+  --bg-secondary: 15 23 42;            /* slate-900 */
+  --bg-tertiary: 31 41 55;             /* gray-800 */
+  
+  /* Surfaces & Cards */
+  --surface-primary: 17 24 39;         /* gray-900 */
+  --surface-hover: 31 41 55;           /* gray-800 */
+  
+  /* Borders */
+  --border-primary: 31 41 55;          /* gray-800 */
+  --border-secondary: 55 65 81;        /* gray-700 */
+  
+  /* Text */
+  --text-primary: 243 244 246;         /* gray-100 */
+  --text-secondary: 209 213 219;       /* gray-300 */
+  --text-tertiary: 156 163 175;        /* gray-400 */
+  
+  /* Accents */
+  --accent-primary: 96 165 250;        /* blue-400 */
+  --accent-hover: 59 130 246;          /* blue-500 */
+  
+  color-scheme: dark;
 }
+
+/* ========================================
+   GLOBAL STYLES
+   ======================================== */
 
 html,
 body,
@@ -22,13 +68,65 @@ body,
   height: 100%;
 }
 
-/* Light */
 body {
-  @apply bg-gray-50 text-gray-900 antialiased transition-colors duration-300;
+  @apply antialiased transition-colors duration-300 text-base;
+  background-color: rgb(var(--bg-primary));
+  color: rgb(var(--text-primary));
 }
 
-/* Dark */
-.dark body {
-  background-color: #0f172a;
-  color: #e5e7eb;
+/* ========================================
+   UTILITY CLASSES FOR COMMON PATTERNS
+   ======================================== */
+
+/* Surfaces */
+.surface-base {
+  @apply bg-white dark:bg-[#111827] transition-colors duration-300;
+}
+
+.surface-card {
+  @apply bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] transition-colors duration-300;
+}
+
+.surface-secondary {
+  @apply bg-gray-50 dark:bg-[#0f172a] transition-colors duration-300;
+}
+
+/* Borders */
+.border-base {
+  @apply border-gray-200 dark:border-[#1f2937] transition-colors duration-300;
+}
+
+.border-secondary {
+  @apply border-gray-300 dark:border-[#374151] transition-colors duration-300;
+}
+
+/* Text */
+.text-base {
+  @apply text-gray-900 dark:text-gray-100 transition-colors duration-300;
+}
+
+.text-secondary {
+  @apply text-gray-600 dark:text-gray-400 transition-colors duration-300;
+}
+
+.text-tertiary {
+  @apply text-gray-500 dark:text-gray-500 transition-colors duration-300;
+}
+
+/* Hover States */
+.hover-surface {
+  @apply hover:bg-gray-100 dark:hover:bg-[#1f2937] transition-colors duration-300;
+}
+
+.hover-surface-light {
+  @apply hover:bg-gray-50 dark:hover:bg-[#0f172a] transition-colors duration-300;
+}
+
+/* Input Fields */
+.input-base {
+  @apply px-4 py-2 rounded-lg border border-gray-300 dark:border-[#1f2937] bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-300;
+}
+
+.input-base:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-[#111827];
 }

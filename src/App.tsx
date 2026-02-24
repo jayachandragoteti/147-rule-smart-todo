@@ -28,7 +28,6 @@ const App = () => {
         dispatch(setUser(null));
       }
     });
-
     return () => unsubscribe();
   }, [dispatch]);
 

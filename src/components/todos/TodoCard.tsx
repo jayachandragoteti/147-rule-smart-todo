@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { THEME_CLASSES } from "../../utils/themeUtils";
 import type { Todo } from "../../types/todo";
 
 interface Props {
@@ -13,7 +14,7 @@ const statusStyles = {
 
 const TodoCard = ({ todo }: Props) => {
   return (
-    <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] rounded-xl overflow-hidden transition-colors duration-300 hover:shadow-md">
+    <div className={`rounded-xl overflow-hidden transition-colors duration-300 hover:shadow-md ${THEME_CLASSES.surface.card}`}>
 
       {todo.posterImage && (
         <img
@@ -45,11 +46,11 @@ const TodoCard = ({ todo }: Props) => {
           </span>
         </div>
 
-        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+        <p className={`text-xs line-clamp-2 ${THEME_CLASSES.text.tertiary}`}>
           {todo.descriptions[0]}
         </p>
 
-        <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+        <div className={`flex justify-between items-center text-xs ${THEME_CLASSES.text.tertiary}`}>
           <span>{todo.actionType}</span>
 
           {todo.apply147Rule && (
@@ -61,7 +62,7 @@ const TodoCard = ({ todo }: Props) => {
 
         <Link
           to={`/todo/${todo.id}`}
-          className="text-blue-600 dark:text-blue-400 text-xs hover:underline cursor-pointer"
+          className={`text-xs hover:underline cursor-pointer ${THEME_CLASSES.text.link}`}
         >
           View Details
         </Link>

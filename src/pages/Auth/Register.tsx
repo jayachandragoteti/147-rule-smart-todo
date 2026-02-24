@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { registerThunk } from "../../features/auth/authThunks";
 import { useNavigate, Link } from "react-router-dom";
+import { THEME_CLASSES } from "../../utils/themeUtils";
 
 const Register = () => {
   const dispatch = useAppDispatch();
@@ -21,14 +22,14 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] rounded-2xl shadow-sm p-8 transition-colors duration-300">
+      <div className={`w-full max-w-md border rounded-2xl shadow-sm p-8 transition-colors duration-300 ${THEME_CLASSES.surface.card}`}>
 
         {/* Heading */}
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">
+          <h2 className={`text-2xl font-semibold tracking-tight ${THEME_CLASSES.text.primary}`}>
             Create Account
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className={`text-sm mt-1 ${THEME_CLASSES.text.tertiary}`}>
             Start organizing your learning journey
           </p>
         </div>
@@ -38,7 +39,7 @@ const Register = () => {
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className={`block text-sm font-medium mb-1 ${THEME_CLASSES.text.primary}`}>
               Email
             </label>
             <input
@@ -46,13 +47,13 @@ const Register = () => {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-[#1f2937] bg-gray-50 dark:bg-[#0f172a] focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${THEME_CLASSES.input.base}`}
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className={`block text-sm font-medium mb-1 ${THEME_CLASSES.text.primary}`}>
               Password
             </label>
             <input
@@ -60,7 +61,7 @@ const Register = () => {
               placeholder="Create a strong password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-[#1f2937] bg-gray-50 dark:bg-[#0f172a] focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${THEME_CLASSES.input.base}`}
             />
           </div>
 
@@ -83,12 +84,12 @@ const Register = () => {
 
         {/* Footer Link */}
         <div className="mt-6 text-center text-sm">
-          <span className="text-gray-500 dark:text-gray-400">
+          <span className={THEME_CLASSES.text.tertiary}>
             Already have an account?
           </span>{" "}
           <Link
             to="/login"
-            className="text-blue-600 hover:underline dark:text-blue-400 cursor-pointer"
+            className={THEME_CLASSES.text.link}
           >
             Login
           </Link>

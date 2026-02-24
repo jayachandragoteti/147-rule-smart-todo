@@ -3,12 +3,14 @@ import PageWrapper from "../components/layout/PageWrapper";
 import TodoCard from "../components/todos/TodoCard";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { fetchTodos } from "../features/todos/todoThunks";
+import { THEME_CLASSES } from "../utils/themeUtils";
 
 const Todos = () => {
   const dispatch = useAppDispatch();
   const todos = useAppSelector((state) => state.todo.todos);
   const loading = useAppSelector((state) => state.todo.loading);
   const error = useAppSelector((state) => state.todo.error);
+  
   const isAuthChecked = useAppSelector(
     (state) => state.auth.isAuthChecked
   );
@@ -22,7 +24,7 @@ const Todos = () => {
   return (
     <PageWrapper>
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold tracking-tight">
+        <h2 className={`text-2xl font-semibold tracking-tight ${THEME_CLASSES.text.primary}`}>
           All Tasks
         </h2>
       </div>
@@ -34,11 +36,11 @@ const Todos = () => {
       )}
 
       {loading ? (
-        <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] rounded-xl p-8 text-center text-gray-500 dark:text-gray-400">
+        <div className={`border rounded-xl p-8 text-center ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.default} ${THEME_CLASSES.text.tertiary}`}>
           Loading tasks...
         </div>
       ) : todos.length === 0 ? (
-        <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] rounded-xl p-8 text-center text-gray-500 dark:text-gray-400">
+        <div className={`border rounded-xl p-8 text-center ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.default} ${THEME_CLASSES.text.tertiary}`}>
           No tasks yet. Start creating your first learning task.
         </div>
       ) : (

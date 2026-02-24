@@ -6,23 +6,8 @@ interface UiState {
   theme: ThemeMode;
 }
 
-const getInitialTheme = (): ThemeMode => {
-  // Check localStorage first
-  const stored = localStorage.getItem("theme");
-  if (stored === "dark" || stored === "light") {
-    return stored;
-  }
-  
-  // Fall back to system preference
-  if (typeof window !== "undefined" && window.matchMedia) {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-  
-  return "light";
-};
-
 const initialState: UiState = {
-  theme: getInitialTheme(),
+  theme: "dark",
 };
 
 const uiSlice = createSlice({
