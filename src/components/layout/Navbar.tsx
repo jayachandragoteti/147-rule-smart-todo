@@ -3,7 +3,6 @@ import { useAppDispatch, useAppSelector, useToast } from "../../app/hooks";
 import { logoutThunk } from "../../features/auth/authThunks";
 import { Link } from "react-router-dom";
 import { THEME_CLASSES } from "../../utils/themeUtils";
-import ThemeToggle from "../../features/ui/ThemeToggle";
 
 import type { RootState } from "../../app/store";
 
@@ -33,28 +32,26 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-black tracking-tight leading-none bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
-              147 MISSION
+              147 SMART TODO
             </span>
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">Operational Grid</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">Spaced Repetition Todo</span>
           </div>
         </Link>
       </div>
 
       <div className="flex items-center gap-4">
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">System Online</span>
+            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Synced</span>
         </div>
 
         <div className="h-6 w-[1px] bg-gray-200 dark:bg-gray-800 mx-1 hidden sm:block" />
 
-        <ThemeToggle />
 
         {user ? (
           <div className="flex items-center gap-3 pl-2">
             <div className="flex flex-col items-end hidden md:flex">
                 <span className={`text-xs font-bold leading-none ${THEME_CLASSES.text.primary}`}>{user.email?.split('@')[0]}</span>
-                <span className={`text-[10px] font-medium opacity-50 ${THEME_CLASSES.text.tertiary}`}>Level 4 Operative</span>
+                <span className={`text-[10px] font-medium opacity-50 ${THEME_CLASSES.text.tertiary}`}>Personal Account</span>
             </div>
             <div className="relative group cursor-pointer">
                 <div className="w-9 h-9 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-xl flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden group-hover:border-blue-500/50 transition-colors">
@@ -67,12 +64,12 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
                         <button
                             onClick={() => {
                                 dispatch(logoutThunk());
-                                toast.success("Session terminated safely.");
+                                toast.success("Successfully logged out.");
                             }}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 text-red-600 transition-colors text-sm font-bold"
                         >
                             <LogOut size={16} />
-                            Terminate Session
+                            Logout
                         </button>
                     </div>
                 </div>
@@ -84,7 +81,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
             className="flex items-center gap-2 text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 transition-all active:scale-95"
           >
             <LogIn size={16} />
-            Authorize
+            Login
           </Link>
         )}
       </div>

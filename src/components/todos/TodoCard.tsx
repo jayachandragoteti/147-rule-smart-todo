@@ -89,7 +89,7 @@ const TodoCard = ({ todo }: Props) => {
 
   return (
     <div
-      className={`group rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+      className={`group rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
     >
       {todo.posterImage && (
         <div className="relative h-44 overflow-hidden">

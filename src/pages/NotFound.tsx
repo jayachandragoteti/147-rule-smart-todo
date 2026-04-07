@@ -19,10 +19,10 @@ const NotFound = () => {
 
         <div className="space-y-4">
             <h1 className={`text-4xl font-black tracking-tight ${THEME_CLASSES.text.primary}`}>
-              Mission Out of Bounds
+              Page Not Found
             </h1>
             <p className={`text-lg font-medium leading-relaxed max-w-sm mx-auto ${THEME_CLASSES.text.tertiary}`}>
-              The coordinates you provided do not exist in the current grid. Your redirection sequence is required.
+              The page you are looking for doesn't exist or has been moved.
             </p>
         </div>
 
@@ -32,20 +32,20 @@ const NotFound = () => {
                 className={`flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest border transition-all active:scale-95 ${THEME_CLASSES.border.base} ${THEME_CLASSES.text.primary} ${THEME_CLASSES.button.hover}`}
             >
                 <MoveLeft size={18} />
-                Abort
+                Go Back
             </button>
             <Link
               to="/"
               className="flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20 active:scale-95"
             >
               <Home size={18} />
-              Re-Sync Dashboard
+              Go Home
             </Link>
         </div>
 
         <div className="pt-8 border-t border-dashed border-gray-100 dark:border-gray-800">
             <p className={`text-[10px] uppercase font-black tracking-[0.3em] opacity-30 ${THEME_CLASSES.text.tertiary}`}>
-                Error Code: UNKNOWN_COORDINATES // Grid ID: 147-RULE
+                Error 404 // 147 Smart Todo
             </p>
         </div>
       </div>

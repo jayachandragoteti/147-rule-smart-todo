@@ -116,8 +116,8 @@ const Journal = () => {
         {/* Left Column: Calendar & List */}
         <div className="flex-1 space-y-8">
           <div className="flex flex-col gap-1">
-              <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>Daily Reflections</h2>
-              <p className={`${THEME_CLASSES.text.secondary}`}>Connect your journey with your missions.</p>
+              <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>Journal</h2>
+              <p className={`${THEME_CLASSES.text.secondary}`}>Write down your thoughts and progress.</p>
           </div>
 
           {/* Search */}
@@ -125,7 +125,7 @@ const Journal = () => {
             <Search size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 ${THEME_CLASSES.text.tertiary} group-focus-within:text-blue-500 transition-colors`} />
             <input
               type="text"
-              placeholder="Search through your wisdom..."
+              placeholder="Search journal..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={`w-full pl-12 pr-4 py-4 rounded-2xl border transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
@@ -146,7 +146,6 @@ const Journal = () => {
                 <span key={d} className={`text-[10px] font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary} mb-2`}>{d}</span>
               ))}
               {daysInMonth.map((day: Date, i: number) => {
-                const hasEntry = entries.some(e => isSameDay(new Date(e.date), day));
                 const isSelected = isSameDay(day, selectedDate);
                 const isToday = isSameDay(day, new Date());
                 return (
@@ -165,9 +164,6 @@ const Journal = () => {
                     }`}
                   >
                     {format(day, "d")}
-                    {hasEntry && !isSelected && (
-                      <span className="absolute bottom-2 w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-                    )}
                   </button>
                 );
               })}
@@ -176,7 +172,7 @@ const Journal = () => {
 
           {/* Recent Entries List */}
           <div className="space-y-4">
-            <h3 className={`font-bold text-xs uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Recent Reflections</h3>
+            <h3 className={`font-bold text-xs uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Recent Entries</h3>
             <div className="grid gap-4">
               {filteredEntries.slice(0, 3).map(entry => (
                 <div 
@@ -192,7 +188,7 @@ const Journal = () => {
                   }`}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className={`font-bold truncate pr-4 ${THEME_CLASSES.text.primary}`}>{entry.title || "Untitled Reflection"}</h4>
+                    <h4 className={`font-bold truncate pr-4 ${THEME_CLASSES.text.primary}`}>{entry.title || "Untitled Entry"}</h4>
                     <span className={`text-[10px] font-bold px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 ${THEME_CLASSES.text.secondary} shrink-0`}>
                       {format(new Date(entry.date), "MMM d, yyyy")}
                     </span>
@@ -240,13 +236,13 @@ const Journal = () => {
               <div className="space-y-6 flex-1 flex flex-col">
                 <input
                   type="text"
-                  placeholder="The theme of today..."
+                  placeholder="Today's theme..."
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className={`w-full bg-transparent text-2xl font-black border-none focus:ring-0 ${THEME_CLASSES.text.primary} placeholder:text-gray-300 dark:placeholder:text-gray-600`}
                 />
                 <textarea
-                  placeholder="Capture your thoughts, victories, and lessons..."
+                  placeholder="Write about your day..."
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   className={`w-full flex-1 bg-transparent border-none focus:ring-0 resize-none text-base leading-relaxed ${THEME_CLASSES.text.secondary} placeholder:text-gray-300 dark:placeholder:text-gray-600 min-h-[300px]`}
@@ -255,7 +251,7 @@ const Journal = () => {
                 {/* Task Linking */}
                 <div className="space-y-3 pt-4 border-t border-dashed">
                   <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
-                    <LinkIcon size={12} /> Link Accomplishments
+                    <LinkIcon size={12} /> Link Tasks
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {todos.slice(0, 6).map(todo => (
@@ -290,17 +286,17 @@ const Journal = () => {
                     onClick={handleSave}
                     className="flex-[2] px-4 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all shadow-xl shadow-blue-500/20 active:scale-95"
                   >
-                    Sync Reflection
+                    Save Entry
                   </button>
                 </div>
               </div>
             ) : selectedEntry ? (
               <div className="space-y-8 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                 <div className="space-y-2">
-                  <h3 className={`text-2xl font-black ${THEME_CLASSES.text.primary}`}>{selectedEntry.title || "Untitled Reflection"}</h3>
+                  <h3 className={`text-2xl font-black ${THEME_CLASSES.text.primary}`}>{selectedEntry.title || "Untitled Entry"}</h3>
                   <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                     <div className="flex items-center gap-1.5"><Clock size={12} /> {format(new Date(selectedEntry.createdAt), "h:mm a")}</div>
-                    <div className="flex items-center gap-1.5"><Sparkles size={12} className="text-amber-500" /> Reflection</div>
+                    <div className="flex items-center gap-1.5"><Sparkles size={12} className="text-amber-500" /> Entry</div>
                   </div>
                 </div>
                 
@@ -311,7 +307,7 @@ const Journal = () => {
                 {selectedEntry.todoIds && selectedEntry.todoIds.length > 0 && (
                   <div className="pt-8 space-y-4 border-t border-dashed">
                     <h4 className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${THEME_CLASSES.text.tertiary}`}>
-                      <Tag size={12} className="text-blue-500" /> Linked Accomplishments
+                      <Tag size={12} className="text-blue-500" /> Linked Tasks
                     </h4>
                     <div className="space-y-3">
                       {selectedEntry.todoIds.map(todoId => {
@@ -321,7 +317,7 @@ const Journal = () => {
                           <div key={todoId} className={`p-4 rounded-2xl border flex items-center justify-between transition-all hover:border-blue-300 ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
                             <div className="flex flex-col">
                                 <span className={`text-xs font-bold ${THEME_CLASSES.text.primary}`}>{todo.title}</span>
-                                <span className="text-[10px] text-gray-400 font-medium">Synced Mission</span>
+                                <span className="text-[10px] text-gray-400 font-medium">Connected Task</span>
                             </div>
                             <span className={`text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-wider ${
                                 todo.status === 'completed' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-600'
@@ -345,7 +341,7 @@ const Journal = () => {
                 </div>
                 <div className="max-w-[240px] space-y-2">
                   <p className={`text-lg font-bold ${THEME_CLASSES.text.primary}`}>A fresh chapter</p>
-                  <p className={`text-sm ${THEME_CLASSES.text.secondary}`}>Empty reflections for this date. What's on your mind?</p>
+                  <p className={`text-sm ${THEME_CLASSES.text.secondary}`}>No entries for this date. What's on your mind?</p>
                 </div>
                 <button 
                   onClick={() => setIsAdding(true)}

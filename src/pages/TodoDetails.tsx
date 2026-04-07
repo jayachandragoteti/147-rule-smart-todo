@@ -109,7 +109,7 @@ const TodoDetails = () => {
           <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
               <Info size={40} className="text-gray-400" />
           </div>
-          <h2 className={`text-2xl font-bold mb-2 ${THEME_CLASSES.text.primary}`}>Mission Not Found</h2>
+          <h2 className={`text-2xl font-bold mb-2 ${THEME_CLASSES.text.primary}`}>Task Not Found</h2>
           <p className={`mb-8 ${THEME_CLASSES.text.tertiary}`}>
             The requested task could not be located in your database.
           </p>
@@ -117,7 +117,7 @@ const TodoDetails = () => {
             onClick={() => navigate("/todos")}
             className="px-8 py-3 bg-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
           >
-            Back to Pipeline
+            Back to List
           </button>
         </div>
       </PageWrapper>
@@ -126,7 +126,7 @@ const TodoDetails = () => {
 
   const statusConfig: Record<string, { label: string; color: string; icon: LucideIcon }> = {
     pending: { label: "Pending", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", icon: Clock },
-    inprogress: { label: "Executing", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", icon: Zap },
+    inprogress: { label: "Working", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", icon: Zap },
     completed: { label: "Completed", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", icon: CheckCircle },
   };
 
@@ -143,7 +143,7 @@ const TodoDetails = () => {
             className={`flex items-center gap-2 font-bold text-sm transition-colors hover:text-blue-500 ${THEME_CLASSES.text.tertiary}`}
           >
             <ArrowLeft size={18} />
-            BACK TO PIPELINE
+            BACK TO LIST
           </button>
 
           <div className="flex items-center gap-3">
@@ -156,7 +156,7 @@ const TodoDetails = () => {
                 <CheckCircle size={18} />
                 {todo.seriesDates && todo.seriesDates.length > 0
                   ? getNextSeriesDate(todo.seriesDates, todo.scheduledDate)
-                    ? "ADVANCE MISSION"
+                    ? "NEXT REVIEW"
                     : "FINISH SERIES"
                   : "COMPLETE TASK"}
               </button>
@@ -194,10 +194,10 @@ const TodoDetails = () => {
                 </div>
                 <div className="space-y-2">
                     <h3 className={`text-2xl font-black ${THEME_CLASSES.text.primary}`}>
-                      Terminate Mission?
+                      Delete Task?
                     </h3>
                     <p className={`text-sm leading-relaxed ${THEME_CLASSES.text.secondary}`}>
-                      This action is irreversible. The mission data for "{todo.title}" will be permanently purged from the synchronization grid.
+                      This action is irreversible. The task "{todo.title}" will be permanently removed.
                     </p>
                 </div>
               </div>
@@ -213,7 +213,7 @@ const TodoDetails = () => {
                   disabled={loading}
                   className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-sm font-bold shadow-xl shadow-red-500/20"
                 >
-                  {loading ? "PURGING..." : "CONFIRM DELETE"}
+                  {loading ? "DELETING..." : "CONFIRM DELETE"}
                 </button>
               </div>
             </div>
@@ -279,7 +279,7 @@ const TodoDetails = () => {
                                     <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
                                         <Info size={16} />
                                     </div>
-                                    <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Mission Briefing</h3>
+                                    <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Notes</h3>
                                 </div>
                                 <div className="space-y-6 pl-11">
                                     {todo.descriptions.map((desc, index) => (
@@ -298,7 +298,7 @@ const TodoDetails = () => {
                                     <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
                                         <LinkIcon size={16} />
                                     </div>
-                                    <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Intel & Assets</h3>
+                                    <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Links & Assets</h3>
                                 </div>
                                 <div className="grid gap-4 sm:grid-cols-2 pl-11">
                                     {todo.links.map((link) => (
@@ -332,13 +332,13 @@ const TodoDetails = () => {
                         <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-600">
                             <Calendar size={20} />
                         </div>
-                        <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Mission Timeline</h3>
+                        <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Task Timeline</h3>
                     </div>
 
                     <div className="space-y-8">
                         <div className="relative pl-6 border-l-2 border-dashed border-gray-100 dark:border-gray-800">
                             <div className="absolute -left-[9px] top-0 w-4 h-4 bg-blue-600 rounded-full border-4 border-white dark:border-gray-900 shadow-md shadow-blue-500/50" />
-                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Execution Date</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Scheduled Date</p>
                             <p className={`text-base font-bold ${THEME_CLASSES.text.primary}`}>
                                 {new Date(todo.scheduledDate).toLocaleDateString("en-US", {
                                     month: "long",
@@ -354,7 +354,7 @@ const TodoDetails = () => {
                         {todo.seriesDates && todo.seriesDates.length > 0 && (
                             <div className="space-y-4">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 flex items-center gap-2">
-                                    <Repeat size={10} /> 1-4-7 Progression Grid
+                                    <Repeat size={10} /> 1-4-7 Review Schedule
                                 </p>
                                 <div className="grid grid-cols-1 gap-2">
                                   {todo.seriesDates.map((d, i) => {
@@ -398,10 +398,10 @@ const TodoDetails = () => {
 
                 {/* Meta data */}
                 <div className={`p-6 text-center space-y-2 opacity-50`}>
-                    <p className={`text-[9px] font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Synced Archive ID</p>
+                    <p className={`text-[9px] font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Synced ID</p>
                     <p className={`text-[9px] font-mono break-all font-medium ${THEME_CLASSES.text.tertiary}`}>{todo.id}</p>
                     <p className={`text-[9px] pt-4`}>
-                        COMMENCED ON {new Date(todo.createdAt).toLocaleDateString()} AT {new Date(todo.createdAt).toLocaleTimeString()}
+                        CREATED ON {new Date(todo.createdAt).toLocaleDateString()} AT {new Date(todo.createdAt).toLocaleTimeString()}
                     </p>
                 </div>
             </div>

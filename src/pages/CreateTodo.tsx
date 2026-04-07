@@ -96,7 +96,7 @@ const CreateTodo = () => {
         descriptions: data.descriptions
           .map((d) => d.value)
           .filter((d) => d.trim() !== ""),
-        posterImage: data.posterImage || undefined,
+        posterImage: data.posterImage || "",
         galleryImages: [],
         links: data.links
           .filter((l) => l.title.trim() && l.url.trim())
@@ -245,7 +245,7 @@ const CreateTodo = () => {
             {/* posterImage */}
             <div className="space-y-4">
               <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
-                <ImageIcon size={14} /> Mission Poster URL
+                <ImageIcon size={14} /> Task Image URL
               </label>
               <div className="flex flex-col gap-4">
                 <input
@@ -260,13 +260,13 @@ const CreateTodo = () => {
                   <div className="relative group w-full aspect-video rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-inner">
                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="text-white text-xs font-black uppercase tracking-widest bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm">Poster Detected</span>
+                        <span className="text-white text-xs font-black uppercase tracking-widest bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm">Image Found</span>
                     </div>
                   </div>
                 )}
                 {imageLoadError && posterImageUrl && (
                   <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3">
-                    <AlertCircle size={14} /> Failed to establish visual link
+                    <AlertCircle size={14} /> Failed to load image
                   </div>
                 )}
               </div>
@@ -397,7 +397,7 @@ const CreateTodo = () => {
                   {/* 147 Previews */}
                   {apply147Value && previewDates.length > 0 && (
                     <div className="px-2 pt-1 space-y-2">
-                      <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Scheduled Protocol</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Task Schedule</p>
                       <div className="grid gap-2">
                         {previewDates.map((pd, i) => (
                           <div key={i} className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-dashed border-gray-200 dark:border-gray-700">
@@ -433,7 +433,7 @@ const CreateTodo = () => {
                 <div className="p-4 rounded-3xl bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold leading-relaxed shadow-lg shadow-red-500/5">
                    <div className="flex items-center gap-2 mb-1">
                       <AlertCircle size={14} className="shrink-0" />
-                      <span className="uppercase tracking-widest text-[10px]">Transmission Error</span>
+                      <span className="uppercase tracking-widest text-[10px]">Error</span>
                    </div>
                    {error}
                 </div>

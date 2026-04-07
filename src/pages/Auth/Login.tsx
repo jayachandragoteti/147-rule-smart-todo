@@ -40,7 +40,7 @@ const Login = () => {
                 Welcome Back
             </h2>
             <p className={`text-sm font-medium ${THEME_CLASSES.text.tertiary}`}>
-                Resume your synchronization with the mission grid.
+                Sign in to access your tasks.
             </p>
           </div>
         </div>
@@ -49,8 +49,8 @@ const Login = () => {
         <div className="space-y-6">
           {/* Email */}
           <div className="space-y-2">
-            <label className={`block text-[10px] font-black uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
-              Protocol Email
+            <label className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
+              Email Address
             </label>
             <div className="relative group">
                 <Mail size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${THEME_CLASSES.text.tertiary} group-focus-within:text-blue-500`} />
@@ -66,14 +66,14 @@ const Login = () => {
 
           {/* Password */}
           <div className="space-y-2">
-            <label className={`block text-[10px] font-black uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
-              Access Cipher
+            <label className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
+              Password
             </label>
             <div className="relative group">
                 <Lock size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${THEME_CLASSES.text.tertiary} group-focus-within:text-blue-500`} />
                 <input
                   type="password"
-                  placeholder="Enter secret cipher"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`w-full pl-12 pr-4 py-3.5 rounded-2xl border text-sm font-medium transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
@@ -85,11 +85,11 @@ const Login = () => {
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm uppercase tracking-widest shadow-xl shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm uppercase tracking-widest shadow-xl shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50"
           >
-            {loading ? "Decrypting..." : (
+            {loading ? "Logging in..." : (
                 <>
-                    Initiate Login
+                    Login
                     <ArrowRight size={18} />
                 </>
             )}
@@ -109,17 +109,17 @@ const Login = () => {
         <div className="pt-6 border-t border-dashed border-gray-100 dark:border-gray-800 text-center space-y-3">
           <p className="text-sm font-medium">
             <span className={THEME_CLASSES.text.tertiary}>
-              New operative?
+              New here?
             </span>{" "}
             <Link
               to="/register"
               className="text-blue-500 font-bold hover:underline"
             >
-              Request Access
+              Create Account
             </Link>
           </p>
-          <div className={`text-[9px] font-black uppercase tracking-[0.3em] opacity-30 ${THEME_CLASSES.text.tertiary}`}>
-            Secure Sync // Encryption AES-256
+          <div className={`text-[9px] font-bold uppercase tracking-wider opacity-30 ${THEME_CLASSES.text.tertiary}`}>
+            Secure Login // 147 Smart Todo
           </div>
         </div>
       </div>

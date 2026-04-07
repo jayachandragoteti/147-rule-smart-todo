@@ -56,16 +56,16 @@ const Today = () => {
                     <Zap size={24} />
                 </div>
                 <div className={`px-4 py-1.5 rounded-full border ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">Active Execution</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">Focus Mode</span>
                 </div>
             </div>
             
             <div className="space-y-2">
                 <h2 className={`text-4xl md:text-5xl font-black tracking-tight ${THEME_CLASSES.text.primary}`}>
-                  Today's Timeline
+                  Today Tasks
                 </h2>
                 <p className={`text-lg font-medium leading-relaxed ${THEME_CLASSES.text.tertiary}`}>
-                  Your priority mission objectives for <span className="text-blue-500 font-bold">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</span>. 
+                  Your focus for <span className="text-blue-500 font-bold">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</span>. 
                 </p>
             </div>
           </div>
@@ -73,7 +73,7 @@ const Today = () => {
           <div className="flex flex-col items-end gap-3 min-w-[200px]">
               <div className="flex items-center gap-2">
                   <Target size={18} className="text-emerald-500" />
-                  <span className={`text-sm font-black uppercase tracking-widest ${THEME_CLASSES.text.primary}`}>Grid Vitality</span>
+                  <span className={`text-sm font-black uppercase tracking-widest ${THEME_CLASSES.text.primary}`}>Progress</span>
               </div>
               <div className={`w-full h-3 rounded-full overflow-hidden border ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
                   <div 
@@ -92,7 +92,7 @@ const Today = () => {
           <div className={`border rounded-3xl p-6 font-bold flex items-center gap-4 animate-shake ${THEME_CLASSES.status.danger} border-red-200 dark:border-red-900/50`}>
             <AlertCircle size={24} />
             <div className="flex flex-col">
-                <span className="text-[10px] uppercase tracking-widest opacity-70">Sync Breach Detected</span>
+                <span className="text-[10px] uppercase tracking-widest opacity-70">Error Loading Tasks</span>
                 <span>{error}</span>
             </div>
           </div>
@@ -124,13 +124,13 @@ const Today = () => {
                 </div>
             </div>
             <div className="space-y-3">
-                <h3 className={`text-3xl font-black ${THEME_CLASSES.text.primary}`}>Timeline Cleared</h3>
+                <h3 className={`text-3xl font-black ${THEME_CLASSES.text.primary}`}>All Done!</h3>
                 <p className={`text-base font-medium max-w-sm leading-relaxed ${THEME_CLASSES.text.tertiary}`}>
-                  All daily directives have been successfully executed. Enjoy your temporary release from the grid or initiate a new protocol.
+                  You've completed all your tasks for today. Enjoy your rest or add a new task.
                 </p>
             </div>
             <button className={`px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-all ${THEME_CLASSES.button.primary} ${THEME_CLASSES.brand.glow}`}>
-                New Directive
+                Add Task
             </button>
           </div>
         ) : (

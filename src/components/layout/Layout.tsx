@@ -24,7 +24,7 @@ const Layout = () => {
 
         {/* Mobile Sidebar */}
         <div
-          className={`fixed inset-0 z-9999 md:hidden ${
+          className={`fixed inset-0 z-50 md:hidden ${
             isOpen ? "pointer-events-auto" : "pointer-events-none"
           }`}
         >

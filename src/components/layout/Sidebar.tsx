@@ -18,24 +18,24 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-blue-500", group: "Strategic" },
-  { to: "/today", label: "My Day", icon: CalendarCheck, color: "text-amber-500", group: "Strategic" },
-  { to: "/profile", label: "Grid Settings", icon: Settings, color: "text-blue-400", group: "Strategic" },
-  { to: "/todos", label: "Pipeline", icon: ListTodo, color: "text-emerald-500", group: "Operational" },
-  { to: "/create-todo", label: "New Mission", icon: PlusCircle, color: "text-indigo-500", group: "Operational" },
-  { to: "/journal", label: "Reflections", icon: BookOpen, color: "text-rose-500", group: "Analysis" },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-blue-500", group: "Main" },
+  { to: "/today", label: "Today Tasks", icon: CalendarCheck, color: "text-amber-500", group: "Main" },
+  { to: "/profile", label: "Profile", icon: Settings, color: "text-blue-400", group: "Main" },
+  { to: "/todos", label: "Todo List", icon: ListTodo, color: "text-emerald-500", group: "Tasks" },
+  { to: "/create-todo", label: "Add Task", icon: PlusCircle, color: "text-indigo-500", group: "Tasks" },
+  { to: "/journal", label: "Journal", icon: BookOpen, color: "text-rose-500", group: "Journal" },
 ];
 
 const Sidebar = ({ onNavigate }: SidebarProps) => {
   const linkStyle = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-black transition-all duration-300 group relative overflow-hidden ${
+    `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 group relative overflow-hidden ${
        isActive
-         ? `bg-blue-600 shadow-xl shadow-blue-500/20 text-white`
+         ? `bg-blue-600 shadow-lg shadow-blue-500/20 text-white`
          : `hover:bg-gray-100 dark:hover:bg-gray-800/50 ${THEME_CLASSES.text.primary}`
     }`;
 
   const todos = useAppSelector((state) => state.todo.todos);
-  const activeMissionsCount = todos.filter(t => 
+  const activeTasksCount = todos.filter(t => 
     t.status !== 'completed' && 
     (t.seriesDates?.some(d => isTodayDate(d)) || isTodayDate(t.scheduledDate))
   ).length;
@@ -52,8 +52,8 @@ const Sidebar = ({ onNavigate }: SidebarProps) => {
       <nav className="flex-1 px-4 space-y-8 overflow-y-auto custom-scrollbar">
         {groups.map(group => (
             <div key={group} className="space-y-2">
-                <div className="px-4 text-[9px] font-black uppercase tracking-[0.3em] opacity-40 mb-3">
-                    {group} Protocol
+                <div className="px-4 text-[9px] font-bold uppercase tracking-wider opacity-40 mb-2">
+                    {group}
                 </div>
                 {navItems.filter(item => item.group === group).map(({ to, label, icon: Icon, color }) => (
                   <NavLink key={to} to={to} end={to === "/"} className={linkStyle} onClick={onNavigate}>
@@ -75,23 +75,21 @@ const Sidebar = ({ onNavigate }: SidebarProps) => {
       </nav>
       
       <div className="px-4 space-y-4">
-          <div className={`p-5 rounded-[2rem] border overflow-hidden relative group transition-all hover:border-emerald-500/30 ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
-              <div className="absolute -top-4 -right-4 w-16 h-16 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all" />
-              <div className="relative z-10 space-y-3">
+          <div className={`p-4 rounded-xl border group transition-all duration-300 hover:border-emerald-500/30 ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
+              <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                      <span className="text-[9px] font-black uppercase tracking-widest opacity-60">Mission Status</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wide opacity-50">Task Overview</span>
                   </div>
                   <div className="flex items-end justify-between">
                       <div className="space-y-0.5">
-                          <div className={`text-lg font-black ${THEME_CLASSES.text.primary}`}>
-                              {activeMissionsCount > 0 ? `${activeMissionsCount} Active` : "Clear"}
+                          <div className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
+                              {activeTasksCount > 0 ? `${activeTasksCount} Active` : "Done"}
                           </div>
-                          <div className={`text-[9px] font-bold opacity-50 uppercase tracking-tighter ${THEME_CLASSES.text.tertiary}`}>
-                              {activeMissionsCount > 0 ? "Operational Hub" : "Standing By"}
+                          <div className={`text-[10px] font-medium opacity-50 tracking-tight ${THEME_CLASSES.text.tertiary}`}>
+                              {activeTasksCount > 0 ? "Daily Progress" : "All Caught Up"}
                           </div>
                       </div>
-                      <Target size={24} className="text-emerald-500 opacity-20" />
+                      <Target size={18} className="text-emerald-500 opacity-60" />
                   </div>
               </div>
           </div>

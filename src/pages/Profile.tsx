@@ -18,8 +18,8 @@ const Profile = () => {
     <PageWrapper>
       <div className="max-w-4xl mx-auto space-y-10">
         <header className="space-y-2">
-          <h2 className={`text-4xl font-black tracking-tight ${THEME_CLASSES.text.primary}`}>Operative Profile</h2>
-          <p className={`${THEME_CLASSES.text.tertiary}`}>Management of your unique operational identity and grid access.</p>
+          <h2 className={`text-4xl font-black tracking-tight ${THEME_CLASSES.text.primary}`}>Your Profile</h2>
+          <p className={`${THEME_CLASSES.text.tertiary}`}>Manage your account and preferences here.</p>
         </header>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -35,18 +35,18 @@ const Profile = () => {
             </div>
             
             <div className="space-y-1">
-              <h3 className={`text-xl font-black ${THEME_CLASSES.text.primary}`}>{user?.displayName || "Anonymous Operative"}</h3>
-              <p className={`text-xs font-bold uppercase tracking-widest text-blue-500`}>Level 4 Strategic Lead</p>
+              <h3 className={`text-xl font-black ${THEME_CLASSES.text.primary}`}>{user?.displayName || "User"}</h3>
+              <p className={`text-xs font-bold uppercase tracking-widest text-blue-500`}>Personal Account</p>
             </div>
 
             <div className="w-full pt-6 border-t border-dashed space-y-4">
               <div className="flex items-center justify-between text-xs px-2">
-                <span className={`font-bold uppercase tracking-tighter opacity-50 ${THEME_CLASSES.text.tertiary}`}>Grid Uptime</span>
+                <span className={`font-bold uppercase tracking-tighter opacity-50 ${THEME_CLASSES.text.tertiary}`}>Account Active</span>
                 <span className={`font-black ${THEME_CLASSES.text.primary}`}>99.8%</span>
               </div>
               <div className="flex items-center justify-between text-xs px-2">
-                <span className={`font-bold uppercase tracking-tighter opacity-50 ${THEME_CLASSES.text.tertiary}`}>Missions Sync</span>
-                <span className={`font-black ${THEME_CLASSES.text.primary}`}>Activated</span>
+                <span className={`font-bold uppercase tracking-tighter opacity-50 ${THEME_CLASSES.text.tertiary}`}>Task Sync</span>
+                <span className={`font-black ${THEME_CLASSES.text.primary}`}>Online</span>
               </div>
             </div>
           </div>
@@ -55,7 +55,7 @@ const Profile = () => {
           <div className="md:col-span-2 space-y-6">
             <div className={`p-8 rounded-[3rem] border space-y-8 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
               <div className="space-y-1">
-                <h4 className={`text-sm font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Grid Authorizations</h4>
+                <h4 className={`text-sm font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Contact Information</h4>
                 <div className="h-[1px] w-12 bg-blue-500" />
               </div>
 
@@ -65,7 +65,7 @@ const Profile = () => {
                     <Mail size={20} />
                   </div>
                   <div className="flex-1">
-                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 mb-0.5`}>Primary Comms</p>
+                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 mb-0.5`}>Email</p>
                     <p className={`font-bold ${THEME_CLASSES.text.primary}`}>{user?.email}</p>
                   </div>
                 </div>
@@ -75,8 +75,8 @@ const Profile = () => {
                     <Shield size={20} />
                   </div>
                   <div className="flex-1">
-                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 mb-0.5`}>System Access</p>
-                    <p className={`font-bold ${THEME_CLASSES.text.primary}`}>Firebase Tactical Cloud</p>
+                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 mb-0.5`}>Cloud Storage</p>
+                    <p className={`font-bold ${THEME_CLASSES.text.primary}`}>Firebase Cloud</p>
                   </div>
                 </div>
 
@@ -85,7 +85,7 @@ const Profile = () => {
                     <Zap size={20} />
                   </div>
                   <div className="flex-1">
-                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 mb-0.5`}>Active Protocol</p>
+                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 mb-0.5`}>Learning Strategy</p>
                     <p className={`font-bold ${THEME_CLASSES.text.primary}`}>1-4-7 Spaced Repetition</p>
                   </div>
                 </div>

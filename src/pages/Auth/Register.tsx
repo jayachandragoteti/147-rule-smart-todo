@@ -37,11 +37,11 @@ const Register = () => {
           </div>
           
           <div className="space-y-1">
-            <h2 className={`text-3xl font-black tracking-tight ${THEME_CLASSES.text.primary}`}>
-                Join the Grid
+            <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
+                Create Account
             </h2>
             <p className={`text-sm font-medium ${THEME_CLASSES.text.tertiary}`}>
-                Initialize your personal 1-4-7 productivity protocol.
+                Start your journey with 1-4-7 Smart Todo.
             </p>
           </div>
         </div>
@@ -50,8 +50,8 @@ const Register = () => {
         <div className="space-y-6">
           {/* Email */}
           <div className="space-y-2">
-            <label className={`block text-[10px] font-black uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
-              Designated Email
+            <label className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
+              Email ADDRESS
             </label>
             <div className="relative group">
                 <Mail size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${THEME_CLASSES.text.tertiary} group-focus-within:text-emerald-500`} />
@@ -67,14 +67,14 @@ const Register = () => {
 
           {/* Password */}
           <div className="space-y-2">
-            <label className={`block text-[10px] font-black uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
-              Security Cipher
+            <label className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
+              Password
             </label>
             <div className="relative group">
                 <Lock size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${THEME_CLASSES.text.tertiary} group-focus-within:text-emerald-500`} />
                 <input
                   type="password"
-                  placeholder="Create a strong cipher"
+                  placeholder="Create a strong password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`w-full pl-12 pr-4 py-3.5 rounded-2xl border text-sm font-medium transition-all focus:ring-4 focus:ring-emerald-500/10 ${THEME_CLASSES.input.base}`}
@@ -86,11 +86,11 @@ const Register = () => {
           <button
             onClick={handleRegister}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm uppercase tracking-widest shadow-xl shadow-emerald-500/20 transition-all active:scale-95 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm uppercase tracking-widest shadow-xl shadow-emerald-500/20 transition-all active:scale-95 disabled:opacity-50"
           >
-            {loading ? "Initializing..." : (
+            {loading ? "Creating account..." : (
                 <>
-                    Create operative Profile
+                    Sign Up
                     <ArrowRight size={18} />
                 </>
             )}
@@ -116,11 +116,11 @@ const Register = () => {
               to="/login"
               className="text-emerald-500 font-bold hover:underline"
             >
-              Access Grid
+              Login instead
             </Link>
           </p>
-          <div className={`text-[9px] font-black uppercase tracking-[0.3em] opacity-30 ${THEME_CLASSES.text.tertiary}`}>
-            Grid Protection Active // Level 4 Security
+          <div className={`text-[9px] font-bold uppercase tracking-wider opacity-30 ${THEME_CLASSES.text.tertiary}`}>
+            Secure Signup // 147 Smart Todo
           </div>
         </div>
       </div>

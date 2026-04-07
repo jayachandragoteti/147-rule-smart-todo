@@ -89,14 +89,14 @@ const Dashboard = () => {
 
   const statCards = [
     {
-      label: "Total Productivity",
+      label: "Total Tasks",
       value: stats.total,
       icon: Target,
       color: "text-blue-500",
       bg: "bg-blue-50 dark:bg-blue-900/20",
     },
     {
-      label: "Today's Focus",
+      label: "Today's Tasks",
       value: stats.todayCount,
       icon: Zap,
       color: "text-amber-500",
@@ -124,10 +124,10 @@ const Dashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div>
           <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
-            Welcome back, {user?.displayName?.split(' ')[0] || 'Achiever'}
+            Welcome back, {user?.displayName?.split(' ')[0] || 'User'}
           </h2>
           <p className={`text-base mt-1 ${THEME_CLASSES.text.secondary}`}>
-            Your productivity engine is running. Let's conquer the day.
+            Stay organized with your spaced repetition schedule.
           </p>
         </div>
         <Link
@@ -135,7 +135,7 @@ const Dashboard = () => {
           className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm font-bold"
         >
           <PlusCircle size={18} />
-          New Breakthrough
+          Add New Task
         </Link>
       </div>
 
@@ -167,7 +167,7 @@ const Dashboard = () => {
                   <Icon size={20} className={color} />
                 </div>
               </div>
-              <p className={`text-4xl font-black ${THEME_CLASSES.text.primary}`}>
+              <p className={`text-3xl font-bold ${THEME_CLASSES.text.primary}`}>
                 {value}
               </p>
             </div>
@@ -184,7 +184,7 @@ const Dashboard = () => {
                  <CalendarCheck size={20} className="text-white" />
               </div>
               <h3 className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
-                Today's Priority
+                Focus for Today
               </h3>
               {stats.todayCount > 0 && (
                 <span className="text-xs font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-full">
@@ -194,13 +194,13 @@ const Dashboard = () => {
             </div>
             {stats.todayCount > 3 && (
               <Link to="/today" className={`text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all ${THEME_CLASSES.text.link}`}>
-                Entire list <ArrowRight size={16} />
+                View all <ArrowRight size={16} />
               </Link>
             )}
           </div>
 
           {loading ? (
-            <div className={`border rounded-3xl p-10 text-center ${THEME_CLASSES.surface.card} ${THEME_CLASSES.text.tertiary}`}> Loading progress... </div>
+            <div className={`border rounded-3xl p-10 text-center ${THEME_CLASSES.surface.card} ${THEME_CLASSES.text.tertiary}`}> Loading tasks... </div>
           ) : todayTodos.length === 0 ? (
             <div className={`border-2 border-dashed rounded-3xl p-12 text-center flex flex-col items-center gap-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
               <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full">
@@ -229,19 +229,19 @@ const Dashboard = () => {
                  <ListTodo size={20} className="text-white" />
               </div>
               <h3 className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
-                Active Pipeline
+                Current Tasks
               </h3>
             </div>
             <Link to="/todos" className={`text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all ${THEME_CLASSES.text.link}`}>
-              All missions <ArrowRight size={16} />
+              View all <ArrowRight size={16} />
             </Link>
           </div>
           
           {loading ? (
-              <div className={`border rounded-3xl p-10 text-center ${THEME_CLASSES.surface.card} ${THEME_CLASSES.text.tertiary}`}> Analyzing pipeline... </div>
+              <div className={`border rounded-3xl p-10 text-center ${THEME_CLASSES.surface.card} ${THEME_CLASSES.text.tertiary}`}> Loading tasks... </div>
           ) : recentTodos.length === 0 ? (
               <div className={`border-2 border-dashed rounded-3xl p-12 text-center text-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.text.tertiary} ${THEME_CLASSES.border.base}`}>
-                  Pipeline is clear.
+                  No active tasks.
               </div>
           ) : (
             <div className="grid gap-4">
