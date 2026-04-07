@@ -41,7 +41,7 @@ const Register = () => {
                 Create Account
             </h2>
             <p className={`text-sm font-medium ${THEME_CLASSES.text.tertiary}`}>
-                Start your journey with 1-4-7 Smart Todo.
+                Start your journey with Smart Todo.
             </p>
           </div>
         </div>

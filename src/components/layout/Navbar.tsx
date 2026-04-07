@@ -32,7 +32,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-black tracking-tight leading-none bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
-              147 SMART TODO
+              SMART TODO
             </span>
             <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">Spaced Repetition Todo</span>
           </div>
