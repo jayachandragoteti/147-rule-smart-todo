@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { toggleTheme } from "./uiSlice";
-import { THEME_CLASSES } from "../../utils/themeUtils";
+import { Sun, Moon } from "lucide-react";
 
 export default function ThemeToggle() {
   const dispatch = useAppDispatch();
@@ -9,9 +9,15 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => dispatch(toggleTheme())}
-      className={`px-3 py-1 rounded border transition-colors duration-300 ${THEME_CLASSES.border.default} ${THEME_CLASSES.button.hover}`}
+      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer"
+      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      title={theme === "dark" ? "Light Mode" : "Dark Mode"}
     >
-      {theme === "dark" ? "Light Mode" : "Dark Mode"}
+      {theme === "dark" ? (
+        <Sun size={18} className="text-amber-400" />
+      ) : (
+        <Moon size={18} className="text-gray-600" />
+      )}
     </button>
   );
 }

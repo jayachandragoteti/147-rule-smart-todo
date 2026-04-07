@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { 
-  getAuth, 
-  setPersistence, 
-  browserLocalPersistence 
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -22,5 +22,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// 🔥 Force persistence in local storage
-setPersistence(auth, browserLocalPersistence);
+// Persist auth state in localStorage (awaited to avoid race conditions)
+setPersistence(auth, browserLocalPersistence).catch((err) => {
+  console.error("Firebase persistence error:", err);
+});

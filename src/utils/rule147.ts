@@ -1,0 +1,80 @@
+import { toDateOnlyString } from "./dateUtils";
+
+/**
+ * 147 Rule Utility
+ *
+ * The 1-4-7 Rule is a spaced repetition technique:
+ * - Day 1: Initial learning
+ * - Day 4: First review (3 days after Day 1)
+ * - Day 7: Second review (6 days after Day 1)
+ *
+ * This reinforces memory retention through increasing intervals.
+ */
+
+/** The interval offsets (in days) from the base date */
+export const RULE_147_OFFSETS = [0, 3, 6] as const;
+
+/** Labels for each occurrence in the series */
+export const RULE_147_LABELS = ["Day 1", "Day 4", "Day 7"] as const;
+
+/**
+ * Generate the three series dates from a base date using the 1-4-7 rule.
+ * @param baseDate - The starting date (Day 1)
+ * @returns An array of three ISO date strings
+ */
+export const generate147Dates = (baseDate: Date): string[] => {
+  return RULE_147_OFFSETS.map((offset) => {
+    const d = new Date(baseDate);
+    d.setDate(baseDate.getDate() + offset);
+    return d.toISOString();
+  });
+};
+
+/**
+ * Get a human-readable label for the current position in a 147 series.
+ * @param seriesDates - The array of series date strings
+ * @param currentDate - The current scheduled date string
+ * @returns A label like "Day 1", "Day 4", "Day 7", or "Series"
+ */
+export const get147Label = (
+  seriesDates: string[],
+  currentDate: string
+): string => {
+  const currentOnly = toDateOnlyString(currentDate);
+  const idx = seriesDates.findIndex(
+    (d) => toDateOnlyString(d) === currentOnly
+  );
+  return RULE_147_LABELS[idx] ?? "Series";
+};
+
+/**
+ * Check if a 147 series is on its final occurrence.
+ * @param seriesDates - The array of series date strings
+ * @param currentDate - The current scheduled date string
+ */
+export const isLastInSeries = (
+  seriesDates: string[],
+  currentDate: string
+): boolean => {
+  const currentOnly = toDateOnlyString(currentDate);
+  const normalized = seriesDates.map((d) => toDateOnlyString(d));
+  const idx = normalized.indexOf(currentOnly);
+  return idx === normalized.length - 1;
+};
+
+/**
+ * Get the next date in the series after the current one.
+ * @returns The next ISO date string, or null if at the end.
+ */
+export const getNextSeriesDate = (
+  seriesDates: string[],
+  currentDate: string
+): string | null => {
+  const currentOnly = toDateOnlyString(currentDate);
+  const normalized = seriesDates.map((d) => toDateOnlyString(d));
+  const idx = normalized.indexOf(currentOnly);
+  if (idx >= 0 && idx < normalized.length - 1) {
+    return seriesDates[idx + 1];
+  }
+  return null;
+};

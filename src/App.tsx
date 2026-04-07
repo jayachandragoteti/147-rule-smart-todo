@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { observeAuthState } from "./services/firebase/authService";
 import { setUser } from "./features/auth/authSlice";
 import AppRoutes from "./routes/AppRoutes";
+import ToastContainer from "./components/ui/ToastContainer";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -31,7 +32,12 @@ const App = () => {
     return () => unsubscribe();
   }, [dispatch]);
 
-  return <AppRoutes />;
+  return (
+    <>
+      <AppRoutes />
+      <ToastContainer />
+    </>
+  );
 };
 
 export default App;

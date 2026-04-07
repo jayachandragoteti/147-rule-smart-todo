@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { Todo } from "../../types/todo";
-import { createTodo, fetchTodos, updateTodo } from "./todoThunks";
+import { createTodo, deleteTodo, fetchTodos, updateTodo } from "./todoThunks";
 
 interface TodoState {
   todos: Todo[];
@@ -17,10 +17,14 @@ const initialState: TodoState = {
 export const todoSlice = createSlice({
   name: "todo",
   initialState,
-  reducers: {},
+  reducers: {
+    clearTodoError: (state) => {
+      state.error = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
-      // Fetch todos
+      // ── Fetch todos ──
       .addCase(fetchTodos.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -34,38 +38,53 @@ export const todoSlice = createSlice({
         state.error =
           (action.payload as string) || "Failed to fetch todos";
       })
-      // Create todo
+
+      // ── Create todo ──
       .addCase(createTodo.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(createTodo.fulfilled, (state, action) => {
         state.loading = false;
-        state.todos.push(...action.payload);
+        state.todos.unshift(...action.payload);
       })
       .addCase(createTodo.rejected, (state, action) => {
         state.loading = false;
         state.error =
           (action.payload as string) || "Failed to create todo";
+      })
+
+      // ── Update todo ──
+      .addCase(updateTodo.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateTodo.fulfilled, (state, action) => {
+        state.loading = false;
+        state.todos = state.todos.map((t) =>
+          t.id === action.payload.id ? action.payload : t
+        );
+      })
+      .addCase(updateTodo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || "Failed to update todo";
+      })
+
+      // ── Delete todo ──
+      .addCase(deleteTodo.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteTodo.fulfilled, (state, action) => {
+        state.loading = false;
+        state.todos = state.todos.filter((t) => t.id !== action.payload);
+      })
+      .addCase(deleteTodo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || "Failed to delete todo";
       });
-      // Update todo
-      builder
-        .addCase(updateTodo.pending, (state) => {
-          state.loading = true;
-          state.error = null;
-        })
-        .addCase(updateTodo.fulfilled, (state, action) => {
-          state.loading = false;
-          // replace the updated todo in state
-          state.todos = state.todos.map((t) =>
-            t.id === action.payload.id ? action.payload : t
-          );
-        })
-        .addCase(updateTodo.rejected, (state, action) => {
-          state.loading = false;
-          state.error = (action.payload as string) || "Failed to update todo";
-        });
   },
 });
 
+export const { clearTodoError } = todoSlice.actions;
 export default todoSlice.reducer;

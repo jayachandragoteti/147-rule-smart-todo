@@ -1,10 +1,26 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { Todo } from "../../types/todo";
-import { createTodoInFirestore, fetchTodosFromFirestore } from "../../services/firebase/todoService";
-import { updateTodoInFirestore } from "../../services/firebase/todoService";
+import {
+  createTodoInFirestore,
+  fetchTodosFromFirestore,
+  updateTodoInFirestore,
+  deleteTodoFromFirestore,
+} from "../../services/firebase/todoService";
+import { generate147Dates } from "../../utils/rule147";
 import type { RootState } from "../../app/store";
 
 type NewTodo = Omit<Todo, "id" | "createdAt">;
+
+/** Helper to get the authenticated user's UID or reject */
+const getUidOrReject = (
+  thunkAPI: { getState: () => RootState; rejectWithValue: (v: string) => unknown }
+) => {
+  const uid = thunkAPI.getState().auth.user?.uid;
+  if (!uid) {
+    return thunkAPI.rejectWithValue("User not authenticated") as never;
+  }
+  return uid;
+};
 
 export const fetchTodos = createAsyncThunk<
   Todo[],
@@ -12,18 +28,11 @@ export const fetchTodos = createAsyncThunk<
   { state: RootState }
 >("todo/fetchTodos", async (_, thunkAPI) => {
   try {
-    const state = thunkAPI.getState();
-    const uid = state.auth.user?.uid;
-
-    if (!uid) {
-      throw new Error("User not authenticated");
-    }
-
-    const todos = await fetchTodosFromFirestore(uid);
-    return todos;
-  } catch (error: any) {
-    console.error("Error fetching todos:", error.message);
-    return thunkAPI.rejectWithValue(error.message);
+    const uid = getUidOrReject(thunkAPI);
+    return await fetchTodosFromFirestore(uid);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to fetch todos";
+    return thunkAPI.rejectWithValue(message);
   }
 });
 
@@ -33,25 +42,18 @@ export const createTodo = createAsyncThunk<
   { state: RootState }
 >("todo/createTodo", async (todoData, thunkAPI) => {
   try {
-    const state = thunkAPI.getState();
-    const uid = state.auth.user?.uid;
+    const uid = getUidOrReject(thunkAPI);
 
-    if (!uid) {
-      throw new Error("User not authenticated");
-    }
     const todosToCreate: NewTodo[] = [];
     const baseDate = new Date(todoData.scheduledDate);
     const baseISODate = baseDate.toISOString();
-    // If applying 147 rule, create a single document that stores all series dates
+
     if (todoData.apply147Rule) {
-      const day4 = new Date(baseDate);
-      day4.setDate(baseDate.getDate() + 4);
-      const day7 = new Date(baseDate);
-      day7.setDate(baseDate.getDate() + 7);
+      const seriesDates = generate147Dates(baseDate);
       todosToCreate.push({
         ...todoData,
         scheduledDate: baseISODate,
-        seriesDates: [baseISODate, day4.toISOString(), day7.toISOString()],
+        seriesDates,
       });
     } else {
       todosToCreate.push({
@@ -61,16 +63,15 @@ export const createTodo = createAsyncThunk<
     }
 
     const savedTodos: Todo[] = [];
-
     for (const todo of todosToCreate) {
       const saved = await createTodoInFirestore(uid, todo);
       savedTodos.push(saved);
     }
 
     return savedTodos;
-  } catch (error: any) {
-    console.error("Error creating todo:", error.message);
-    return thunkAPI.rejectWithValue(error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to create todo";
+    return thunkAPI.rejectWithValue(message);
   }
 });
 
@@ -80,17 +81,25 @@ export const updateTodo = createAsyncThunk<
   { state: RootState }
 >("todo/updateTodo", async ({ id, updates }, thunkAPI) => {
   try {
-    const state = thunkAPI.getState();
-    const uid = state.auth.user?.uid;
+    const uid = getUidOrReject(thunkAPI);
+    return await updateTodoInFirestore(uid, id, updates);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to update todo";
+    return thunkAPI.rejectWithValue(message);
+  }
+});
 
-    if (!uid) {
-      throw new Error("User not authenticated");
-    }
-
-    const updated = await updateTodoInFirestore(uid, id, updates);
-    return updated;
-  } catch (error: any) {
-    console.error("Error updating todo:", error.message);
-    return thunkAPI.rejectWithValue(error.message);
+export const deleteTodo = createAsyncThunk<
+  string,
+  string,
+  { state: RootState }
+>("todo/deleteTodo", async (todoId, thunkAPI) => {
+  try {
+    const uid = getUidOrReject(thunkAPI);
+    await deleteTodoFromFirestore(uid, todoId);
+    return todoId;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to delete todo";
+    return thunkAPI.rejectWithValue(message);
   }
 });

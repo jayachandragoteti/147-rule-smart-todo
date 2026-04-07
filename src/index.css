@@ -69,64 +69,37 @@ body,
 }
 
 body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   @apply antialiased transition-colors duration-300 text-base;
   background-color: rgb(var(--bg-primary));
   color: rgb(var(--text-primary));
 }
 
 /* ========================================
-   UTILITY CLASSES FOR COMMON PATTERNS
+   SCROLLBAR STYLING
    ======================================== */
 
-/* Surfaces */
-.surface-base {
-  @apply bg-white dark:bg-[#111827] transition-colors duration-300;
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.surface-card {
-  @apply bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] transition-colors duration-300;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.surface-secondary {
-  @apply bg-gray-50 dark:bg-[#0f172a] transition-colors duration-300;
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-700 rounded-full;
 }
 
-/* Borders */
-.border-base {
-  @apply border-gray-200 dark:border-[#1f2937] transition-colors duration-300;
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-600;
 }
 
-.border-secondary {
-  @apply border-gray-300 dark:border-[#374151] transition-colors duration-300;
-}
+/* ========================================
+   SELECTION STYLING
+   ======================================== */
 
-/* Text */
-.text-base {
-  @apply text-gray-900 dark:text-gray-100 transition-colors duration-300;
-}
-
-.text-secondary {
-  @apply text-gray-600 dark:text-gray-400 transition-colors duration-300;
-}
-
-.text-tertiary {
-  @apply text-gray-500 dark:text-gray-500 transition-colors duration-300;
-}
-
-/* Hover States */
-.hover-surface {
-  @apply hover:bg-gray-100 dark:hover:bg-[#1f2937] transition-colors duration-300;
-}
-
-.hover-surface-light {
-  @apply hover:bg-gray-50 dark:hover:bg-[#0f172a] transition-colors duration-300;
-}
-
-/* Input Fields */
-.input-base {
-  @apply px-4 py-2 rounded-lg border border-gray-300 dark:border-[#1f2937] bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-300;
-}
-
-.input-base:focus {
-  @apply outline-none ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-[#111827];
+::selection {
+  @apply bg-blue-500/20;
 }

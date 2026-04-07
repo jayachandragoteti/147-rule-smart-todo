@@ -20,15 +20,15 @@ export interface Todo {
   apply147Rule: boolean;
   seriesDates?: string[];
   createdAt: string;
-  scheduledDate: string; 
+  scheduledDate: string;
   dueDate?: string;
 }
 
 export type CreateTodoFormValues = {
-    scheduledDate: string;
-    title: string;
-    descriptions: { value: string }[];
-    posterImage: string;
-    links: { title: string; url: string }[];
-    apply147Rule: boolean;
-  };
+  scheduledDate: string;
+  title: string;
+  descriptions: { value: string }[];
+  posterImage: string;
+  links: { title: string; url: string }[];
+  apply147Rule: boolean;
+};

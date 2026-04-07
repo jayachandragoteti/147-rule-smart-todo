@@ -4,7 +4,10 @@ import {
   getDocs,
   doc,
   updateDoc,
+  deleteDoc,
   getDoc,
+  query,
+  orderBy,
 } from "firebase/firestore";
 import type { Todo } from "../../types/todo";
 import { db } from "./firebase";
@@ -15,12 +18,13 @@ export const fetchTodosFromFirestore = async (
   uid: string
 ): Promise<Todo[]> => {
   const todosRef = collection(db, "users", uid, "todos");
-  const querySnapshot = await getDocs(todosRef);
+  const q = query(todosRef, orderBy("createdAt", "desc"));
+  const querySnapshot = await getDocs(q);
   const todos: Todo[] = [];
-  querySnapshot.forEach((doc) => {
+  querySnapshot.forEach((docSnap) => {
     todos.push({
-      id: doc.id,
-      ...doc.data(),
+      id: docSnap.id,
+      ...docSnap.data(),
     } as Todo);
   });
   return todos;
@@ -49,19 +53,26 @@ export const updateTodoInFirestore = async (
   updates: Partial<NewTodo & { status?: string; apply147Rule?: boolean }>
 ): Promise<Todo> => {
   const docRef = doc(db, "users", uid, "todos", id);
-  await updateDoc(docRef, updates as any);
+  await updateDoc(docRef, updates as Record<string, unknown>);
 
-  // return the latest document
+  // Return the latest document
   const snap = await getDoc(docRef);
   if (!snap.exists()) {
     throw new Error("Todo not found");
   }
 
-  const data = snap.data() as any;
-  // ensure we don't accidentally overwrite id if it's present in document data
+  const data = snap.data() as Record<string, unknown>;
   const { id: _docId, ...rest } = data;
   return {
     id: snap.id,
     ...(rest as Omit<Todo, "id">),
   };
+};
+
+export const deleteTodoFromFirestore = async (
+  uid: string,
+  id: string
+): Promise<void> => {
+  const docRef = doc(db, "users", uid, "todos", id);
+  await deleteDoc(docRef);
 };
