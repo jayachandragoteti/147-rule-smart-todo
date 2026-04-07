@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { registerThunk } from "../../features/auth/authThunks";
 import { useNavigate, Link } from "react-router-dom";
 import { THEME_CLASSES } from "../../utils/themeUtils";
-import { Mail, Lock, UserPlus, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import { Mail, Lock, UserPlus, ArrowRight, ShieldCheck } from "lucide-react";
 
 const Register = () => {
   const dispatch = useAppDispatch();

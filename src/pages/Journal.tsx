@@ -3,8 +3,6 @@ import {
   Search, 
   Plus, 
   Calendar as CalendarIcon, 
-  Book, 
-  X, 
   Edit3, 
   Tag, 
   Clock,
@@ -19,12 +17,12 @@ import PageWrapper from "../components/layout/PageWrapper";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import { fetchJournalEntries, addJournalEntry, updateJournalEntry } from "../features/journal/journalSlice";
 import { THEME_CLASSES } from "../utils/themeUtils";
-import { JournalEntry } from "../types";
+import type { JournalEntry } from "../types";
 
 const Journal = () => {
   const dispatch = useAppDispatch();
   const toast = useToast();
-  const { entries, loading } = useAppSelector((state) => state.journal);
+  const { entries } = useAppSelector((state) => state.journal);
   const user = useAppSelector((state) => state.auth.user);
   const todos = useAppSelector((state) => state.todo.todos);
 
@@ -147,7 +145,7 @@ const Journal = () => {
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => (
                 <span key={d} className={`text-[10px] font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary} mb-2`}>{d}</span>
               ))}
-              {daysInMonth.map((day, i) => {
+              {daysInMonth.map((day: Date, i: number) => {
                 const hasEntry = entries.some(e => isSameDay(new Date(e.date), day));
                 const isSelected = isSameDay(day, selectedDate);
                 const isToday = isSameDay(day, new Date());

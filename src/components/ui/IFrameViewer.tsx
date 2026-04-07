@@ -1,4 +1,3 @@
-import React from "react";
 import { X, Minimize2, Maximize2, ExternalLink } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { closeIFrame, toggleIFrameMinimize } from "../../features/ui/uiSlice";

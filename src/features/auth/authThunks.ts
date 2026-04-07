@@ -9,7 +9,7 @@ export const registerThunk = createAsyncThunk(
   "auth/register",
   async ({ email, password }: { email: string; password: string }) => {
     const user = await registerUser(email, password);
-    return { uid: user.uid, email: user.email };
+    return { uid: user.uid, email: user.email, displayName: user.displayName };
   }
 );
 
@@ -17,7 +17,7 @@ export const loginThunk = createAsyncThunk(
   "auth/login",
   async ({ email, password }: { email: string; password: string }) => {
     const user = await loginUser(email, password);
-    return { uid: user.uid, email: user.email };
+    return { uid: user.uid, email: user.email, displayName: user.displayName };
   }
 );
 

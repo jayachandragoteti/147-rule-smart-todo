@@ -1,4 +1,4 @@
-import { User, Mail, Shield, Zap, LogOut } from "lucide-react";
+import { Mail, Shield, Zap, LogOut } from "lucide-react";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import PageWrapper from "../components/layout/PageWrapper";
 import { THEME_CLASSES } from "../utils/themeUtils";

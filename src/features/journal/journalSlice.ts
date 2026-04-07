@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { 
   collection, 
   addDoc, 
@@ -7,12 +7,11 @@ import {
   where, 
   doc, 
   updateDoc, 
-  deleteDoc,
   serverTimestamp,
   orderBy
 } from "firebase/firestore";
-import { db } from "../../services/firebase/firebaseConfig";
-import { JournalEntry, CreateJournalFormValues } from "../../types";
+import { db } from "../../services/firebase/firebase";
+import type { JournalEntry, CreateJournalFormValues } from "../../types";
 
 interface JournalState {
   entries: JournalEntry[];

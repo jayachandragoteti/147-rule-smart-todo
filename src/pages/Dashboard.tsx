@@ -2,7 +2,6 @@ import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   ListTodo,
-  Clock,
   CheckCircle2,
   RefreshCw,
   CalendarCheck,
@@ -14,14 +13,13 @@ import {
 } from "lucide-react";
 import PageWrapper from "../components/layout/PageWrapper";
 import TodoCard from "../components/todos/TodoCard";
-import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { fetchTodos } from "../features/todos/todoThunks";
 import { isTodayDate } from "../utils/dateUtils";
 import { THEME_CLASSES } from "../utils/themeUtils";
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
-  const toast = useToast();
   const { todos, loading } = useAppSelector((state) => state.todo);
   const isAuthChecked = useAppSelector((state) => state.auth.isAuthChecked);
   const user = useAppSelector((state) => state.auth.user);
