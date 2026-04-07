@@ -2,14 +2,10 @@
  * Check if a date string is today's date
  */
 export const isTodayDate = (dateString: string): boolean => {
-  const d = new Date(dateString);
-  const today = new Date();
-
-  return (
-    d.getFullYear() === today.getFullYear() &&
-    d.getMonth() === today.getMonth() &&
-    d.getDate() === today.getDate()
-  );
+  if (!dateString) return false;
+  const target = toDateOnlyString(dateString);
+  const now = toDateOnlyString(new Date().toISOString());
+  return target === now;
 };
 
 /**

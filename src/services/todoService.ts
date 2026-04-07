@@ -9,8 +9,8 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
-import type { Todo } from "../../types/todo";
-import { db } from "./firebase";
+import type { Todo } from "../types/todo";
+import { db } from "./firebase/firebase";
 
 type NewTodo = Omit<Todo, "id" | "createdAt">;
 

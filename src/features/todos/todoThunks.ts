@@ -5,7 +5,7 @@ import {
   fetchTodosFromFirestore,
   updateTodoInFirestore,
   deleteTodoFromFirestore,
-} from "../../services/firebase/todoService";
+} from "../../services/todoService";
 import { generate147Dates } from "../../utils/rule147";
 import type { RootState } from "../../app/store";
 

@@ -51,6 +51,21 @@ export const THEME_CLASSES = {
     base: "border-gray-200 dark:border-[#1f2937] transition-colors duration-300",
     default: "border-gray-200 dark:border-[#1f2937] transition-colors duration-300",
   },
+
+  /* Functional / Status Classes */
+  status: {
+    active: "bg-blue-600 text-white shadow-blue-500/20",
+    success: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600",
+    warning: "bg-amber-100 dark:bg-amber-900/30 text-amber-600",
+    danger: "bg-red-100 dark:bg-red-900/30 text-red-600",
+  },
+
+  /* Brand Classes */
+  brand: {
+    primary: "bg-blue-600 dark:bg-blue-600",
+    gradient: "bg-gradient-to-r from-blue-600 to-indigo-700",
+    glow: "shadow-[0_0_15px_rgba(37,99,235,0.4)]",
+  }
 } as const;
 
 /**

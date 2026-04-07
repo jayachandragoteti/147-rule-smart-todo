@@ -4,6 +4,7 @@ import { observeAuthState } from "./services/firebase/authService";
 import { setUser } from "./features/auth/authSlice";
 import AppRoutes from "./routes/AppRoutes";
 import ToastContainer from "./components/ui/ToastContainer";
+import IFrameViewer from "./components/ui/IFrameViewer";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -36,6 +37,7 @@ const App = () => {
     <>
       <AppRoutes />
       <ToastContainer />
+      <IFrameViewer />
     </>
   );
 };

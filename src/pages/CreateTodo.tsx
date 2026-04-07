@@ -1,18 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import { createTodo } from "../features/todos/todoThunks";
 import { TODO_ACTION_TYPE, TODO_STATUS } from "../utils/todoConstants";
 import { VALIDATION, FORM_MESSAGES } from "../utils/constants";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
-import type { CreateTodoFormValues } from "../types/todo";
+import type { CreateTodoFormValues, TodoPriority, TodoRecurrence } from "../types/todo";
 import { useState } from "react";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { generate147Dates, RULE_147_LABELS } from "../utils/rule147";
+import { Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw } from "lucide-react";
 
 const CreateTodo = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const toast = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageLoadError, setImageLoadError] = useState(false);
 
@@ -27,12 +29,17 @@ const CreateTodo = () => {
     formState: { errors },
   } = useForm<CreateTodoFormValues>({
     defaultValues: {
-      scheduledDate: "",
+      scheduledDate: new Date().toISOString().split("T")[0],
+      scheduledTime: "09:00",
       title: "",
-      descriptions: [],
+      descriptions: [{ value: "" }],
       posterImage: "",
       links: [],
       apply147Rule: false,
+      priority: "medium",
+      category: "Personal",
+      recurrence: "none",
+      reminderEnabled: true,
     },
   });
 
@@ -48,9 +55,6 @@ const CreateTodo = () => {
     remove: removeLink,
   } = useFieldArray({ control, name: "links" });
 
-  /* ----------------------------
-     Image URL Handler & Validation
-  ---------------------------- */
   const posterImageUrl = useWatch({ control, name: "posterImage" });
 
   const validateImageUrl = (url: string) => {
@@ -74,15 +78,11 @@ const CreateTodo = () => {
     }
   };
 
-  const toast = useToast();
-
-  /* ----------------------------
-     Submit Handler
-  ---------------------------- */
   const onSubmit = async (data: CreateTodoFormValues) => {
     const resultAction = await dispatch(
       createTodo({
         scheduledDate: data.scheduledDate,
+        scheduledTime: data.scheduledTime,
         title: data.title.trim(),
         descriptions: data.descriptions
           .map((d) => d.value)
@@ -99,6 +99,11 @@ const CreateTodo = () => {
         status: TODO_STATUS.PENDING,
         actionType: TODO_ACTION_TYPE.LEARNING,
         apply147Rule: data.apply147Rule,
+        priority: data.priority,
+        category: data.category,
+        recurrence: data.recurrence,
+        reminderEnabled: data.reminderEnabled,
+        order: Date.now(),
       })
     );
     if (createTodo.fulfilled.match(resultAction)) {
@@ -109,11 +114,9 @@ const CreateTodo = () => {
     }
   };
 
-  /* ----------------------------
-     147 Preview Dates
-  ---------------------------- */
   const scheduledDateValue = useWatch({ control, name: "scheduledDate" });
   const apply147Value = useWatch({ control, name: "apply147Rule" });
+  const recurrenceValue = useWatch({ control, name: "recurrence" });
 
   let previewDates: { label: string; date: string }[] = [];
   if (apply147Value && scheduledDateValue) {
@@ -125,281 +128,274 @@ const CreateTodo = () => {
     }));
   }
 
+  const categories = ["Personal", "Work", "Learning", "Health", "Finances", "Projects"];
+  const priorities: { value: TodoPriority; label: string; color: string }[] = [
+    { value: "low", label: "Low", color: "text-gray-500" },
+    { value: "medium", label: "Medium", color: "text-blue-500" },
+    { value: "high", label: "High", color: "text-orange-500" },
+    { value: "urgent", label: "Urgent", color: "text-red-500" },
+  ];
+
+  const recurrences: { value: TodoRecurrence; label: string; icon: any; color: string }[] = [
+    { value: "none", label: "Once", icon: Calendar, color: "bg-gray-500" },
+    { value: "daily", label: "Daily", icon: RefreshCcw, color: "bg-emerald-500" },
+    { value: "weekly", label: "Weekly", icon: RefreshCcw, color: "bg-blue-500" },
+    { value: "monthly", label: "Monthly", icon: RefreshCcw, color: "bg-purple-500" },
+  ];
+
   return (
     <PageWrapper>
-      <div className="max-w-3xl mx-auto space-y-8">
-        <h2
-          className={`text-2xl font-semibold tracking-tight ${THEME_CLASSES.text.primary}`}
-        >
-          Create New Todo
-        </h2>
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="flex flex-col gap-2">
+            <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
+              Create New Task
+            </h2>
+            <p className={`${THEME_CLASSES.text.secondary}`}>Organize your day with precision and smart rules.</p>
+        </div>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className={`border rounded-2xl p-6 space-y-6 transition-colors duration-300 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.default}`}
-        >
-          {/* Scheduled Date */}
-          <div>
-            <label
-              className={`block text-sm font-medium mb-1 ${THEME_CLASSES.text.primary}`}
-            >
-              Task Date *
-            </label>
-            <input
-              type="date"
-              {...register("scheduledDate", {
-                required: FORM_MESSAGES.REQUIRED_DATE,
-              })}
-              className={`w-full px-4 py-2 rounded-lg border ${THEME_CLASSES.input.base}`}
-            />
-            {errors.scheduledDate && (
-              <p className="text-xs text-red-500 mt-1">
-                {errors.scheduledDate.message}
-              </p>
-            )}
-          </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Info */}
+          <div className={`lg:col-span-2 space-y-6 p-8 border rounded-3xl shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+            {/* Title */}
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
+                Task Title
+              </label>
+              <input
+                type="text"
+                placeholder="What needs to be done?"
+                {...register("title", {
+                  required: FORM_MESSAGES.REQUIRED_TITLE,
+                  minLength: { value: VALIDATION.TITLE_MIN_LENGTH, message: FORM_MESSAGES.MIN_TITLE },
+                })}
+                className={`w-full px-5 py-3 rounded-2xl border text-lg focus:ring-4 focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base} ${errors.title ? 'border-red-500' : ''}`}
+              />
+              {errors.title && <p className="text-xs text-red-500 mt-2 ml-1 font-medium">{errors.title.message}</p>}
+            </div>
 
-          {/* Title */}
-          <div>
-            <label
-              className={`block text-sm font-medium mb-1 ${THEME_CLASSES.text.primary}`}
-            >
-              Task Title *
-            </label>
-            <input
-              type="text"
-              placeholder="Enter task title"
-              {...register("title", {
-                required: FORM_MESSAGES.REQUIRED_TITLE,
-                minLength: {
-                  value: VALIDATION.TITLE_MIN_LENGTH,
-                  message: FORM_MESSAGES.MIN_TITLE,
-                },
-              })}
-              className={`w-full px-4 py-2 rounded-lg border ${THEME_CLASSES.input.base}`}
-            />
-            {errors.title && (
-              <p className="text-xs text-red-500 mt-1">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
-
-          {/* Descriptions */}
-          <div className="space-y-3">
-            <p
-              className={`text-sm font-medium ${THEME_CLASSES.text.primary}`}
-            >
-              Descriptions
-            </p>
-
-            {descFields.map((field, index) => (
-              <div key={field.id} className="relative">
-                <textarea
-                  rows={3}
-                  {...register(`descriptions.${index}.value` as const)}
-                  placeholder="Add a description paragraph..."
-                  className={`w-full px-4 py-2 rounded-lg border ${THEME_CLASSES.input.base}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => removeDesc(index)}
-                  className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-sm"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-
-            <button
-              type="button"
-              onClick={() => appendDesc({ value: "" })}
-              className={`text-sm cursor-pointer ${THEME_CLASSES.text.link}`}
-            >
-              + Add Description
-            </button>
-          </div>
-
-          {/* Poster Image */}
-          <div>
-            <label
-              className={`block text-sm font-medium mb-1 ${THEME_CLASSES.text.primary}`}
-            >
-              Poster Image (optional)
-            </label>
-            <input
-              type="url"
-              placeholder="Image URL (e.g., https://example.com/image.jpg)"
-              {...register("posterImage", {
-                validate: validateImageUrl,
-                onChange: (e) => handleImageUrlChange(e.target.value),
-              })}
-              className={`w-full px-4 py-2 rounded-lg border ${THEME_CLASSES.input.base}`}
-            />
-            {errors.posterImage && (
-              <p className="text-xs text-red-500 mt-1">
-                {errors.posterImage.message}
-              </p>
-            )}
-            {posterImageUrl && imageLoadError && (
-              <p className="text-xs text-red-500 mt-1">
-                ⚠️ Image URL is not accessible. Check the URL and try again.
-              </p>
-            )}
-            {imagePreview && !imageLoadError && (
-              <div className="mt-3">
-                <p className={`text-xs mb-2 ${THEME_CLASSES.text.tertiary}`}>
-                  ✓ Image Preview:
-                </p>
-                <img
-                  src={imagePreview}
-                  alt="Poster preview"
-                  className={`max-w-xs h-auto rounded-lg border ${THEME_CLASSES.border.default}`}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Links */}
-          <div className="space-y-3">
-            <p
-              className={`text-sm font-medium ${THEME_CLASSES.text.primary}`}
-            >
-              Reference Links
-            </p>
-
-            {linkFields.map((field, index) => (
-              <div key={field.id} className="space-y-2">
-                <div className="grid sm:grid-cols-2 gap-3">
+            {/* Date & Time Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
+                    <Clock size={14} /> Scheduled Date
+                  </label>
                   <input
-                    type="text"
-                    placeholder="Title"
-                    {...register(`links.${index}.title` as const, {
-                      minLength: {
-                        value: VALIDATION.LINK_TITLE_MIN_LENGTH,
-                        message: FORM_MESSAGES.MIN_LINK_TITLE,
-                      },
-                    })}
-                    className={`px-4 py-2 rounded-lg border ${THEME_CLASSES.input.base}`}
-                  />
-                  <input
-                    type="text"
-                    placeholder="URL (e.g., https://example.com)"
-                    {...register(`links.${index}.url` as const, {
-                      pattern: {
-                        value: VALIDATION.URL_PATTERN,
-                        message: FORM_MESSAGES.INVALID_URL,
-                      },
-                    })}
-                    className={`px-4 py-2 rounded-lg border ${THEME_CLASSES.input.base}`}
+                    type="date"
+                    {...register("scheduledDate", { required: FORM_MESSAGES.REQUIRED_DATE })}
+                    className={`w-full px-5 py-3 rounded-2xl border focus:ring-4 focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base}`}
                   />
                 </div>
-                {(errors.links?.[index]?.title ||
-                  errors.links?.[index]?.url) && (
-                  <div className="text-xs space-y-1">
-                    {errors.links?.[index]?.title && (
-                      <p className="text-red-500">
-                        {errors.links[index].title?.message}
-                      </p>
-                    )}
-                    {errors.links?.[index]?.url && (
-                      <p className="text-red-500">
-                        {errors.links[index].url?.message}
-                      </p>
-                    )}
+                <div>
+                  <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
+                    <Clock size={14} /> Time
+                  </label>
+                  <input
+                    type="time"
+                    {...register("scheduledTime")}
+                    className={`w-full px-5 py-3 rounded-2xl border focus:ring-4 focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base}`}
+                  />
+                </div>
+            </div>
+
+            {/* Descriptions */}
+            <div className="space-y-4">
+              <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
+                Notes & Details
+              </label>
+              {descFields.map((field, index) => (
+                <div key={field.id} className="relative group">
+                  <textarea
+                    rows={2}
+                    {...register(`descriptions.${index}.value` as const)}
+                    placeholder="Add a detail..."
+                    className={`w-full px-5 py-3 rounded-2xl border transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
+                  />
+                  {index > 0 && (
+                    <button
+                        type="button"
+                        onClick={() => removeDesc(index)}
+                        className="absolute -right-3 -top-3 p-1.5 bg-red-100 dark:bg-red-900/40 text-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => appendDesc({ value: "" })}
+                className={`flex items-center gap-2 text-sm font-semibold py-2 px-1 hover:gap-3 transition-all ${THEME_CLASSES.text.link}`}
+              >
+                <Plus size={16} /> Add Another Point
+              </button>
+            </div>
+
+            {/* Links */}
+            <div className="space-y-4">
+              <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
+                Reference Links
+              </label>
+              {linkFields.map((field, index) => (
+                <div key={field.id} className="p-4 border rounded-2xl flex flex-col sm:flex-row gap-3 relative group bg-gray-50/50 dark:bg-gray-800/20 border-dashed">
+                  <input
+                    type="text"
+                    placeholder="Label (e.g. Documentation)"
+                    {...register(`links.${index}.title` as const)}
+                    className={`flex-1 px-4 py-2 rounded-xl border-none bg-white dark:bg-gray-800 text-sm ${THEME_CLASSES.text.primary}`}
+                  />
+                  <input
+                    type="text"
+                    placeholder="URL (https://...)"
+                    {...register(`links.${index}.url` as const)}
+                    className={`flex-[2] px-4 py-2 rounded-xl border-none bg-white dark:bg-gray-800 text-sm ${THEME_CLASSES.text.primary}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeLink(index)}
+                    className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => appendLink({ title: "", url: "" })}
+                className={`flex items-center gap-2 text-sm font-semibold py-2 px-1 hover:gap-3 transition-all ${THEME_CLASSES.text.link}`}
+              >
+                <Plus size={16} /> Add Reference Link
+              </button>
+            </div>
+          </div>
+
+          {/* Sidebar Config */}
+          <div className="space-y-6">
+             {/* Category & Priority */}
+             <div className={`p-6 border rounded-3xl shadow-sm space-y-6 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+                <div>
+                  <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-3 ${THEME_CLASSES.text.tertiary}`}>
+                    <Tag size={14} /> Category
+                  </label>
+                  <select
+                    {...register("category")}
+                    className={`w-full px-4 py-3 rounded-2xl border appearance-none ${THEME_CLASSES.input.base}`}
+                  >
+                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                  <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-3 ${THEME_CLASSES.text.tertiary}`}>
+                    <Flag size={14} /> Priority Level
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {priorities.map(({ value, label, color }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setValue("priority", value)}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
+                          useWatch({ control, name: "priority" }) === value
+                            ? `${color} border-current bg-current/5 ring-2 ring-current ring-offset-2 dark:ring-offset-gray-900`
+                            : `${THEME_CLASSES.border.base} ${THEME_CLASSES.text.secondary} opacity-60`
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
                   </div>
-                )}
+                </div>
+             </div>
+
+             {/* Smart Features */}
+             <div className={`p-6 border rounded-3xl shadow-sm space-y-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+                <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
+                  Productivity Rules
+                </label>
+                
+                {/* Recurrence Dropdown */}
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    {recurrences.map((r) => (
+                      <button
+                        key={r.value}
+                        type="button"
+                        onClick={() => setValue("recurrence", r.value)}
+                        className={`flex items-center gap-2 p-3 rounded-2xl border transition-all ${
+                          recurrenceValue === r.value
+                            ? "bg-blue-500/10 border-blue-500 text-blue-600 ring-1 ring-blue-500"
+                            : THEME_CLASSES.border.base
+                        }`}
+                      >
+                        <r.icon size={14} />
+                        <span className="text-xs font-bold">{r.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 147 Rule */}
                 <button
                   type="button"
-                  onClick={() => removeLink(index)}
-                  className="text-sm text-red-500 hover:text-red-700"
+                  onClick={() => setValue("apply147Rule", !apply147Value)}
+                  className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-3 ${
+                    apply147Value ? "bg-purple-100/50 dark:bg-purple-900/10 border-purple-500 ring-1 ring-purple-500" : THEME_CLASSES.border.base
+                  }`}
                 >
-                  Remove Link
+                  <div className={`p-2 rounded-xl ${apply147Value ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                    <Repeat size={18} />
+                  </div>
+                  <div>
+                    <p className={`text-sm font-bold ${apply147Value ? 'text-purple-700 dark:text-purple-300' : THEME_CLASSES.text.primary}`}>1-4-7 Spaced Repetition</p>
+                    <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Repeat tasks on days 1, 4, and 7 for maximum retention.</p>
+                  </div>
                 </button>
-              </div>
-            ))}
 
-            <button
-              type="button"
-              onClick={() => appendLink({ title: "", url: "" })}
-              className={`text-sm cursor-pointer ${THEME_CLASSES.text.link}`}
-            >
-              + Add Link
-            </button>
-          </div>
+                {/* Reminders */}
+                <button
+                  type="button"
+                  onClick={() => setValue("reminderEnabled", !useWatch({ control, name: "reminderEnabled" }))}
+                  className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-3 ${
+                    useWatch({ control, name: "reminderEnabled" }) ? "bg-amber-100/50 dark:bg-amber-900/10 border-amber-500 ring-1 ring-amber-500" : THEME_CLASSES.border.base
+                  }`}
+                >
+                  <div className={`p-2 rounded-xl ${useWatch({ control, name: "reminderEnabled" }) ? 'bg-amber-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                    <Bell size={18} />
+                  </div>
+                  <div>
+                    <p className={`text-sm font-bold ${useWatch({ control, name: "reminderEnabled" }) ? 'text-amber-700 dark:text-amber-300' : THEME_CLASSES.text.primary}`}>Notifications</p>
+                    <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Get alerted when it's time to work on this.</p>
+                  </div>
+                </button>
+             </div>
 
-          {/* 147 Rule */}
-          <div
-            className={`flex items-center justify-between border rounded-lg px-4 py-3 ${THEME_CLASSES.border.default}`}
-          >
-            <div>
-              <p
-                className={`text-sm font-medium ${THEME_CLASSES.text.primary}`}
-              >
-                Apply 147 Rule
-              </p>
-              <p className={`text-xs ${THEME_CLASSES.text.tertiary}`}>
-                Automatically repeat on day 1, day 4, and day 7 for spaced
-                repetition.
-              </p>
-            </div>
-            <input
-              type="checkbox"
-              {...register("apply147Rule")}
-              className="w-5 h-5 cursor-pointer accent-purple-600"
-            />
-          </div>
-
-          {/* 147 Preview */}
-          {previewDates.length > 0 && (
-            <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4 text-sm">
-              <p className="font-medium mb-2 text-purple-800 dark:text-purple-200">
-                📅 Scheduled Dates (1-4-7 Rule):
-              </p>
-              <ul className="space-y-1">
-                {previewDates.map(({ label, date }, index) => (
-                  <li
-                    key={index}
-                    className="text-purple-700 dark:text-purple-300"
-                  >
-                    <span className="font-medium">{label}:</span> {date}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Error */}
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
-              {error}
-            </div>
-          )}
-
-          {/* Buttons */}
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/todos")}
-              className={`px-4 py-2 border rounded-lg cursor-pointer ${THEME_CLASSES.border.default} ${THEME_CLASSES.button.hover}`}
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 transition-colors cursor-pointer"
-            >
-              {loading && (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              )}
-              {loading ? "Saving..." : "Save Task"}
-            </button>
+             {/* Action Buttons */}
+             <div className="flex flex-col gap-3">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl font-bold shadow-xl shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                >
+                  {loading && <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                  {loading ? "Creating..." : "Create Task"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/todos")}
+                  className={`w-full py-4 border rounded-3xl font-bold transition-all ${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.primary}`}
+                >
+                  Discard
+                </button>
+             </div>
           </div>
         </form>
       </div>
     </PageWrapper>
+  );
+};
+
+export default CreateTodo;
+
   );
 };
 

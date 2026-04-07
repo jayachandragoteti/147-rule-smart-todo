@@ -5,7 +5,14 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { fetchTodos } from "../features/todos/todoThunks";
 import { isTodayDate } from "../utils/dateUtils";
 import { THEME_CLASSES } from "../utils/themeUtils";
-import { CalendarCheck } from "lucide-react";
+import { 
+  CalendarCheck, 
+  Sparkles, 
+  Target,
+  Zap,
+  CheckCircle2,
+  AlertCircle
+} from "lucide-react";
 
 const Today = () => {
   const dispatch = useAppDispatch();
@@ -35,73 +42,106 @@ const Today = () => {
     (t) => t.status === "completed"
   ).length;
 
+  const progressPercent = todayTodos.length > 0 
+    ? Math.round((completedCount / todayTodos.length) * 100) 
+    : 0;
+
   return (
     <PageWrapper>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <CalendarCheck size={24} className="text-blue-500" />
-          <div>
-            <h2
-              className={`text-2xl font-semibold tracking-tight ${THEME_CLASSES.text.primary}`}
-            >
-              Today's Tasks
-            </h2>
-            {todayTodos.length > 0 && (
-              <p className={`text-sm mt-0.5 ${THEME_CLASSES.text.tertiary}`}>
-                {completedCount} of {todayTodos.length} completed
-              </p>
-            )}
+      <div className="space-y-10">
+        {/* Hero Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2">
+          <div className="space-y-4 max-w-2xl">
+            <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-xl ${THEME_CLASSES.brand.primary} ${THEME_CLASSES.brand.glow}`}>
+                    <Zap size={24} />
+                </div>
+                <div className={`px-4 py-1.5 rounded-full border ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">Active Execution</span>
+                </div>
+            </div>
+            
+            <div className="space-y-2">
+                <h2 className={`text-4xl md:text-5xl font-black tracking-tight ${THEME_CLASSES.text.primary}`}>
+                  Today's Timeline
+                </h2>
+                <p className={`text-lg font-medium leading-relaxed ${THEME_CLASSES.text.tertiary}`}>
+                  Your priority mission objectives for <span className="text-blue-500 font-bold">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</span>. 
+                </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-end gap-3 min-w-[200px]">
+              <div className="flex items-center gap-2">
+                  <Target size={18} className="text-emerald-500" />
+                  <span className={`text-sm font-black uppercase tracking-widest ${THEME_CLASSES.text.primary}`}>Grid Vitality</span>
+              </div>
+              <div className={`w-full h-3 rounded-full overflow-hidden border ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
+                  <div 
+                    className={`h-full transition-all duration-1000 ease-out ${THEME_CLASSES.brand.gradient} ${THEME_CLASSES.brand.glow}`}
+                    style={{ width: `${progressPercent}%` }}
+                  />
+              </div>
+              <div className="flex justify-between w-full text-[10px] font-black uppercase tracking-widest opacity-50">
+                  <span>{completedCount} COMPLETED</span>
+                  <span>{progressPercent}%</span>
+              </div>
           </div>
         </div>
 
-        {/* Date display */}
-        <span className={`text-sm ${THEME_CLASSES.text.secondary}`}>
-          {new Date().toLocaleDateString("en-US", {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}
-        </span>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4 text-sm text-red-700 dark:text-red-100">
-          Error loading tasks: {error}
-        </div>
-      )}
-
-      {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className={`rounded-xl p-4 border animate-pulse ${THEME_CLASSES.surface.card}`}
-            >
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3" />
-              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2" />
-              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+        {error && (
+          <div className={`border rounded-3xl p-6 font-bold flex items-center gap-4 animate-shake ${THEME_CLASSES.status.danger} border-red-200 dark:border-red-900/50`}>
+            <AlertCircle size={24} />
+            <div className="flex flex-col">
+                <span className="text-[10px] uppercase tracking-widest opacity-70">Sync Breach Detected</span>
+                <span>{error}</span>
             </div>
-          ))}
-        </div>
-      ) : todayTodos.length === 0 ? (
-        <div
-          className={`border rounded-xl p-10 text-center ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.default}`}
-        >
-          <p className="text-4xl mb-3">🎉</p>
-          <p className={`font-medium ${THEME_CLASSES.text.primary}`}>
-            All clear for today!
-          </p>
-          <p className={`text-sm mt-1 ${THEME_CLASSES.text.tertiary}`}>
-            No tasks scheduled. Enjoy your free time or create a new task.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {todayTodos.map((todo) => (
-            <TodoCard key={todo.id} todo={todo} />
-          ))}
-        </div>
-      )}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className={`rounded-[2.5rem] p-8 border animate-pulse ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+              >
+                <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded-xl w-3/4 mb-4" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded-lg w-full mb-3" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded-lg w-5/6" />
+              </div>
+            ))}
+          </div>
+        ) : todayTodos.length === 0 ? (
+          <div
+            className={`border rounded-[3.5rem] p-24 text-center shadow-2xl shadow-emerald-500/[0.03] flex flex-col items-center justify-center space-y-8 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+          >
+            <div className="relative">
+                <div className={`w-24 h-24 rounded-[2.5rem] flex items-center justify-center shadow-inner ${THEME_CLASSES.status.success}`}>
+                  <CheckCircle2 size={56} className="opacity-60" />
+                </div>
+                <div className={`absolute -top-2 -right-2 p-2 rounded-full text-white shadow-lg animate-bounce ${THEME_CLASSES.brand.primary}`}>
+                  <Sparkles size={16} />
+                </div>
+            </div>
+            <div className="space-y-3">
+                <h3 className={`text-3xl font-black ${THEME_CLASSES.text.primary}`}>Timeline Cleared</h3>
+                <p className={`text-base font-medium max-w-sm leading-relaxed ${THEME_CLASSES.text.tertiary}`}>
+                  All daily directives have been successfully executed. Enjoy your temporary release from the grid or initiate a new protocol.
+                </p>
+            </div>
+            <button className={`px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-all ${THEME_CLASSES.button.primary} ${THEME_CLASSES.brand.glow}`}>
+                New Directive
+            </button>
+          </div>
+        ) : (
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {todayTodos.map((todo) => (
+              <TodoCard key={todo.id} todo={todo} />
+            ))}
+          </div>
+        )}
+      </div>
     </PageWrapper>
   );
 };
