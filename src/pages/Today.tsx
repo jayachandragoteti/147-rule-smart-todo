@@ -6,7 +6,6 @@ import { fetchTodos } from "../features/todos/todoThunks";
 import { isTodayDate } from "../utils/dateUtils";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { 
-  CalendarCheck, 
   Sparkles, 
   Target,
   Zap,

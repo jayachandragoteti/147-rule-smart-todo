@@ -13,7 +13,8 @@ import {
   Zap,
   Target,
   Repeat,
-  Info
+  Info,
+  type LucideIcon
 } from "lucide-react";
 import PageWrapper from "../components/layout/PageWrapper";
 import { useAppSelector, useAppDispatch, useToast } from "../app/hooks";
@@ -123,7 +124,7 @@ const TodoDetails = () => {
     );
   }
 
-  const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+  const statusConfig: Record<string, { label: string; color: string; icon: LucideIcon }> = {
     pending: { label: "Pending", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", icon: Clock },
     inprogress: { label: "Executing", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", icon: Zap },
     completed: { label: "Completed", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", icon: CheckCircle },
@@ -131,10 +132,6 @@ const TodoDetails = () => {
 
   const currentStatus = statusConfig[todo.status] || statusConfig.pending;
   const isCompleted = todo.status === "completed";
-  const seriesLabel =
-    todo.seriesDates && todo.seriesDates.length > 0
-      ? get147Label(todo.seriesDates, todo.scheduledDate)
-      : null;
 
   return (
     <PageWrapper>

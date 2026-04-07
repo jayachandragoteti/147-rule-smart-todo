@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import ThemeToggle from "../../features/ui/ThemeToggle";
 
+import type { RootState } from "../../app/store";
+
 interface NavbarProps {
   onMenuClick?: () => void;
 }
@@ -12,12 +14,7 @@ interface NavbarProps {
 const Navbar = ({ onMenuClick }: NavbarProps) => {
   const dispatch = useAppDispatch();
   const toast = useToast();
-  const { user } = useAppSelector((state) => state.auth);
-
-  const getInitial = () => {
-    if (!user?.email) return "U";
-    return user.email.charAt(0).toUpperCase();
-  };
+  const { user } = useAppSelector((state: RootState) => state.auth);
 
   return (
     <header className={`h-16 flex items-center justify-between px-6 border-b transition-all duration-300 sticky top-0 z-40 backdrop-blur-md ${THEME_CLASSES.surface.navbar} ${THEME_CLASSES.border.base}`}>

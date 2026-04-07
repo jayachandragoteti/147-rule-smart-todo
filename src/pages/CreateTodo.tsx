@@ -6,10 +6,13 @@ import { TODO_ACTION_TYPE, TODO_STATUS } from "../utils/todoConstants";
 import { VALIDATION, FORM_MESSAGES } from "../utils/constants";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import type { CreateTodoFormValues, TodoPriority, TodoRecurrence } from "../types/todo";
-import { useState } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { generate147Dates, RULE_147_LABELS } from "../utils/rule147";
-import { Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw } from "lucide-react";
+import { 
+  Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, ImageIcon, 
+  type LucideIcon 
+} from "lucide-react";
 
 const CreateTodo = () => {
   const dispatch = useAppDispatch();
@@ -57,14 +60,6 @@ const CreateTodo = () => {
 
   const posterImageUrl = useWatch({ control, name: "posterImage" });
 
-  const validateImageUrl = (url: string) => {
-    if (!url) return true;
-    if (!VALIDATION.URL_PATTERN.test(url)) {
-      return FORM_MESSAGES.INVALID_URL;
-    }
-    return true;
-  };
-
   const handleImageUrlChange = (url: string) => {
     setImageLoadError(false);
     setValue("posterImage", url, { shouldValidate: true });
@@ -76,6 +71,20 @@ const CreateTodo = () => {
     } else {
       setImagePreview(null);
     }
+  };
+
+  useEffect(() => {
+    if (posterImageUrl) {
+      handleImageUrlChange(posterImageUrl);
+    }
+  }, [posterImageUrl]);
+
+  const validateImageUrl = (url: string) => {
+    if (!url) return true;
+    if (!VALIDATION.URL_PATTERN.test(url)) {
+      return FORM_MESSAGES.INVALID_URL;
+    }
+    return true;
   };
 
   const onSubmit = async (data: CreateTodoFormValues) => {
@@ -96,8 +105,8 @@ const CreateTodo = () => {
             title: link.title.trim(),
             url: link.url.trim(),
           })),
-        status: TODO_STATUS.PENDING,
-        actionType: TODO_ACTION_TYPE.LEARNING,
+        status: TODO_STATUS.PENDING as any,
+        actionType: TODO_ACTION_TYPE.LEARNING as any,
         apply147Rule: data.apply147Rule,
         priority: data.priority,
         category: data.category,
@@ -136,12 +145,15 @@ const CreateTodo = () => {
     { value: "urgent", label: "Urgent", color: "text-red-500" },
   ];
 
-  const recurrences: { value: TodoRecurrence; label: string; icon: any; color: string }[] = [
+  const recurrences: { value: TodoRecurrence; label: string; icon: LucideIcon; color: string }[] = [
     { value: "none", label: "Once", icon: Calendar, color: "bg-gray-500" },
     { value: "daily", label: "Daily", icon: RefreshCcw, color: "bg-emerald-500" },
     { value: "weekly", label: "Weekly", icon: RefreshCcw, color: "bg-blue-500" },
     { value: "monthly", label: "Monthly", icon: RefreshCcw, color: "bg-purple-500" },
   ];
+
+  const watchPriority = useWatch({ control, name: "priority" });
+  const watchReminder = useWatch({ control, name: "reminderEnabled" });
 
   return (
     <PageWrapper>
@@ -170,7 +182,7 @@ const CreateTodo = () => {
                 })}
                 className={`w-full px-5 py-3 rounded-2xl border text-lg focus:ring-4 focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base} ${errors.title ? 'border-red-500' : ''}`}
               />
-              {errors.title && <p className="text-xs text-red-500 mt-2 ml-1 font-medium">{errors.title.message}</p>}
+              {errors.title && <p className="text-xs text-red-500 mt-2 ml-1 font-medium">{errors.title.message as ReactNode}</p>}
             </div>
 
             {/* Date & Time Grid */}
@@ -228,6 +240,36 @@ const CreateTodo = () => {
               >
                 <Plus size={16} /> Add Another Point
               </button>
+            </div>
+
+            {/* posterImage */}
+            <div className="space-y-4">
+              <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
+                <ImageIcon size={14} /> Mission Poster URL
+              </label>
+              <div className="flex flex-col gap-4">
+                <input
+                  type="text"
+                  placeholder="https://images.unsplash.com/..."
+                  {...register("posterImage", { validate: validateImageUrl })}
+                  className={`w-full px-5 py-3 rounded-2xl border transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base} ${errors.posterImage ? 'border-red-500' : ''}`}
+                />
+                {errors.posterImage && <p className="text-xs text-red-500 ml-1 font-medium">{errors.posterImage.message as ReactNode}</p>}
+                
+                {imagePreview && !imageLoadError && (
+                  <div className="relative group w-full aspect-video rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-inner">
+                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span className="text-white text-xs font-black uppercase tracking-widest bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm">Poster Detected</span>
+                    </div>
+                  </div>
+                )}
+                {imageLoadError && posterImageUrl && (
+                  <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3">
+                    <AlertCircle size={14} /> Failed to establish visual link
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Links */}
@@ -295,7 +337,7 @@ const CreateTodo = () => {
                         type="button"
                         onClick={() => setValue("priority", value)}
                         className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
-                          useWatch({ control, name: "priority" }) === value
+                          watchPriority === value
                             ? `${color} border-current bg-current/5 ring-2 ring-current ring-offset-2 dark:ring-offset-gray-900`
                             : `${THEME_CLASSES.border.base} ${THEME_CLASSES.text.secondary} opacity-60`
                         }`}
@@ -307,7 +349,7 @@ const CreateTodo = () => {
                 </div>
              </div>
 
-             {/* Smart Features */}
+              {/* Smart Features */}
              <div className={`p-6 border rounded-3xl shadow-sm space-y-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
                 <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
                   Productivity Rules
@@ -335,39 +377,67 @@ const CreateTodo = () => {
                 </div>
 
                 {/* 147 Rule */}
-                <button
-                  type="button"
-                  onClick={() => setValue("apply147Rule", !apply147Value)}
-                  className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-3 ${
-                    apply147Value ? "bg-purple-100/50 dark:bg-purple-900/10 border-purple-500 ring-1 ring-purple-500" : THEME_CLASSES.border.base
-                  }`}
-                >
-                  <div className={`p-2 rounded-xl ${apply147Value ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                    <Repeat size={18} />
-                  </div>
-                  <div>
-                    <p className={`text-sm font-bold ${apply147Value ? 'text-purple-700 dark:text-purple-300' : THEME_CLASSES.text.primary}`}>1-4-7 Spaced Repetition</p>
-                    <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Repeat tasks on days 1, 4, and 7 for maximum retention.</p>
-                  </div>
-                </button>
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setValue("apply147Rule", !apply147Value)}
+                    className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-3 ${
+                      apply147Value ? "bg-purple-100/50 dark:bg-purple-900/10 border-purple-500 ring-1 ring-purple-500" : THEME_CLASSES.border.base
+                    }`}
+                  >
+                    <div className={`p-2 rounded-xl ${apply147Value ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                      <Repeat size={18} />
+                    </div>
+                    <div className="flex-1">
+                      <p className={`text-sm font-bold ${apply147Value ? 'text-purple-700 dark:text-purple-300' : THEME_CLASSES.text.primary}`}>1-4-7 Spaced Repetition</p>
+                      <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Repeat tasks on days 1, 4, and 7 for maximum retention.</p>
+                    </div>
+                  </button>
+
+                  {/* 147 Previews */}
+                  {apply147Value && previewDates.length > 0 && (
+                    <div className="px-2 pt-1 space-y-2">
+                      <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Scheduled Protocol</p>
+                      <div className="grid gap-2">
+                        {previewDates.map((pd, i) => (
+                          <div key={i} className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-dashed border-gray-200 dark:border-gray-700">
+                            <span className="font-bold opacity-60">{pd.label}</span>
+                            <span className={`font-black ${THEME_CLASSES.text.primary}`}>{pd.date}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Reminders */}
                 <button
                   type="button"
-                  onClick={() => setValue("reminderEnabled", !useWatch({ control, name: "reminderEnabled" }))}
+                  onClick={() => setValue("reminderEnabled", !watchReminder)}
                   className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-3 ${
-                    useWatch({ control, name: "reminderEnabled" }) ? "bg-amber-100/50 dark:bg-amber-900/10 border-amber-500 ring-1 ring-amber-500" : THEME_CLASSES.border.base
+                    watchReminder ? "bg-amber-100/50 dark:bg-amber-900/10 border-amber-500 ring-1 ring-amber-500" : THEME_CLASSES.border.base
                   }`}
                 >
-                  <div className={`p-2 rounded-xl ${useWatch({ control, name: "reminderEnabled" }) ? 'bg-amber-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                  <div className={`p-2 rounded-xl ${watchReminder ? 'bg-amber-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
                     <Bell size={18} />
                   </div>
                   <div>
-                    <p className={`text-sm font-bold ${useWatch({ control, name: "reminderEnabled" }) ? 'text-amber-700 dark:text-amber-300' : THEME_CLASSES.text.primary}`}>Notifications</p>
+                    <p className={`text-sm font-bold ${watchReminder ? 'text-amber-700 dark:text-amber-300' : THEME_CLASSES.text.primary}`}>Notifications</p>
                     <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Get alerted when it's time to work on this.</p>
                   </div>
                 </button>
              </div>
+
+             {/* Error Display */}
+             {error && (
+                <div className="p-4 rounded-3xl bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold leading-relaxed shadow-lg shadow-red-500/5">
+                   <div className="flex items-center gap-2 mb-1">
+                      <AlertCircle size={14} className="shrink-0" />
+                      <span className="uppercase tracking-widest text-[10px]">Transmission Error</span>
+                   </div>
+                   {error}
+                </div>
+             )}
 
              {/* Action Buttons */}
              <div className="flex flex-col gap-3">
@@ -391,11 +461,6 @@ const CreateTodo = () => {
         </form>
       </div>
     </PageWrapper>
-  );
-};
-
-export default CreateTodo;
-
   );
 };
 
