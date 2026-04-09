@@ -208,9 +208,9 @@ const CreateTodo = () => {
             <p className={`text-sm ${THEME_CLASSES.text.secondary}`}>{id ? "Update your task details below." : "Fill in the details to add a task to your schedule."}</p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Info */}
-          <div className={`lg:col-span-2 space-y-6 p-6 border rounded-2xl shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+          <div className={`lg:col-span-2 space-y-5 p-5 border rounded-xl shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
             {/* Title */}
             <div>
               <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
@@ -223,13 +223,13 @@ const CreateTodo = () => {
                   required: FORM_MESSAGES.REQUIRED_TITLE,
                   minLength: { value: VALIDATION.TITLE_MIN_LENGTH, message: FORM_MESSAGES.MIN_TITLE },
                 })}
-                className={`w-full px-5 py-3 rounded-2xl border text-lg focus:ring-4 focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base} ${errors.title ? 'border-red-500' : ''}`}
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm focus:ring-[3px] focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base} ${errors.title ? 'border-red-500' : ''}`}
               />
               {errors.title && <p className="text-xs text-red-500 mt-2 ml-1 font-medium">{errors.title.message as ReactNode}</p>}
             </div>
 
             {/* Date & Time Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
                     <Clock size={14} /> Scheduled Date
@@ -237,7 +237,7 @@ const CreateTodo = () => {
                   <input
                     type="date"
                     {...register("scheduledDate", { required: FORM_MESSAGES.REQUIRED_DATE })}
-                    className={`w-full px-5 py-3 rounded-2xl border focus:ring-4 focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base}`}
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm focus:ring-[3px] focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base}`}
                   />
                 </div>
                 <div>
@@ -247,13 +247,13 @@ const CreateTodo = () => {
                   <input
                     type="time"
                     {...register("scheduledTime")}
-                    className={`w-full px-5 py-3 rounded-2xl border focus:ring-4 focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base}`}
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm focus:ring-[3px] focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base}`}
                   />
                 </div>
             </div>
 
             {/* Descriptions */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
                 Notes & Details
               </label>
@@ -263,7 +263,7 @@ const CreateTodo = () => {
                     rows={2}
                     {...register(`descriptions.${index}.value` as const)}
                     placeholder="Add a detail..."
-                    className={`w-full px-5 py-3 rounded-2xl border transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm transition-all focus:ring-[3px] focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
                   />
                   {index > 0 && (
                     <button
@@ -286,21 +286,21 @@ const CreateTodo = () => {
             </div>
 
             {/* posterImage */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
                 <ImageIcon size={14} /> Task Image URL
               </label>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3">
                 <input
                   type="text"
                   placeholder="https://images.unsplash.com/..."
                   {...register("posterImage", { validate: validateImageUrl })}
-                  className={`w-full px-5 py-3 rounded-2xl border transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base} ${errors.posterImage ? 'border-red-500' : ''}`}
+                  className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm transition-all focus:ring-[3px] focus:ring-blue-500/10 ${THEME_CLASSES.input.base} ${errors.posterImage ? 'border-red-500' : ''}`}
                 />
                 {errors.posterImage && <p className="text-xs text-red-500 ml-1 font-medium">{errors.posterImage.message as ReactNode}</p>}
                 
                 {imagePreview && !imageLoadError && (
-                  <div className="relative group w-full aspect-video rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-inner">
+                  <div className="relative group w-full aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-inner">
                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <span className="text-white text-xs font-black uppercase tracking-widest bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm">Image Found</span>
@@ -308,7 +308,7 @@ const CreateTodo = () => {
                   </div>
                 )}
                 {imageLoadError && posterImageUrl && (
-                  <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3">
+                  <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3">
                     <AlertCircle size={14} /> Failed to load image
                   </div>
                 )}
@@ -316,30 +316,30 @@ const CreateTodo = () => {
             </div>
 
             {/* Links */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
                 Reference Links
               </label>
               {linkFields.map((field, index) => (
-                <div key={field.id} className="p-4 border rounded-2xl flex flex-col sm:flex-row gap-3 relative group bg-gray-50/50 dark:bg-gray-800/20 border-dashed">
+                <div key={field.id} className="p-3 border rounded-xl flex flex-col sm:flex-row gap-2 relative group bg-gray-50/50 dark:bg-gray-800/20 border-dashed">
                   <input
                     type="text"
-                    placeholder="Label (e.g. Documentation)"
+                    placeholder="Label"
                     {...register(`links.${index}.title` as const)}
-                    className={`flex-1 px-4 py-2 rounded-xl border-none bg-white dark:bg-gray-800 text-sm ${THEME_CLASSES.text.primary}`}
+                    className={`flex-1 px-3 py-2 rounded-lg border-none bg-white dark:bg-gray-800 text-sm ${THEME_CLASSES.text.primary}`}
                   />
                   <input
                     type="text"
-                    placeholder="URL (https://...)"
+                    placeholder="URL"
                     {...register(`links.${index}.url` as const)}
-                    className={`flex-[2] px-4 py-2 rounded-xl border-none bg-white dark:bg-gray-800 text-sm ${THEME_CLASSES.text.primary}`}
+                    className={`flex-[2] px-3 py-2 rounded-lg border-none bg-white dark:bg-gray-800 text-sm ${THEME_CLASSES.text.primary}`}
                   />
                   <button
                     type="button"
                     onClick={() => removeLink(index)}
-                    className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors"
+                    className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               ))}
@@ -356,14 +356,14 @@ const CreateTodo = () => {
           {/* Sidebar Config */}
           <div className="space-y-6">
              {/* Category & Priority */}
-             <div className={`p-5 border rounded-2xl shadow-sm space-y-5 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+             <div className={`p-5 border rounded-xl shadow-sm space-y-5 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
                 <div>
                   <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-3 ${THEME_CLASSES.text.tertiary}`}>
                     <Tag size={14} /> Category
                   </label>
                   <select
                     {...register("category")}
-                    className={`w-full px-4 py-3 rounded-2xl border appearance-none ${THEME_CLASSES.input.base}`}
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm transition-all focus:ring-[3px] focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
                   >
                     {categories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
@@ -379,9 +379,9 @@ const CreateTodo = () => {
                         key={value}
                         type="button"
                         onClick={() => setValue("priority", value)}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
+                        className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all ${
                           watchPriority === value
-                            ? `${color} border-current bg-current/5 ring-2 ring-current ring-offset-2 dark:ring-offset-gray-900`
+                            ? `${color} border-current bg-current/5 ring-1 ring-current`
                             : `${THEME_CLASSES.border.base} ${THEME_CLASSES.text.secondary} opacity-60`
                         }`}
                       >
@@ -393,7 +393,7 @@ const CreateTodo = () => {
              </div>
 
               {/* Smart Features */}
-             <div className={`p-5 border rounded-2xl shadow-sm space-y-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+             <div className={`p-5 border rounded-xl shadow-sm space-y-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
                 <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
                   Productivity Rules
                 </label>
@@ -406,7 +406,7 @@ const CreateTodo = () => {
                         key={r.value}
                         type="button"
                         onClick={() => setValue("recurrence", r.value)}
-                        className={`flex items-center gap-2 p-3 rounded-2xl border transition-all ${
+                        className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
                           recurrenceValue === r.value
                             ? "bg-blue-500/10 border-blue-500 text-blue-600 ring-1 ring-blue-500"
                             : THEME_CLASSES.border.base
@@ -424,26 +424,25 @@ const CreateTodo = () => {
                   <button
                     type="button"
                     onClick={() => setValue("apply147Rule", !apply147Value)}
-                    className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-3 ${
+                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-start gap-3 ${
                       apply147Value ? "bg-purple-100/50 dark:bg-purple-900/10 border-purple-500 ring-1 ring-purple-500" : THEME_CLASSES.border.base
                     }`}
                   >
-                    <div className={`p-2 rounded-xl ${apply147Value ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                      <Repeat size={18} />
+                    <div className={`p-2 rounded-lg ${apply147Value ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                      <Repeat size={16} />
                     </div>
                     <div className="flex-1">
-                      <p className={`text-sm font-bold ${apply147Value ? 'text-purple-700 dark:text-purple-300' : THEME_CLASSES.text.primary}`}>1-4-7 Spaced Repetition</p>
-                      <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Repeat tasks on days 1, 4, and 7 for maximum retention.</p>
+                      <p className={`text-sm font-bold ${apply147Value ? 'text-purple-700 dark:text-purple-300' : THEME_CLASSES.text.primary}`}>1-4-7 Rule</p>
+                      <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Spaced repetition for retention.</p>
                     </div>
                   </button>
 
                   {/* 147 Previews */}
                   {apply147Value && previewDates.length > 0 && (
                     <div className="px-2 pt-1 space-y-2">
-                      <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Task Schedule</p>
                       <div className="grid gap-2">
                         {previewDates.map((pd, i) => (
-                          <div key={i} className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-dashed border-gray-200 dark:border-gray-700">
+                          <div key={i} className="flex items-center justify-between text-[11px] p-2 rounded-lg bg-gray-50 dark:bg-gray-800/40 border border-dashed border-gray-200 dark:border-gray-700">
                             <span className="font-bold opacity-60">{pd.label}</span>
                             <span className={`font-black ${THEME_CLASSES.text.primary}`}>{pd.date}</span>
                           </div>
@@ -457,16 +456,16 @@ const CreateTodo = () => {
                 <button
                   type="button"
                   onClick={() => setValue("reminderEnabled", !watchReminder)}
-                  className={`w-full p-4 rounded-2xl border text-left transition-all flex items-start gap-3 ${
+                  className={`w-full p-3 rounded-xl border text-left transition-all flex items-start gap-3 ${
                     watchReminder ? "bg-amber-100/50 dark:bg-amber-900/10 border-amber-500 ring-1 ring-amber-500" : THEME_CLASSES.border.base
                   }`}
                 >
-                  <div className={`p-2 rounded-xl ${watchReminder ? 'bg-amber-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                    <Bell size={18} />
+                  <div className={`p-2 rounded-lg ${watchReminder ? 'bg-amber-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                    <Bell size={16} />
                   </div>
                   <div>
                     <p className={`text-sm font-bold ${watchReminder ? 'text-amber-700 dark:text-amber-300' : THEME_CLASSES.text.primary}`}>Notifications</p>
-                    <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Get alerted when it's time to work on this.</p>
+                    <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Get alerted when it's time.</p>
                   </div>
                 </button>
 
@@ -479,15 +478,15 @@ const CreateTodo = () => {
                     type="text"
                     placeholder="teammate@company.com..."
                     {...register("assignTo")}
-                    className={`w-full px-5 py-3 rounded-2xl border transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm transition-all focus:ring-[3px] focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
                   />
-                  <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Optionally assign this task to another user via email.</p>
+                  <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Assign this task to another user via email.</p>
                 </div>
              </div>
 
              {/* Error Display */}
              {error && (
-                <div className="p-4 rounded-3xl bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold leading-relaxed shadow-lg shadow-red-500/5">
+                <div className="p-4 rounded-xl bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold leading-relaxed">
                    <div className="flex items-center gap-2 mb-1">
                       <AlertCircle size={14} className="shrink-0" />
                       <span className="uppercase tracking-widest text-[10px]">Error</span>
@@ -501,15 +500,15 @@ const CreateTodo = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="flex-[2] flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all hover:shadow-blue-500/30 disabled:opacity-50"
                 >
                   {loading && <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                  {loading ? (id ? "Updating..." : "Creating...") : (id ? "Save Changes" : "Create Task")}
+                  {loading ? (id ? "Updating..." : "Creating...") : (id ? "Update Action" : "Deploy Task")}
                 </button>
                 <button
                   type="button"
-                  onClick={() => id ? navigate(`/todo/${id}`) : navigate("/todos")}
-                  className={`w-full py-3.5 border rounded-xl font-bold transition-all ${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.primary}`}
+                  onClick={() => navigate(-1)}
+                  className={`flex-1 py-3 px-6 rounded-xl font-bold border transition-all hover:shadow-md ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base} ${THEME_CLASSES.text.secondary}`}
                 >
                   Discard
                 </button>

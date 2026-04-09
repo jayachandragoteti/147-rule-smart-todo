@@ -92,19 +92,19 @@ const TodoCard = ({ todo }: Props) => {
       className={`group rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
     >
       {todo.posterImage && (
-        <div className="relative h-44 overflow-hidden">
+        <div className="relative h-40 overflow-hidden">
           <img
             src={todo.posterImage}
             alt={todo.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-             <span className="text-white text-xs font-medium">Click to view details</span>
+             <span className="text-white text-[10px] font-bold">Click to view details</span>
           </div>
         </div>
       )}
 
-      <div className="p-5 space-y-4">
+      <div className="p-4 space-y-3.5">
         {/* Category & Priority */}
         <div className="flex justify-between items-center">
           <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 ${THEME_CLASSES.text.tertiary}`}>

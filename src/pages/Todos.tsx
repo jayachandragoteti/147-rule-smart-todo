@@ -182,8 +182,8 @@ const Todos = () => {
       </div>
 
       {/* Control Bar */}
-      <div className={`border rounded-2xl p-5 space-y-5 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-        <div className="flex flex-col lg:flex-row gap-4">
+      <div className={`border rounded-xl p-4 space-y-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+        <div className="flex flex-col lg:flex-row gap-3">
             {/* Search */}
             <div className="relative flex-1 group">
                 <Search
@@ -195,7 +195,7 @@ const Todos = () => {
                     placeholder="Search tasks by name, notes, or category..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-11 pr-4 py-3 rounded-xl border text-sm transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
+                    className={`w-full pl-10 pr-3 py-2 rounded-lg border text-sm transition-all focus:ring-[3px] focus:ring-blue-500/10 shadow-sm ${THEME_CLASSES.input.base}`}
                 />
             </div>
 
@@ -208,7 +208,7 @@ const Todos = () => {
                     type="date"
                     value={dateFilter}
                     onChange={(e) => setDateFilter(e.target.value)}
-                    className={`w-full sm:w-48 pl-11 pr-4 py-3 rounded-xl border text-sm transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
+                    className={`w-full sm:w-48 pl-10 pr-3 py-2 rounded-lg border text-sm transition-all focus:ring-[3px] focus:ring-blue-500/10 shadow-sm ${THEME_CLASSES.input.base}`}
                     title="Filter by date"
                 />
             </div>
@@ -222,7 +222,7 @@ const Todos = () => {
                     <select
                         value={sortField}
                         onChange={(e) => setSortField(e.target.value as SortField)}
-                        className={`w-full sm:w-48 pl-10 pr-4 py-3 rounded-xl border text-sm font-medium appearance-none transition-all cursor-pointer focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
+                        className={`w-full sm:w-48 pl-9 pr-3 py-2 rounded-lg border text-sm font-medium appearance-none transition-all cursor-pointer focus:ring-[3px] focus:ring-blue-500/10 shadow-sm ${THEME_CLASSES.input.base}`}
                     >
                         <option value="scheduledDate">By Date</option>
                         <option value="createdAt">By Created</option>
@@ -233,10 +233,10 @@ const Todos = () => {
                 
                 <button
                     onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                    className={`p-3 border rounded-xl transition-all active:scale-95 ${THEME_CLASSES.border.base} ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.button.hover}`}
+                    className={`p-2 border rounded-lg transition-all active:scale-95 shadow-sm ${THEME_CLASSES.border.base} ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.button.hover}`}
                     title={sortOrder === "asc" ? "Ascending" : "Descending"}
                 >
-                    {sortOrder === "asc" ? <SortAsc size={18} className="text-blue-500" /> : <SortDesc size={18} className="text-blue-500" />}
+                    {sortOrder === "asc" ? <SortAsc size={16} className="text-blue-500" /> : <SortDesc size={16} className="text-blue-500" />}
                 </button>
             </div>
         </div>

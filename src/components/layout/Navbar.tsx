@@ -1,5 +1,4 @@
 import { LogOut, LogIn, Menu, Zap, User } from "lucide-react";
-import ThemeToggle from "../../features/ui/ThemeToggle";
 import { useAppDispatch, useAppSelector, useToast } from "../../app/hooks";
 import { logoutThunk } from "../../features/auth/authThunks";
 import { Link } from "react-router-dom";
@@ -47,10 +46,6 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">
             <span className="text-[10px] font-semibold uppercase tracking-widest opacity-60">Synced</span>
         </div>
-
-        <ThemeToggle />
-        <div className="h-6 w-[1px] bg-gray-200 dark:bg-gray-800 mx-1 hidden sm:block" />
-
 
         {user ? (
           <div className="flex items-center gap-3 pl-2">
