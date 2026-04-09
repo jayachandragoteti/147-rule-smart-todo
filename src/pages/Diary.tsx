@@ -28,9 +28,8 @@ import {
   addMonths, 
   subMonths, 
   startOfWeek,
-  parseISO 
 } from "date-fns";
-import { Brain, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import PageWrapper from "../components/layout/PageWrapper";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import { fetchJournalEntries, addJournalEntry, updateJournalEntry, deleteJournalEntry } from "../features/journal/journalSlice";

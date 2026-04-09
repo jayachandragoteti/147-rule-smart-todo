@@ -137,10 +137,10 @@ const journalSlice = createSlice({
         state.entries.unshift(action.payload);
       })
       // Update
-      .addCase(updateJournalEntry.fulfilled, (state, action) => {
+      .addCase(updateJournalEntry.fulfilled, (state, action: any) => {
         const index = state.entries.findIndex((e) => e.id === action.payload.id);
         if (index !== -1) {
-          state.entries[index] = { ...state.entries[index], ...action.payload };
+          state.entries[index] = { ...state.entries[index], ...action.payload } as any;
         }
       })
       // Delete

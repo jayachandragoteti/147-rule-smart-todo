@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAppSelector, useAppDispatch, useToast } from "../../app/hooks";
 import { isTodayDate } from "../../utils/dateUtils";
-import { Bell, Clock, CheckCircle2, X, Volume2, Sparkles, RefreshCw, Calendar } from "lucide-react";
+import { Bell, Clock, CheckCircle2, X, Volume2, Sparkles, RefreshCw } from "lucide-react";
 import { suggestReschedule } from "../../services/aiService";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import type { Todo } from "../../types/todo";
@@ -18,7 +18,6 @@ const ReminderSystem = () => {
   const [activeReminders, setActiveReminders] = useState<Todo[]>([]);
   const [snoozed, setSnoozed] = useState<{ [id: string]: number }>({});
   const [aiSuggestions, setAiSuggestions] = useState<{ [id: string]: { suggestedTime: string, reason: string } }>({});
-  const [isParsingReschedule, setIsParsingReschedule] = useState<{ [id: string]: boolean }>({});
 
   /** Prevent double-firing within the same minute */
   const lastCheckedMinute = useRef<number>(-1);
@@ -130,14 +129,11 @@ const ReminderSystem = () => {
 
     // If snoozed 3+ times, generate AI suggestion for next time it triggers
     if (newSnoozeCount >= 3 && !aiSuggestions[id]) {
-      setIsParsingReschedule(prev => ({ ...prev, [id]: true }));
       try {
         const suggestion = await suggestReschedule(todo);
         setAiSuggestions(prev => ({ ...prev, [id]: suggestion }));
       } catch (err) {
         console.error("Failed to get AI reschedule suggestion", err);
-      } finally {
-        setIsParsingReschedule(prev => ({ ...prev, [id]: false }));
       }
     }
   };

@@ -32,7 +32,8 @@ import { openIFrame } from "../features/ui/uiSlice";
 import type { TodoStatus, Todo } from "../types/todo";
 import { format, isAfter } from "date-fns";
 import { get147Label } from "../utils/rule147";
-import { parseTask, generateDailyPlan, AISuggestion } from "../services/aiService";
+import { parseTask, generateDailyPlan } from "../services/aiService";
+import type { AISuggestion } from "../services/aiService";
 import { createTodo as createTodoThunk } from "../features/todos/todoThunks";
 
 const Home = () => {
@@ -49,7 +50,6 @@ const Home = () => {
 
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [quickTitle, setQuickTitle] = useState("");
-  const [isQuickAdding, setIsQuickAdding] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
