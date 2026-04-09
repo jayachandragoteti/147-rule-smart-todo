@@ -1,103 +1,181 @@
-import { Mail, Shield, Zap, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Bell, LogOut, Check, Save } from "lucide-react";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import PageWrapper from "../components/layout/PageWrapper";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { logoutThunk } from "../features/auth/authThunks";
+import { getUserProfile, saveUserProfile } from "../services/firebase/profileService";
 
 const Profile = () => {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const toast = useToast();
 
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [bio, setBio] = useState("");
+  const [notifications, setNotifications] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user?.uid) {
+        try {
+          const profile = await getUserProfile(user.uid);
+          if (profile) {
+            setDisplayName(profile.displayName || user?.displayName || "");
+            setBio(profile.bio || "");
+            setNotifications(profile.notificationsEnabled || false);
+          }
+        } catch (err) {
+          console.error("Failed to fetch profile:", err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchProfile();
+  }, [user]);
+
+  const handleUpdateProfile = async () => {
+    if (!user?.uid) return;
+    setSaving(true);
+    try {
+      await saveUserProfile({
+        uid: user.uid,
+        displayName,
+        bio,
+        notificationsEnabled: notifications,
+        email: user.email || ""
+      });
+      toast.success("Profile updated successfully");
+    } catch (err) {
+      toast.error("Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleLogout = () => {
     dispatch(logoutThunk());
-    toast.success("Successfully logged out");
+    toast.success("Logged out successfully");
   };
+
+  if (loading) {
+    return (
+      <PageWrapper>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   return (
     <PageWrapper>
-      <div className="max-w-4xl mx-auto space-y-10">
-        <header className="space-y-2">
-          <h2 className={`text-4xl font-black tracking-tight ${THEME_CLASSES.text.primary}`}>Your Profile</h2>
-          <p className={`${THEME_CLASSES.text.tertiary}`}>Manage your account and preferences here.</p>
+      <div className="max-w-4xl mx-auto space-y-8">
+        <header className="space-y-1">
+          <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>Settings</h2>
+          <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>Manage your account and preferences.</p>
         </header>
 
         <div className="grid md:grid-cols-3 gap-8">
           {/* Identity Card */}
-          <div className={`md:col-span-1 p-8 rounded-[3rem] border flex flex-col items-center text-center space-y-6 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base} shadow-2xl shadow-blue-500/5`}>
-            <div className="relative group">
-              <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-5xl font-black shadow-2xl shadow-blue-500/30 group-hover:scale-105 transition-transform duration-500">
-                {user?.email?.charAt(0).toUpperCase()}
+          <div className={`md:col-span-1 p-6 rounded-2xl border flex flex-col items-center text-center space-y-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base} shadow-sm`}>
+            <div className="relative">
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-blue-500/20">
+                {displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
               </div>
-              <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-emerald-500 rounded-full border-4 border-white dark:border-gray-900 flex items-center justify-center text-white shadow-lg animate-pulse">
-                <Shield size={18} />
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-500 rounded-lg border-2 border-white dark:border-gray-900 flex items-center justify-center text-white shadow-md">
+                <Check size={14} />
               </div>
             </div>
             
-            <div className="space-y-1">
-              <h3 className={`text-xl font-black ${THEME_CLASSES.text.primary}`}>{user?.displayName || "User"}</h3>
-              <p className={`text-xs font-bold uppercase tracking-widest text-blue-500`}>Personal Account</p>
+            <div className="space-y-0.5">
+              <h3 className={`text-lg font-bold ${THEME_CLASSES.text.primary}`}>{displayName || "User"}</h3>
+              <p className={`text-[10px] font-bold uppercase tracking-widest text-blue-500`}>Personal Account</p>
             </div>
 
-            <div className="w-full pt-6 border-t border-dashed space-y-4">
-              <div className="flex items-center justify-between text-xs px-2">
-                <span className={`font-bold uppercase tracking-tighter opacity-50 ${THEME_CLASSES.text.tertiary}`}>Account Active</span>
-                <span className={`font-black ${THEME_CLASSES.text.primary}`}>99.8%</span>
-              </div>
-              <div className="flex items-center justify-between text-xs px-2">
-                <span className={`font-bold uppercase tracking-tighter opacity-50 ${THEME_CLASSES.text.tertiary}`}>Task Sync</span>
-                <span className={`font-black ${THEME_CLASSES.text.primary}`}>Online</span>
+            <div className="w-full pt-4 border-t border-dashed space-y-3">
+              <div className="flex items-center justify-between text-[10px] px-1 font-bold uppercase tracking-tight opacity-60">
+                <span className={THEME_CLASSES.text.tertiary}>Status</span>
+                <span className="text-emerald-500">Online</span>
               </div>
             </div>
           </div>
 
-          {/* Configuration Settings */}
+          {/* Settings Form */}
           <div className="md:col-span-2 space-y-6">
-            <div className={`p-8 rounded-[3rem] border space-y-8 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-              <div className="space-y-1">
-                <h4 className={`text-sm font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Contact Information</h4>
-                <div className="h-[1px] w-12 bg-blue-500" />
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-6 p-4 rounded-3xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
-                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-2xl group-hover:bg-blue-500 group-hover:text-white transition-all">
-                    <Mail size={20} />
+            <div className={`p-6 rounded-2xl border space-y-6 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base} shadow-sm`}>
+              {/* Personal Info */}
+              <section className="space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <User size={16} className="text-blue-500" />
+                  <h4 className={`text-xs font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Personal Info</h4>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className={`text-[10px] uppercase font-bold tracking-wider ml-1 ${THEME_CLASSES.text.secondary}`}>Name</label>
+                    <input 
+                      type="text"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Your name"
+                      className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:ring-2 focus:ring-blue-500/20 outline-none ${THEME_CLASSES.input.base}`}
+                    />
                   </div>
-                  <div className="flex-1">
-                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 mb-0.5`}>Email</p>
-                    <p className={`font-bold ${THEME_CLASSES.text.primary}`}>{user?.email}</p>
+                  
+                  <div className="space-y-1.5">
+                    <label className={`text-[10px] uppercase font-bold tracking-wider ml-1 ${THEME_CLASSES.text.secondary}`}>Bio</label>
+                    <textarea 
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Tell us a bit about yourself..."
+                      rows={3}
+                      className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:ring-2 focus:ring-blue-500/20 outline-none resize-none ${THEME_CLASSES.input.base}`}
+                    />
                   </div>
                 </div>
+              </section>
 
-                <div className="flex items-center gap-6 p-4 rounded-3xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
-                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-2xl group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                    <Shield size={20} />
-                  </div>
-                  <div className="flex-1">
-                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 mb-0.5`}>Cloud Storage</p>
-                    <p className={`font-bold ${THEME_CLASSES.text.primary}`}>Firebase Cloud</p>
-                  </div>
+              {/* Preferences */}
+              <section className="pt-4 border-t border-dashed space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Bell size={16} className="text-amber-500" />
+                  <h4 className={`text-xs font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Preferences</h4>
                 </div>
-
-                <div className="flex items-center gap-6 p-4 rounded-3xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
-                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-2xl group-hover:bg-amber-500 group-hover:text-white transition-all">
-                    <Zap size={20} />
+                
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/20">
+                  <div className="space-y-0.5">
+                    <p className={`text-sm font-bold ${THEME_CLASSES.text.primary}`}>Push Notifications</p>
+                    <p className={`text-[10px] ${THEME_CLASSES.text.tertiary}`}>Stay updated with task reminders.</p>
                   </div>
-                  <div className="flex-1">
-                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 mb-0.5`}>Learning Strategy</p>
-                    <p className={`font-bold ${THEME_CLASSES.text.primary}`}>1-4-7 Spaced Repetition</p>
-                  </div>
+                  <button 
+                    onClick={() => setNotifications(!notifications)}
+                    className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${notifications ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'}`}
+                  >
+                    <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${notifications ? 'translate-x-6' : 'translate-x-0'}`} />
+                  </button>
                 </div>
-              </div>
+              </section>
 
-              <div className="pt-8 border-t border-dashed">
+              {/* Save Button */}
+              <div className="pt-4 flex gap-3">
+                <button 
+                  onClick={handleUpdateProfile}
+                  disabled={saving}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50"
+                >
+                  <Save size={18} />
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
                 <button 
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-red-500/20 active:scale-95 transition-all"
+                  className="px-6 py-3 border border-red-200 dark:border-red-900/40 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center gap-2"
                 >
                   <LogOut size={18} />
-                  Terminate Session
+                  Sign Out
                 </button>
               </div>
             </div>

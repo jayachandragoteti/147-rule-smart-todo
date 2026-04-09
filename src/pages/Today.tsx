@@ -56,13 +56,13 @@ const Today = () => {
                     <Zap size={24} />
                 </div>
                 <div className={`px-4 py-1.5 rounded-full border ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">Focus Mode</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Focus Mode</span>
                 </div>
             </div>
             
             <div className="space-y-2">
-                <h2 className={`text-4xl md:text-5xl font-black tracking-tight ${THEME_CLASSES.text.primary}`}>
-                  Today Tasks
+                <h2 className={`text-4xl md:text-5xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
+                  Today's Tasks
                 </h2>
                 <p className={`text-lg font-medium leading-relaxed ${THEME_CLASSES.text.tertiary}`}>
                   Your focus for <span className="text-blue-500 font-bold">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</span>. 
@@ -113,24 +113,24 @@ const Today = () => {
           </div>
         ) : todayTodos.length === 0 ? (
           <div
-            className={`border rounded-[3.5rem] p-24 text-center shadow-2xl shadow-emerald-500/[0.03] flex flex-col items-center justify-center space-y-8 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+            className={`border rounded-3xl p-16 text-center shadow-sm flex flex-col items-center justify-center space-y-6 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
           >
             <div className="relative">
-                <div className={`w-24 h-24 rounded-[2.5rem] flex items-center justify-center shadow-inner ${THEME_CLASSES.status.success}`}>
-                  <CheckCircle2 size={56} className="opacity-60" />
+                <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shadow-inner ${THEME_CLASSES.status.success}`}>
+                  <CheckCircle2 size={40} className="opacity-60" />
                 </div>
-                <div className={`absolute -top-2 -right-2 p-2 rounded-full text-white shadow-lg animate-bounce ${THEME_CLASSES.brand.primary}`}>
-                  <Sparkles size={16} />
+                <div className={`absolute -top-2 -right-2 p-2 rounded-full text-white shadow-lg ${THEME_CLASSES.brand.primary}`}>
+                  <Sparkles size={14} />
                 </div>
             </div>
-            <div className="space-y-3">
-                <h3 className={`text-3xl font-black ${THEME_CLASSES.text.primary}`}>All Done!</h3>
-                <p className={`text-base font-medium max-w-sm leading-relaxed ${THEME_CLASSES.text.tertiary}`}>
-                  You've completed all your tasks for today. Enjoy your rest or add a new task.
+            <div className="space-y-2">
+                <h3 className={`text-2xl font-bold ${THEME_CLASSES.text.primary}`}>All Caught Up!</h3>
+                <p className={`text-sm font-medium max-w-sm leading-relaxed ${THEME_CLASSES.text.tertiary}`}>
+                  You've completed all your tasks for today.
                 </p>
             </div>
-            <button className={`px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-all ${THEME_CLASSES.button.primary} ${THEME_CLASSES.brand.glow}`}>
-                Add Task
+            <button className={`px-8 py-3 rounded-xl font-bold text-sm uppercase tracking-wide active:scale-95 transition-all ${THEME_CLASSES.button.primary}`}>
+                Add New Task
             </button>
           </div>
         ) : (

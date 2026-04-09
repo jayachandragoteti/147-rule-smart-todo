@@ -10,13 +10,13 @@
 export const THEME_CLASSES = {
   /* Surface Classes */
   surface: {
-    base: "bg-white dark:bg-[#111827] transition-colors duration-300",
-    card: "bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] transition-colors duration-300",
-    secondary: "bg-gray-50 dark:bg-[#0f172a] transition-colors duration-300",
-    hover: "hover:bg-gray-50 dark:hover:bg-[#0f172a] transition-colors duration-300",
-    navbar: "bg-white dark:bg-[#111827] transition-colors duration-300",
-    active: "bg-gray-200 dark:bg-[#1f2937] transition-colors duration-300",
-    code: "bg-gray-50 dark:bg-[#0f172a] transition-colors duration-300",
+    base: "bg-white dark:bg-[#0f1115] transition-colors duration-300",
+    card: "bg-white dark:bg-[#12141a] border border-gray-100 dark:border-[#1e293b] transition-colors duration-300",
+    secondary: "bg-gray-50 dark:bg-[#12141a] transition-colors duration-300",
+    hover: "hover:bg-gray-50 dark:hover:bg-[#1a1c22] transition-colors duration-300",
+    navbar: "bg-white dark:bg-[#0f1115] transition-colors duration-300",
+    active: "bg-gray-100 dark:bg-[#1a1c22] transition-colors duration-300",
+    code: "bg-gray-50 dark:bg-[#12141a] transition-colors duration-300",
   },
 
   /* Border Classes */

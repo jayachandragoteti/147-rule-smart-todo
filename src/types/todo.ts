@@ -29,6 +29,7 @@ export interface Todo {
   dueDate?: string;
   reminderEnabled: boolean;
   order: number;
+  assignTo?: string;
 }
 
 export type CreateTodoFormValues = {
@@ -43,4 +44,5 @@ export type CreateTodoFormValues = {
   category: string;
   recurrence: TodoRecurrence;
   reminderEnabled: boolean;
+  assignTo?: string;
 };

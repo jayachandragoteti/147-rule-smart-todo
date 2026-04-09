@@ -145,7 +145,7 @@ const Dashboard = () => {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className={`rounded-3xl p-6 border animate-pulse ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+              className={`rounded-xl p-6 border animate-pulse ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
             >
               <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-3" />
               <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-12" />
@@ -157,7 +157,7 @@ const Dashboard = () => {
           {statCards.map(({ label, value, icon: Icon, color, bg }) => (
             <div
               key={label}
-              className={`rounded-3xl p-6 border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+              className={`rounded-xl p-6 border transition-all duration-300 hover:shadow-md ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
             >
               <div className="flex items-center justify-between mb-4">
                 <span className={`text-xs font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
@@ -202,7 +202,7 @@ const Dashboard = () => {
           {loading ? (
             <div className={`border rounded-3xl p-10 text-center ${THEME_CLASSES.surface.card} ${THEME_CLASSES.text.tertiary}`}> Loading tasks... </div>
           ) : todayTodos.length === 0 ? (
-            <div className={`border-2 border-dashed rounded-3xl p-12 text-center flex flex-col items-center gap-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+            <div className={`border-2 border-dashed rounded-2xl p-8 text-center flex flex-col items-center gap-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
               <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full">
                   <CheckCircle2 size={32} className="text-gray-400" />
               </div>
@@ -240,7 +240,7 @@ const Dashboard = () => {
           {loading ? (
               <div className={`border rounded-3xl p-10 text-center ${THEME_CLASSES.surface.card} ${THEME_CLASSES.text.tertiary}`}> Loading tasks... </div>
           ) : recentTodos.length === 0 ? (
-              <div className={`border-2 border-dashed rounded-3xl p-12 text-center text-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.text.tertiary} ${THEME_CLASSES.border.base}`}>
+              <div className={`border-2 border-dashed rounded-2xl p-8 text-center text-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.text.tertiary} ${THEME_CLASSES.border.base}`}>
                   No active tasks.
               </div>
           ) : (

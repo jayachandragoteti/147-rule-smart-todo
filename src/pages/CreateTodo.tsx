@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
-import { createTodo } from "../features/todos/todoThunks";
+import { createTodo, updateTodo } from "../features/todos/todoThunks";
 import { TODO_ACTION_TYPE, TODO_STATUS } from "../utils/todoConstants";
 import { VALIDATION, FORM_MESSAGES } from "../utils/constants";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 const CreateTodo = () => {
+  const { id } = useParams();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const toast = useToast();
@@ -23,12 +24,15 @@ const CreateTodo = () => {
 
   const loading = useAppSelector((state) => state.todo.loading);
   const error = useAppSelector((state) => state.todo.error);
+  const todos = useAppSelector((state) => state.todo.todos);
+  const editModeTodo = id ? todos.find((t) => t.id === id) : null;
 
   const {
     register,
     control,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<CreateTodoFormValues>({
     defaultValues: {
@@ -43,6 +47,7 @@ const CreateTodo = () => {
       category: "Personal",
       recurrence: "none",
       reminderEnabled: true,
+      assignTo: "",
     },
   });
 
@@ -57,6 +62,28 @@ const CreateTodo = () => {
     append: appendLink,
     remove: removeLink,
   } = useFieldArray({ control, name: "links" });
+
+  useEffect(() => {
+    if (editModeTodo) {
+      reset({
+        scheduledDate: editModeTodo.scheduledDate ? new Date(editModeTodo.scheduledDate).toISOString().split("T")[0] : "",
+        scheduledTime: editModeTodo.scheduledTime || "",
+        title: editModeTodo.title || "",
+        descriptions: editModeTodo.descriptions?.length ? editModeTodo.descriptions.map(d => ({ value: d })) : [{ value: "" }],
+        posterImage: editModeTodo.posterImage || "",
+        links: editModeTodo.links || [],
+        apply147Rule: editModeTodo.apply147Rule || false,
+        priority: editModeTodo.priority || "medium",
+        category: editModeTodo.category || "Personal",
+        recurrence: editModeTodo.recurrence || "none",
+        reminderEnabled: editModeTodo.reminderEnabled ?? true,
+        assignTo: editModeTodo.assignTo || "",
+      });
+      if (editModeTodo.posterImage) {
+          handleImageUrlChange(editModeTodo.posterImage);
+      }
+    }
+  }, [editModeTodo, reset]);
 
   const posterImageUrl = useWatch({ control, name: "posterImage" });
 
@@ -88,16 +115,14 @@ const CreateTodo = () => {
   };
 
   const onSubmit = async (data: CreateTodoFormValues) => {
-    const resultAction = await dispatch(
-      createTodo({
+    const todoData = {
         scheduledDate: data.scheduledDate,
         scheduledTime: data.scheduledTime,
         title: data.title.trim(),
         descriptions: data.descriptions
           .map((d) => d.value)
           .filter((d) => d.trim() !== ""),
-        posterImage: data.posterImage || "",
-        galleryImages: [],
+        posterImage: data.posterImage && data.posterImage.trim() ? data.posterImage.trim() : undefined,
         links: data.links
           .filter((l) => l.title.trim() && l.url.trim())
           .map((link, index) => ({
@@ -105,21 +130,39 @@ const CreateTodo = () => {
             title: link.title.trim(),
             url: link.url.trim(),
           })),
-        status: TODO_STATUS.PENDING as any,
-        actionType: TODO_ACTION_TYPE.LEARNING as any,
         apply147Rule: data.apply147Rule,
         priority: data.priority,
         category: data.category,
         recurrence: data.recurrence,
         reminderEnabled: data.reminderEnabled,
-        order: Date.now(),
-      })
-    );
-    if (createTodo.fulfilled.match(resultAction)) {
-      toast.success("Task created successfully!");
-      navigate("/todos");
+        assignTo: data.assignTo?.trim() || undefined,
+    };
+
+    if (id) {
+       // Update mode
+       const resultAction = await dispatch(updateTodo({ id, updates: todoData }));
+       if (updateTodo.fulfilled.match(resultAction)) {
+           toast.success("Task updated successfully!");
+           navigate(`/todo/${id}`);
+       } else {
+           toast.error("Failed to update task");
+       }
     } else {
-      toast.error("Failed to create task");
+       // Create mode
+       const createPayload = {
+         ...todoData,
+         galleryImages: [],
+         status: TODO_STATUS.PENDING as any,
+         actionType: TODO_ACTION_TYPE.LEARNING as any,
+         order: Date.now(),
+       };
+       const resultAction = await dispatch(createTodo(createPayload));
+       if (createTodo.fulfilled.match(resultAction)) {
+         toast.success("Task created successfully!");
+         navigate("/todos");
+       } else {
+         toast.error("Failed to create task");
+       }
     }
   };
 
@@ -159,15 +202,15 @@ const CreateTodo = () => {
     <PageWrapper>
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex flex-col gap-2">
-            <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
-              Create New Task
+            <h2 className={`text-2xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
+              {id ? "Edit Task" : "Create New Task"}
             </h2>
-            <p className={`${THEME_CLASSES.text.secondary}`}>Organize your day with precision and smart rules.</p>
+            <p className={`text-sm ${THEME_CLASSES.text.secondary}`}>{id ? "Update your task details below." : "Fill in the details to add a task to your schedule."}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Info */}
-          <div className={`lg:col-span-2 space-y-6 p-8 border rounded-3xl shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+          <div className={`lg:col-span-2 space-y-6 p-6 border rounded-2xl shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
             {/* Title */}
             <div>
               <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
@@ -313,7 +356,7 @@ const CreateTodo = () => {
           {/* Sidebar Config */}
           <div className="space-y-6">
              {/* Category & Priority */}
-             <div className={`p-6 border rounded-3xl shadow-sm space-y-6 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+             <div className={`p-5 border rounded-2xl shadow-sm space-y-5 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
                 <div>
                   <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-3 ${THEME_CLASSES.text.tertiary}`}>
                     <Tag size={14} /> Category
@@ -350,7 +393,7 @@ const CreateTodo = () => {
              </div>
 
               {/* Smart Features */}
-             <div className={`p-6 border rounded-3xl shadow-sm space-y-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+             <div className={`p-5 border rounded-2xl shadow-sm space-y-4 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
                 <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
                   Productivity Rules
                 </label>
@@ -426,6 +469,20 @@ const CreateTodo = () => {
                     <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Get alerted when it's time to work on this.</p>
                   </div>
                 </button>
+
+                {/* Collaboration */}
+                <div className="space-y-3 pt-2">
+                  <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
+                    Assign To
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="teammate@company.com..."
+                    {...register("assignTo")}
+                    className={`w-full px-5 py-3 rounded-2xl border transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
+                  />
+                  <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Optionally assign this task to another user via email.</p>
+                </div>
              </div>
 
              {/* Error Display */}
@@ -444,15 +501,15 @@ const CreateTodo = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl font-bold shadow-xl shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                 >
                   {loading && <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                  {loading ? "Creating..." : "Create Task"}
+                  {loading ? (id ? "Updating..." : "Creating...") : (id ? "Save Changes" : "Create Task")}
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate("/todos")}
-                  className={`w-full py-4 border rounded-3xl font-bold transition-all ${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.primary}`}
+                  onClick={() => id ? navigate(`/todo/${id}`) : navigate("/todos")}
+                  className={`w-full py-3.5 border rounded-xl font-bold transition-all ${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.primary}`}
                 >
                   Discard
                 </button>

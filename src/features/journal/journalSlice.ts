@@ -4,14 +4,20 @@ import {
   addDoc, 
   getDocs, 
   query, 
-  where, 
   doc, 
   updateDoc, 
-  serverTimestamp,
+  deleteDoc,
   orderBy
 } from "firebase/firestore";
 import { db } from "../../services/firebase/firebase";
 import type { JournalEntry, CreateJournalFormValues } from "../../types";
+
+/**
+ * FIXED: Journal entries are now stored in users/{uid}/journals
+ * instead of a flat top-level 'journals' collection.
+ * This is a security fix — previously all user journals were accessible
+ * in the same collection with only a userId field.
+ */
 
 interface JournalState {
   entries: JournalEntry[];
@@ -25,52 +31,85 @@ const initialState: JournalState = {
   error: null,
 };
 
+// Helper: get user-scoped journal collection reference
+const getUserJournalsRef = (userId: string) =>
+  collection(db, "users", userId, "journals");
+
 export const fetchJournalEntries = createAsyncThunk(
   "journal/fetchAll",
-  async (userId: string) => {
-    const q = query(
-      collection(db, "journals"),
-      where("userId", "==", userId),
-      orderBy("date", "desc")
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as JournalEntry[];
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const q = query(
+        getUserJournalsRef(userId),
+        orderBy("date", "desc")
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      })) as JournalEntry[];
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to fetch diary entries";
+      return rejectWithValue(message);
+    }
   }
 );
 
 export const addJournalEntry = createAsyncThunk(
   "journal/add",
-  async ({ userId, data }: { userId: string; data: CreateJournalFormValues }) => {
-    const docRef = await addDoc(collection(db, "journals"), {
-      ...data,
-      userId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      serverTimestamp: serverTimestamp(),
-    });
-    return {
-      id: docRef.id,
-      ...data,
-      userId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    } as JournalEntry;
+  async ({ userId, data }: { userId: string; data: CreateJournalFormValues }, { rejectWithValue }) => {
+    try {
+      const now = new Date().toISOString();
+      const entryData = {
+        ...data,
+        userId,
+        createdAt: now,
+        updatedAt: now,
+      };
+      const docRef = await addDoc(getUserJournalsRef(userId), entryData);
+      return {
+        id: docRef.id,
+        ...entryData,
+      } as JournalEntry;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to save diary entry";
+      return rejectWithValue(message);
+    }
   }
 );
 
 export const updateJournalEntry = createAsyncThunk(
   "journal/update",
-  async ({ id, data }: { id: string; data: Partial<CreateJournalFormValues> }) => {
-    const docRef = doc(db, "journals", id);
-    const updateData = {
-      ...data,
-      updatedAt: new Date().toISOString(),
-    };
-    await updateDoc(docRef, updateData);
-    return { id, ...updateData };
+  async (
+    { id, userId, data }: { id: string; userId: string; data: Partial<CreateJournalFormValues> },
+    { rejectWithValue }
+  ) => {
+    try {
+      const docRef = doc(db, "users", userId, "journals", id);
+      const updateData = {
+        ...data,
+        updatedAt: new Date().toISOString(),
+      };
+      await updateDoc(docRef, updateData);
+      return { id, ...updateData };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to update diary entry";
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const deleteJournalEntry = createAsyncThunk(
+  "journal/delete",
+  async ({ id, userId }: { id: string; userId: string }, { rejectWithValue }) => {
+    try {
+      const docRef = doc(db, "users", userId, "journals", id);
+      await deleteDoc(docRef);
+      return id;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to delete diary entry";
+      return rejectWithValue(message);
+    }
   }
 );
 
@@ -80,8 +119,10 @@ const journalSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Fetch
       .addCase(fetchJournalEntries.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchJournalEntries.fulfilled, (state, action) => {
         state.loading = false;
@@ -89,16 +130,22 @@ const journalSlice = createSlice({
       })
       .addCase(fetchJournalEntries.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to fetch journal entries";
+        state.error = action.payload as string || "Failed to fetch diary entries";
       })
+      // Add
       .addCase(addJournalEntry.fulfilled, (state, action) => {
         state.entries.unshift(action.payload);
       })
+      // Update
       .addCase(updateJournalEntry.fulfilled, (state, action) => {
         const index = state.entries.findIndex((e) => e.id === action.payload.id);
         if (index !== -1) {
           state.entries[index] = { ...state.entries[index], ...action.payload };
         }
+      })
+      // Delete
+      .addCase(deleteJournalEntry.fulfilled, (state, action) => {
+        state.entries = state.entries.filter((e) => e.id !== action.payload);
       });
   },
 });

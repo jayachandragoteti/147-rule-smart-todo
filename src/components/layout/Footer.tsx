@@ -1,5 +1,5 @@
 import { THEME_CLASSES } from "../../utils/themeUtils";
-import { Sparkles, Activity } from "lucide-react";
+import { Activity } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -22,12 +22,8 @@ const Footer = () => {
 
         <div className="flex items-center gap-2 group">
             <span className={`text-[11px] font-bold ${THEME_CLASSES.text.tertiary}`}>
-                © {new Date().getFullYear()} Operational Directive //
+                © {new Date().getFullYear()} Operational Directive
             </span>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/10 rounded-full border border-blue-100 dark:border-blue-900/20">
-                <Sparkles size={10} className="text-blue-500" />
-                <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Premium Grid</span>
-            </div>
         </div>
       </div>
     </footer>

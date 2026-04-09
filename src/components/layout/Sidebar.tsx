@@ -4,7 +4,7 @@ import {
   CalendarCheck, 
   ListTodo, 
   PlusCircle, 
-  BookOpen, 
+  Heart, 
   Settings,
   Shield,
   Target
@@ -19,11 +19,11 @@ interface SidebarProps {
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-blue-500", group: "Main" },
-  { to: "/today", label: "Today Tasks", icon: CalendarCheck, color: "text-amber-500", group: "Main" },
-  { to: "/profile", label: "Profile", icon: Settings, color: "text-blue-400", group: "Main" },
-  { to: "/todos", label: "Todo List", icon: ListTodo, color: "text-emerald-500", group: "Tasks" },
-  { to: "/create-todo", label: "Add Task", icon: PlusCircle, color: "text-indigo-500", group: "Tasks" },
-  { to: "/journal", label: "Journal", icon: BookOpen, color: "text-rose-500", group: "Journal" },
+  { to: "/today", label: "Today", icon: CalendarCheck, color: "text-amber-500", group: "Main" },
+  { to: "/profile", label: "Settings", icon: Settings, color: "text-blue-400", group: "Main" },
+  { to: "/todos", label: "All Tasks", icon: ListTodo, color: "text-emerald-500", group: "Tasks" },
+  { to: "/create-todo", label: "New Task", icon: PlusCircle, color: "text-indigo-500", group: "Tasks" },
+  { to: "/heartspace", label: "Heartspace", icon: Heart, color: "text-rose-400", group: "Personal" },
 ];
 
 const Sidebar = ({ onNavigate }: SidebarProps) => {

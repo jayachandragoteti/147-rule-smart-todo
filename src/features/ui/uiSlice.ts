@@ -15,6 +15,7 @@ export interface IFrameState {
   url: string;
   title: string;
   isMinimized: boolean;
+  isMaximized: boolean;
 }
 
 interface UiState {
@@ -46,6 +47,7 @@ const initialState: UiState = {
     url: "",
     title: "",
     isMinimized: false,
+    isMaximized: false,
   },
 };
 
@@ -78,12 +80,20 @@ const uiSlice = createSlice({
       state.iframe.title = action.payload.title;
       state.iframe.isOpen = true;
       state.iframe.isMinimized = false;
+      state.iframe.isMaximized = false;
     },
     closeIFrame: (state) => {
       state.iframe.isOpen = false;
+      state.iframe.isMaximized = false;
+      state.iframe.isMinimized = false;
     },
     toggleIFrameMinimize: (state) => {
       state.iframe.isMinimized = !state.iframe.isMinimized;
+      if (state.iframe.isMinimized) state.iframe.isMaximized = false;
+    },
+    toggleIFrameMaximize: (state) => {
+      state.iframe.isMaximized = !state.iframe.isMaximized;
+      if (state.iframe.isMaximized) state.iframe.isMinimized = false;
     },
   },
 });
@@ -97,6 +107,7 @@ export const {
   openIFrame,
   closeIFrame,
   toggleIFrameMinimize,
+  toggleIFrameMaximize,
 } = uiSlice.actions;
 export default uiSlice.reducer;
 

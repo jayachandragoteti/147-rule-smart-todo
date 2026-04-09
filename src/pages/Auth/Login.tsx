@@ -14,10 +14,15 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
+    if (!email || !password) return;
     const result = await dispatch(loginThunk({ email, password }));
     if (loginThunk.fulfilled.match(result)) {
       navigate("/");
     }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleLogin();
   };
 
   return (
@@ -36,7 +41,7 @@ const Login = () => {
           </div>
           
           <div className="space-y-1">
-            <h2 className={`text-3xl font-black tracking-tight ${THEME_CLASSES.text.primary}`}>
+            <h2 className={`text-2xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
                 Welcome Back
             </h2>
             <p className={`text-sm font-medium ${THEME_CLASSES.text.tertiary}`}>
@@ -56,9 +61,10 @@ const Login = () => {
                 <Mail size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${THEME_CLASSES.text.tertiary} group-focus-within:text-blue-500`} />
                 <input
                   type="email"
-                  placeholder="Enter authorized email"
+                  placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   className={`w-full pl-12 pr-4 py-3.5 rounded-2xl border text-sm font-medium transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
                 />
             </div>
@@ -73,9 +79,10 @@ const Login = () => {
                 <Lock size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${THEME_CLASSES.text.tertiary} group-focus-within:text-blue-500`} />
                 <input
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="Your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   className={`w-full pl-12 pr-4 py-3.5 rounded-2xl border text-sm font-medium transition-all focus:ring-4 focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
                 />
             </div>
@@ -118,8 +125,8 @@ const Login = () => {
               Create Account
             </Link>
           </p>
-          <div className={`text-[9px] font-bold uppercase tracking-wider opacity-30 ${THEME_CLASSES.text.tertiary}`}>
-            Secure Login // Smart Todo
+          <div className={`text-[9px] font-medium uppercase tracking-wider opacity-30 ${THEME_CLASSES.text.tertiary}`}>
+            Secure · Smart Todo
           </div>
         </div>
       </div>

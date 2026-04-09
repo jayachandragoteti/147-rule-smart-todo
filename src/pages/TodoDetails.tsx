@@ -14,6 +14,7 @@ import {
   Target,
   Repeat,
   Info,
+  Edit3,
   type LucideIcon
 } from "lucide-react";
 import PageWrapper from "../components/layout/PageWrapper";
@@ -172,6 +173,15 @@ const TodoDetails = () => {
             </button>
 
             <button
+              onClick={() => navigate(`/edit-todo/${todo.id}`)}
+              disabled={loading}
+              className={`flex items-center justify-center p-2.5 border rounded-2xl transition-all hover:border-blue-500 hover:text-blue-500 active:scale-95 disabled:opacity-50 ${THEME_CLASSES.border.base} ${THEME_CLASSES.surface.card}`}
+              title="Edit Task"
+            >
+              <Edit3 size={20} />
+            </button>
+
+            <button
               onClick={() => setShowDeleteConfirm(true)}
               disabled={loading}
               className="flex items-center justify-center p-2.5 bg-red-50 text-red-600 dark:bg-red-900/20 hover:bg-red-600 hover:text-white rounded-2xl transition-all active:scale-95 disabled:opacity-50"
@@ -193,7 +203,7 @@ const TodoDetails = () => {
                   <AlertTriangle size={32} />
                 </div>
                 <div className="space-y-2">
-                    <h3 className={`text-2xl font-black ${THEME_CLASSES.text.primary}`}>
+                    <h3 className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
                       Delete Task?
                     </h3>
                     <p className={`text-sm leading-relaxed ${THEME_CLASSES.text.secondary}`}>
@@ -204,9 +214,9 @@ const TodoDetails = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className={`flex-1 px-4 py-3 rounded-2xl text-sm font-bold border ${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.primary}`}
+                  className={`flex-1 px-4 py-3 rounded-xl text-sm font-bold border ${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.primary}`}
                 >
-                  ABORT
+                  Cancel
                 </button>
                 <button
                   onClick={handleDelete}
@@ -224,7 +234,7 @@ const TodoDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Main Section */}
             <div className="lg:col-span-2 space-y-8">
-                <div className={`border rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-500/5 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+                <div className={`border rounded-2xl overflow-hidden shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
                     {todo.posterImage && (
                         <div className="w-full h-96 relative">
                             <img
@@ -243,7 +253,7 @@ const TodoDetails = () => {
 
                     <div className="p-10 space-y-10">
                         {!todo.posterImage && (
-                            <h2 className={`text-4xl font-black tracking-tight leading-tight ${THEME_CLASSES.text.primary}`}>
+                            <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
                                 {todo.title}
                             </h2>
                         )}
@@ -327,7 +337,7 @@ const TodoDetails = () => {
             {/* Right Side Column */}
             <div className="space-y-8">
                 {/* Timeline Panel */}
-                <div className={`border rounded-[2.5rem] p-8 shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+                <div className={`border rounded-2xl p-6 shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
                     <div className="flex items-center gap-3 mb-8">
                         <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-600">
                             <Calendar size={20} />
@@ -392,6 +402,16 @@ const TodoDetails = () => {
                                 </div>
                                 <span className={`text-xs font-bold text-blue-500`}>{todo.category || 'Standard'}</span>
                             </div>
+                            
+                            {todo.assignTo && (
+                              <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                      <div className={`w-3 h-3 rounded-full bg-blue-500/20 flex items-center justify-center`} />
+                                      <span className={`text-[10px] font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Assigned To</span>
+                                  </div>
+                                  <span className={`text-xs font-bold text-purple-500`}>{todo.assignTo}</span>
+                              </div>
+                            )}
                         </div>
                     </div>
                 </div>

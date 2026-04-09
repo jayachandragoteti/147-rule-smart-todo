@@ -8,7 +8,7 @@ import Register from "../pages/Auth/Register";
 import TodoDetails from "../pages/TodoDetails";
 import Todos from "../pages/Todos";
 import CreateTodo from "../pages/CreateTodo";
-import Journal from "../pages/Journal";
+import Diary from "../pages/Diary";
 import Profile from "../pages/Profile";
 import NotFound from "../pages/NotFound";
 
@@ -23,7 +23,8 @@ const AppRoutes = () => {
           <Route path="/todos" element={<Todos />} />
           <Route path="/todo/:id" element={<TodoDetails />} />
           <Route path="/create-todo" element={<CreateTodo />} />
-          <Route path="/journal" element={<Journal />} />
+          <Route path="/edit-todo/:id" element={<CreateTodo />} />
+          <Route path="/heartspace" element={<Diary />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>

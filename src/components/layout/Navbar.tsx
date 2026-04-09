@@ -1,4 +1,5 @@
 import { LogOut, LogIn, Menu, Zap, User } from "lucide-react";
+import ThemeToggle from "../../features/ui/ThemeToggle";
 import { useAppDispatch, useAppSelector, useToast } from "../../app/hooks";
 import { logoutThunk } from "../../features/auth/authThunks";
 import { Link } from "react-router-dom";
@@ -31,27 +32,28 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
             <Zap size={20} fill="currentColor" />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-black tracking-tight leading-none bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
-              SMART TODO
+            <span className="text-base font-bold tracking-tight leading-none text-gray-900 dark:text-white">
+              Smart Todo
             </span>
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">Spaced Repetition Todo</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider opacity-40">1 · 4 · 7 Productivity</span>
           </div>
         </Link>
       </div>
 
       <div className="flex items-center gap-4">
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">
-            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Synced</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest opacity-60">Synced</span>
         </div>
 
+        <ThemeToggle />
         <div className="h-6 w-[1px] bg-gray-200 dark:bg-gray-800 mx-1 hidden sm:block" />
 
 
         {user ? (
           <div className="flex items-center gap-3 pl-2">
             <div className="flex flex-col items-end hidden md:flex">
-                <span className={`text-xs font-bold leading-none ${THEME_CLASSES.text.primary}`}>{user.email?.split('@')[0]}</span>
-                <span className={`text-[10px] font-medium opacity-50 ${THEME_CLASSES.text.tertiary}`}>Personal Account</span>
+                <span className={`text-xs font-semibold leading-none ${THEME_CLASSES.text.primary}`}>{user.displayName?.split(' ')[0] || user.email?.split('@')[0]}</span>
+                <span className={`text-[10px] font-medium opacity-50 ${THEME_CLASSES.text.tertiary}`}>My Account</span>
             </div>
             <div className="relative group cursor-pointer">
                 <div className="w-9 h-9 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-xl flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden group-hover:border-blue-500/50 transition-colors">
