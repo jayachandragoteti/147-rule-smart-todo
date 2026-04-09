@@ -122,7 +122,7 @@ const CreateTodo = () => {
         descriptions: data.descriptions
           .map((d) => d.value)
           .filter((d) => d.trim() !== ""),
-        posterImage: data.posterImage && data.posterImage.trim() ? data.posterImage.trim() : undefined,
+        posterImage: data.posterImage && data.posterImage.trim() ? data.posterImage.trim() : "",
         links: data.links
           .filter((l) => l.title.trim() && l.url.trim())
           .map((link, index) => ({
@@ -135,7 +135,7 @@ const CreateTodo = () => {
         category: data.category,
         recurrence: data.recurrence,
         reminderEnabled: data.reminderEnabled,
-        assignTo: data.assignTo?.trim() || undefined,
+        assignTo: data.assignTo?.trim() || "",
     };
 
     if (id) {

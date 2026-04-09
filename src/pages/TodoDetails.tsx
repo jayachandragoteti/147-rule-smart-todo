@@ -15,6 +15,7 @@ import {
   Repeat,
   Info,
   Edit3,
+  RefreshCcw,
   type LucideIcon
 } from "lucide-react";
 import PageWrapper from "../components/layout/PageWrapper";
@@ -67,6 +68,18 @@ const TodoDetails = () => {
       toast.success("Task completed!");
     } catch {
       toast.error("Failed to update task");
+    }
+  };
+
+  const handleReopenTask = async () => {
+    if (!todo) return;
+    try {
+      await dispatch(
+        updateTodo({ id: todo.id, updates: { status: TODO_STATUS.PENDING } })
+      ).unwrap();
+      toast.success("Task reopened successfully!");
+    } catch (err) {
+      toast.error("Failed to reopen task");
     }
   };
 
@@ -148,46 +161,54 @@ const TodoDetails = () => {
           </button>
 
           <div className="flex items-center gap-3">
-            {!isCompleted && (
+            {!isCompleted ? (
               <button
                 onClick={handleMarkComplete}
                 disabled={loading}
-                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-sm font-bold transition-all shadow-xl shadow-blue-500/20 active:scale-95 disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-50"
               >
-                <CheckCircle size={18} />
+                <CheckCircle size={16} />
                 {todo.seriesDates && todo.seriesDates.length > 0
                   ? getNextSeriesDate(todo.seriesDates, todo.scheduledDate)
                     ? "NEXT REVIEW"
                     : "FINISH SERIES"
                   : "COMPLETE TASK"}
               </button>
+            ) : (
+              <button
+                onClick={handleReopenTask}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-50"
+              >
+                <RefreshCcw size={16} />
+                REOPEN TASK
+              </button>
             )}
 
             <button
               onClick={handleDuplicate}
               disabled={loading}
-              className={`flex items-center justify-center p-2.5 border rounded-2xl transition-all hover:border-blue-500 hover:text-blue-500 active:scale-95 disabled:opacity-50 ${THEME_CLASSES.border.base} ${THEME_CLASSES.surface.card}`}
+              className={`flex items-center justify-center p-2.5 border rounded-xl transition-all hover:border-blue-500 hover:text-blue-500 active:scale-95 disabled:opacity-50 ${THEME_CLASSES.border.base} ${THEME_CLASSES.surface.card}`}
               title="Duplicate Task"
             >
-              <Copy size={20} />
+              <Copy size={16} />
             </button>
 
             <button
               onClick={() => navigate(`/edit-todo/${todo.id}`)}
               disabled={loading}
-              className={`flex items-center justify-center p-2.5 border rounded-2xl transition-all hover:border-blue-500 hover:text-blue-500 active:scale-95 disabled:opacity-50 ${THEME_CLASSES.border.base} ${THEME_CLASSES.surface.card}`}
+              className={`flex items-center justify-center p-2.5 border rounded-xl transition-all hover:border-blue-500 hover:text-blue-500 active:scale-95 disabled:opacity-50 ${THEME_CLASSES.border.base} ${THEME_CLASSES.surface.card}`}
               title="Edit Task"
             >
-              <Edit3 size={20} />
+              <Edit3 size={16} />
             </button>
 
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              disabled={loading}
-              className="flex items-center justify-center p-2.5 bg-red-50 text-red-600 dark:bg-red-900/20 hover:bg-red-600 hover:text-white rounded-2xl transition-all active:scale-95 disabled:opacity-50"
+              className="flex items-center justify-center p-2.5 text-red-500 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 rounded-xl transition-all hover:bg-red-500 hover:text-white active:scale-95"
               title="Delete Task"
             >
-              <Trash2 size={20} />
+              <Trash2 size={16} />
             </button>
           </div>
         </div>

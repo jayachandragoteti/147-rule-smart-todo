@@ -92,7 +92,7 @@ const TodoCard = ({ todo }: Props) => {
       className={`group rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
     >
       {todo.posterImage && (
-        <div className="relative h-40 overflow-hidden">
+        <div className="relative h-32 overflow-hidden">
           <img
             src={todo.posterImage}
             alt={todo.title}
@@ -104,7 +104,7 @@ const TodoCard = ({ todo }: Props) => {
         </div>
       )}
 
-      <div className="p-4 space-y-3.5">
+      <div className="p-4 space-y-2">
         {/* Category & Priority */}
         <div className="flex justify-between items-center">
           <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 ${THEME_CLASSES.text.tertiary}`}>
@@ -145,7 +145,7 @@ const TodoCard = ({ todo }: Props) => {
             {todo.descriptions[0]}
           </p>
         ) : (
-          <div className="h-4" />
+          <div className="h-2" />
         )}
 
         {/* Meta row */}

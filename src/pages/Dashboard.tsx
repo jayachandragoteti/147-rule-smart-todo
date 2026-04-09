@@ -148,51 +148,16 @@ const Dashboard = () => {
         </Link>
       </div>
 
-      {/* Stats Grid */}
-      {loading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className={`rounded-xl p-6 border animate-pulse ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
-            >
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-3" />
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-12" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {statCards.map(({ label, value, icon: Icon, color, bg, path }) => (
-            <Link
-              key={label}
-              to={path}
-              className={`block rounded-xl p-6 border transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className={`text-xs font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
-                  {label}
-                </span>
-                <div className={`p-2.5 rounded-xl ${bg}`}>
-                  <Icon size={20} className={color} />
-                </div>
-              </div>
-              <p className={`text-3xl font-bold ${THEME_CLASSES.text.primary}`}>
-                {value}
-              </p>
-            </Link>
-          ))}
-        </div>
-      )}
+
 
       {/* Currently Working On */}
       {inProgressTodos.length > 0 && (
         <div className="mb-10 p-6 rounded-3xl border bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border-blue-200 dark:border-blue-800/30 shadow-lg shadow-blue-500/5">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/30">
-               <Zap size={20} className="text-white animate-pulse" />
+          <div className="flex items-center gap-2 mb-5">
+            <div className="p-1.5 bg-blue-600 rounded-lg shadow-sm">
+               <Zap size={16} className="text-white animate-pulse" />
             </div>
-            <h3 className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
+            <h3 className={`text-lg font-bold ${THEME_CLASSES.text.primary}`}>
               Currently Working On
             </h3>
           </div>
@@ -208,11 +173,11 @@ const Dashboard = () => {
         {/* Today's Tasks Section */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500 rounded-xl">
-                 <CalendarCheck size={20} className="text-white" />
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-blue-500 rounded-lg">
+                 <CalendarCheck size={16} className="text-white" />
               </div>
-              <h3 className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
+              <h3 className={`text-lg font-bold ${THEME_CLASSES.text.primary}`}>
                 Focus for Today
               </h3>
               {stats.todayCount > 0 && (
@@ -253,11 +218,11 @@ const Dashboard = () => {
         {/* Recent Active Tasks */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-500 rounded-xl">
-                 <ListTodo size={20} className="text-white" />
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-emerald-500 rounded-lg">
+                 <ListTodo size={16} className="text-white" />
               </div>
-              <h3 className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
+              <h3 className={`text-lg font-bold ${THEME_CLASSES.text.primary}`}>
                 Recent Tasks
               </h3>
             </div>
@@ -280,6 +245,48 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="pt-10">
+        <h3 className={`text-lg font-bold mb-5 ${THEME_CLASSES.text.primary}`}>
+           Overview Statistics
+        </h3>
+        {/* Stats Grid */}
+        {loading ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className={`rounded-xl p-6 border animate-pulse ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+              >
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-3" />
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-12" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {statCards.map(({ label, value, icon: Icon, color, bg, path }) => (
+              <Link
+                key={label}
+                to={path}
+                className={`block rounded-xl p-5 border transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 ${THEME_CLASSES.text.tertiary}`}>
+                    {label}
+                  </span>
+                  <div className={`p-2 rounded-lg ${bg}`}>
+                    <Icon size={16} className={color} />
+                  </div>
+                </div>
+                <p className={`text-2xl font-bold ${THEME_CLASSES.text.primary}`}>
+                  {value}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </PageWrapper>
   );
