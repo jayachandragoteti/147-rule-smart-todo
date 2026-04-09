@@ -7,7 +7,8 @@ import {
   Heart, 
   Settings,
   Shield,
-  Target
+  StickyNote,
+  Home,
 } from "lucide-react";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import { useAppSelector } from "../../app/hooks";
@@ -18,13 +19,16 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-blue-500", group: "Main" },
-  { to: "/today", label: "Today", icon: CalendarCheck, color: "text-amber-500", group: "Main" },
-  { to: "/profile", label: "Settings", icon: Settings, color: "text-blue-400", group: "Main" },
-  { to: "/todos", label: "All Tasks", icon: ListTodo, color: "text-emerald-500", group: "Tasks" },
-  { to: "/create-todo", label: "New Task", icon: PlusCircle, color: "text-indigo-500", group: "Tasks" },
-  { to: "/heartspace", label: "Heartspace", icon: Heart, color: "text-rose-400", group: "Personal" },
+  { to: "/",           label: "Home",       icon: Home,          color: "text-blue-500",    group: "Main" },
+  { to: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard, color: "text-amber-500", group: "Main" },
+  { to: "/today",      label: "Today",      icon: CalendarCheck, color: "text-emerald-500", group: "Main" },
+  { to: "/todos",      label: "All Tasks",  icon: ListTodo,      color: "text-indigo-500",  group: "Tasks" },
+  { to: "/create-todo", label: "New Task",  icon: PlusCircle,    color: "text-blue-500",    group: "Tasks" },
+  { to: "/heartspace", label: "Heartspace", icon: Heart,         color: "text-rose-400",    group: "Personal" },
+  { to: "/notes",      label: "Notes",      icon: StickyNote,    color: "text-amber-500",   group: "Personal" },
+  { to: "/profile",    label: "Settings",   icon: Settings,      color: "text-blue-400",    group: "Personal" },
 ];
+
 
 const Sidebar = ({ onNavigate }: SidebarProps) => {
   const linkStyle = ({ isActive }: { isActive: boolean }) =>
@@ -35,6 +39,7 @@ const Sidebar = ({ onNavigate }: SidebarProps) => {
     }`;
 
   const todos = useAppSelector((state) => state.todo.todos);
+  const notes = useAppSelector((state) => state.notes.notes);
   const activeTasksCount = todos.filter(t => 
     t.status !== 'completed' && 
     (t.seriesDates?.some(d => isTodayDate(d)) || isTodayDate(t.scheduledDate))
@@ -78,18 +83,31 @@ const Sidebar = ({ onNavigate }: SidebarProps) => {
           <div className={`p-4 rounded-xl border group transition-all duration-300 hover:border-emerald-500/30 ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
               <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wide opacity-50">Task Overview</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wide opacity-50">Quick Stats</span>
                   </div>
-                  <div className="flex items-end justify-between">
+                  <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-0.5">
-                          <div className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
-                              {activeTasksCount > 0 ? `${activeTasksCount} Active` : "Done"}
+                          <div className={`text-lg font-bold ${THEME_CLASSES.text.primary}`}>
+                              {activeTasksCount > 0 ? `${activeTasksCount}` : "0"}
                           </div>
                           <div className={`text-[10px] font-medium opacity-50 tracking-tight ${THEME_CLASSES.text.tertiary}`}>
-                              {activeTasksCount > 0 ? "Daily Progress" : "All Caught Up"}
+                              Today Active
                           </div>
                       </div>
-                      <Target size={18} className="text-emerald-500 opacity-60" />
+                      <div className="space-y-0.5">
+                          <div className={`text-lg font-bold ${THEME_CLASSES.text.primary}`}>
+                              {notes.length}
+                          </div>
+                          <div className={`text-[10px] font-medium opacity-50 tracking-tight ${THEME_CLASSES.text.tertiary}`}>
+                              Notes
+                          </div>
+                      </div>
+                  </div>
+                  <div className={`h-1.5 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800`}>
+                      <div 
+                          className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-700"
+                          style={{ width: activeTasksCount > 0 ? `${Math.min(100, (todos.filter(t => t.status === 'completed').length / todos.length) * 100)}%` : '0%' }}
+                      />
                   </div>
               </div>
           </div>

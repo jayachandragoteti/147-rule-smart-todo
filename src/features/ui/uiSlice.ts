@@ -25,8 +25,14 @@ interface UiState {
   iframe: IFrameState;
 }
 
-/** Read persisted settings from localStorage */
+/** Read persisted theme from localStorage, fallback system preference, then dark */
 const getInitialTheme = (): ThemeMode => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("theme") as ThemeMode | null;
+    if (saved === "light" || saved === "dark") return saved;
+    // Check system preference
+    if (window.matchMedia("(prefers-color-scheme: light)").matches) return "light";
+  }
   return "dark";
 };
 

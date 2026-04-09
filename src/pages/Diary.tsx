@@ -9,11 +9,28 @@ import {
   ChevronLeft,
   ChevronRight,
   Heart,
-  Sparkles,
   Link as LinkIcon,
-  Trash2
+  Trash2,
+  Smile,
+  Meh,
+  Frown,
+  Zap,
+  RefreshCw,
+  Sparkles as SparklesIcon
 } from "lucide-react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek } from "date-fns";
+import { analyzeMood, summarizeContent } from "../services/aiService";
+import { 
+  format, 
+  startOfMonth, 
+  endOfMonth, 
+  eachDayOfInterval, 
+  isSameDay, 
+  addMonths, 
+  subMonths, 
+  startOfWeek,
+  parseISO 
+} from "date-fns";
+import { Brain, BookOpen } from "lucide-react";
 import PageWrapper from "../components/layout/PageWrapper";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import { fetchJournalEntries, addJournalEntry, updateJournalEntry, deleteJournalEntry } from "../features/journal/journalSlice";
@@ -39,6 +56,7 @@ const Diary = () => {
 
   // Calendar state
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -68,32 +86,45 @@ const Diary = () => {
         return;
     }
     
-    const data = {
+    const data: any = {
       title: title || "New Entry",
       content,
       date: selectedDate.toISOString(),
       todoIds: selectedTodoIds,
     };
 
+    setIsAiProcessing(true);
     try {
-        if (editingEntry || selectedEntry) {
-            const id = editingEntry?.id || selectedEntry?.id;
-            if (id) {
-                await dispatch(updateJournalEntry({ id, userId: user.uid, data })).unwrap();
-                toast.success("Entry updated ✓");
-            }
-        } else {
-            await dispatch(addJournalEntry({ userId: user.uid, data })).unwrap();
-            toast.success("Entry saved to your Heartspace ✓");
+      // AI Enhancement
+      if (content.length > 50) {
+        const [moodResult, summary] = await Promise.all([
+          analyzeMood(content),
+          summarizeContent(content)
+        ]);
+        data.mood = moodResult.mood;
+        data.aiSummary = summary;
+      }
+      
+      if (editingEntry || selectedEntry) {
+        const id = editingEntry?.id || selectedEntry?.id;
+        if (id) {
+          await dispatch(updateJournalEntry({ id, userId: user.uid, data })).unwrap();
+          toast.success("Entry updated & analyzed ✓");
         }
+      } else {
+        await dispatch(addJournalEntry({ userId: user.uid, data })).unwrap();
+        toast.success("Entry saved & analyzed ✓");
+      }
 
-        setIsAdding(false);
-        setEditingEntry(null);
-        setTitle("");
-        setContent("");
-        setSelectedTodoIds([]);
+      setIsAdding(false);
+      setEditingEntry(null);
+      setTitle("");
+      setContent("");
+      setSelectedTodoIds([]);
     } catch {
-        toast.error("Failed to save entry");
+      toast.error("Failed to save entry");
+    } finally {
+      setIsAiProcessing(false);
     }
   };
 
@@ -380,21 +411,48 @@ const Diary = () => {
                   </button>
                   <button 
                     onClick={handleSave}
-                    className="flex-[2] px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all active:scale-95"
+                    disabled={isAiProcessing}
+                    className="flex-[2] px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
+                    {isAiProcessing ? <RefreshCw size={16} className="animate-spin" /> : null}
                     {editingEntry ? "Update Entry" : "Save Entry"}
                   </button>
                 </div>
+                {isAiProcessing && (
+                  <p className="text-[10px] text-blue-500 font-bold text-center animate-pulse flex items-center justify-center gap-1.5">
+                    <SparklesIcon size={10} /> AI is analyzing your thoughts and mood...
+                  </p>
+                )}
               </div>
             ) : selectedEntry ? (
               <div className="space-y-6 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                 <div className="space-y-1.5">
                   <h3 className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>{selectedEntry.title || "Untitled Entry"}</h3>
-                  <div className="flex items-center gap-3 text-[10px] font-medium text-gray-400">
+                  <div className="flex flex-wrap items-center gap-3 text-[10px] font-medium text-gray-400">
                     <div className="flex items-center gap-1"><Clock size={10} /> {format(new Date(selectedEntry.createdAt), "h:mm a")}</div>
-                    <div className="flex items-center gap-1"><Sparkles size={10} className="text-rose-400" /> Heartspace</div>
+                    <div className="flex items-center gap-1"><BookOpen size={10} className="text-rose-400" /> Heartspace</div>
+                    {selectedEntry.mood && (
+                      <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg">
+                        {selectedEntry.mood === 'happy' && <Smile size={10} />}
+                        {selectedEntry.mood === 'neutral' && <Meh size={10} />}
+                        {(selectedEntry.mood === 'sad' || selectedEntry.mood === 'stressed') && <Frown size={10} />}
+                        {selectedEntry.mood === 'focused' && <Zap size={10} />}
+                        <span className="uppercase tracking-widest">{selectedEntry.mood}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {selectedEntry.aiSummary && (
+                   <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-1 flex items-center gap-1">
+                        <SparklesIcon size={10} /> AI Summary
+                      </p>
+                      <p className={`text-xs italic leading-relaxed ${THEME_CLASSES.text.secondary}`}>
+                        "{selectedEntry.aiSummary}"
+                      </p>
+                   </div>
+                )}
                 
                 <p className={`text-sm leading-loose whitespace-pre-wrap ${THEME_CLASSES.text.secondary}`}>
                   {selectedEntry.content}

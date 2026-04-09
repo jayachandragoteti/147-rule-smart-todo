@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { useAppSelector, useAppDispatch, useToast } from "../../app/hooks";
 import { isTodayDate } from "../../utils/dateUtils";
-import { Bell, Clock, CheckCircle2, X } from "lucide-react";
+import { Bell, Clock, CheckCircle2, X, Volume2, Sparkles, RefreshCw, Calendar } from "lucide-react";
+import { suggestReschedule } from "../../services/aiService";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import type { Todo } from "../../types/todo";
 import { updateTodo } from "../../features/todos/todoThunks";
 import { TODO_STATUS } from "../../utils/todoConstants";
+import { playNotificationSound } from "../../utils/soundEngine";
 
 const ReminderSystem = () => {
   const { todos } = useAppSelector((state) => state.todo);
@@ -15,130 +17,149 @@ const ReminderSystem = () => {
 
   const [activeReminders, setActiveReminders] = useState<Todo[]>([]);
   const [snoozed, setSnoozed] = useState<{ [id: string]: number }>({});
-  
-  const lastCheckedMinute = useRef<number>(-1);
+  const [aiSuggestions, setAiSuggestions] = useState<{ [id: string]: { suggestedTime: string, reason: string } }>({});
+  const [isParsingReschedule, setIsParsingReschedule] = useState<{ [id: string]: boolean }>({});
 
-  // Request notification permission on mount
+  /** Prevent double-firing within the same minute */
+  const lastCheckedMinute = useRef<number>(-1);
+  /** Track which todos already triggered (persist across renders) */
+  const triggeredThisMinute = useRef<Set<string>>(new Set());
+
+  // Request browser notification permission on mount
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
   }, []);
 
-  // Play sound function using web audio api
-  const playAlertSound = () => {
-    if (!soundEnabled) return;
-    try {
-      const audioCtx = new window.AudioContext();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-      oscillator.frequency.exponentialRampToValueAtTime(880.00, audioCtx.currentTime + 0.1); // A5
-
-      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      oscillator.start(audioCtx.currentTime);
-      oscillator.stop(audioCtx.currentTime + 0.5);
-    } catch (e) {
-      console.warn("Audio not supported or blocked");
-    }
-  };
-
   useEffect(() => {
     const checkReminders = () => {
       const now = new Date();
       const currentMin = now.getMinutes();
-      
-      // Prevent double triggering in the same minute
-      if (lastCheckedMinute.current === currentMin) return;
-      
-      const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      const nowTimeMs = now.getTime();
+      const currentHour = now.getHours();
+      const currentTimeStr = `${String(currentHour).padStart(2, "0")}:${String(currentMin).padStart(2, "0")}`;
+      const nowMs = now.getTime();
+
+      // Reset per-minute tracking when the minute turns over
+      if (lastCheckedMinute.current !== currentMin) {
+        lastCheckedMinute.current = currentMin;
+        triggeredThisMinute.current = new Set();
+      }
 
       const triggered: Todo[] = [];
 
-      todos.forEach(todo => {
+      todos.forEach((todo) => {
         if (!todo.reminderEnabled || todo.status === "completed") return;
+        // Skip if already triggered this minute
+        if (triggeredThisMinute.current.has(todo.id)) return;
 
-        // Check if snoozed timer is up
+        // Check if snoozed
         if (snoozed[todo.id]) {
-          if (nowTimeMs >= snoozed[todo.id]) {
+          if (nowMs >= snoozed[todo.id]) {
             triggered.push(todo);
-            // remove from snoozed
-            setSnoozed(prev => {
+            triggeredThisMinute.current.add(todo.id);
+            setSnoozed((prev) => {
               const next = { ...prev };
               delete next[todo.id];
               return next;
             });
           }
-          return; // Skip normal time check if currently snoozed
+          return;
         }
 
         // Normal schedule check
-        let isForToday = false;
-        if (todo.seriesDates && todo.seriesDates.length > 0) {
-           isForToday = todo.seriesDates.some(d => isTodayDate(d));
-        } else {
-           isForToday = isTodayDate(todo.scheduledDate);
-        }
+        const isForToday = todo.seriesDates?.length
+          ? todo.seriesDates.some((d) => isTodayDate(d))
+          : isTodayDate(todo.scheduledDate);
 
         if (isForToday && todo.scheduledTime === currentTimeStr) {
-           triggered.push(todo);
+          triggered.push(todo);
+          triggeredThisMinute.current.add(todo.id);
         }
       });
 
       if (triggered.length > 0) {
-        lastCheckedMinute.current = currentMin;
-        setActiveReminders(prev => {
-          // Avoid duplicates in active display
-          const existingIds = new Set(prev.map(t => t.id));
-          const newReminders = triggered.filter(t => !existingIds.has(t.id));
+        setActiveReminders((prev) => {
+          const existingIds = new Set(prev.map((t) => t.id));
+          const newReminders = triggered.filter((t) => !existingIds.has(t.id));
           if (newReminders.length > 0) {
-             playAlertSound();
-             newReminders.forEach(todo => {
-                if ("Notification" in window && Notification.permission === "granted" && document.visibilityState !== "visible") {
-                  new Notification(`Reminder: ${todo.title}`, {
-                    body: todo.descriptions?.[0] || 'It is time for your task.'
-                  });
-                }
-             });
+            // Play each task's own sound (or 'bell' as fallback)
+            newReminders.forEach((todo) => {
+              playNotificationSound(todo.notificationSound ?? "bell", soundEnabled);
+
+              // Browser notification when app is in background
+              if (
+                "Notification" in window &&
+                Notification.permission === "granted" &&
+                document.visibilityState !== "visible"
+              ) {
+                new Notification(`⏰ Reminder: ${todo.title}`, {
+                  body: todo.descriptions?.[0] || "It's time for your task.",
+                  icon: "/favicon.ico",
+                });
+              }
+            });
           }
           return [...prev, ...newReminders];
         });
       }
     };
 
-    // Run interval
-    const interval = setInterval(checkReminders, 10000); // verify every 10 sec
-    checkReminders(); // check immediately on mount
+    const interval = setInterval(checkReminders, 10_000); // check every 10s
+    checkReminders(); // immediate check on mount
 
     return () => clearInterval(interval);
   }, [todos, snoozed, soundEnabled]);
 
   const handleDismiss = (id: string) => {
-    setActiveReminders(prev => prev.filter(t => t.id !== id));
+    setActiveReminders((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const handleSnooze = (id: string) => {
-    // Snooze for 10 minutes
-    const snoozeTime = Date.now() + 10 * 60 * 1000;
-    setSnoozed(prev => ({ ...prev, [id]: snoozeTime }));
+  const handleSnooze = async (todo: Todo) => {
+    const id = todo.id;
+    const currentSnoozeCount = todo.snoozeCount || 0;
+    const newSnoozeCount = currentSnoozeCount + 1;
+    
+    // Update snooze count in Firestore
+    dispatch(updateTodo({ id, updates: { snoozeCount: newSnoozeCount } }));
+
+    const snoozeUntil = Date.now() + 10 * 60 * 1000; // 10 minutes
+    setSnoozed((prev) => ({ ...prev, [id]: snoozeUntil }));
     handleDismiss(id);
     toast.info("Reminder snoozed for 10 minutes");
+
+    // If snoozed 3+ times, generate AI suggestion for next time it triggers
+    if (newSnoozeCount >= 3 && !aiSuggestions[id]) {
+      setIsParsingReschedule(prev => ({ ...prev, [id]: true }));
+      try {
+        const suggestion = await suggestReschedule(todo);
+        setAiSuggestions(prev => ({ ...prev, [id]: suggestion }));
+      } catch (err) {
+        console.error("Failed to get AI reschedule suggestion", err);
+      } finally {
+        setIsParsingReschedule(prev => ({ ...prev, [id]: false }));
+      }
+    }
+  };
+
+  const handleApplyReschedule = async (id: string, newTime: string) => {
+    try {
+      await dispatch(updateTodo({ 
+        id, 
+        updates: { scheduledTime: newTime, snoozeCount: 0 } 
+      })).unwrap();
+      handleDismiss(id);
+      toast.success(`Task rescheduled to ${newTime} per AI suggestion`);
+    } catch {
+      toast.error("Failed to reschedule task");
+    }
   };
 
   const handleCompleteTask = async (id: string) => {
     try {
       await dispatch(updateTodo({ id, updates: { status: TODO_STATUS.COMPLETED } })).unwrap();
       handleDismiss(id);
-      toast.success("Task completed!");
+      toast.success("Task completed! 🎉");
     } catch {
       toast.error("Failed to complete task");
     }
@@ -147,44 +168,94 @@ const ReminderSystem = () => {
   if (activeReminders.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-3">
-      {activeReminders.map(todo => (
-         <div key={todo.id} className="w-80 p-5 rounded-2xl shadow-2xl border border-amber-500/30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md animate-in slide-in-from-bottom-5">
-            <div className="flex justify-between items-start mb-3">
-               <div className="flex items-center gap-2 text-amber-500">
-                  <Bell size={18} className="animate-pulse" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Reminding</span>
-               </div>
-               <button onClick={() => handleDismiss(todo.id)} className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                  <X size={16} />
-               </button>
+    <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-3 max-w-[calc(100vw-2rem)]">
+      {activeReminders.map((todo) => (
+        <div
+          key={todo.id}
+          className="w-80 p-5 rounded-2xl shadow-2xl border border-amber-400/30 bg-white/97 dark:bg-gray-900/97 backdrop-blur-md"
+          style={{ animation: "slideInFromBottom 0.3s ease-out" }}
+        >
+          {/* Header */}
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <Bell size={16} className="text-amber-500 animate-pulse" />
+              </div>
+              <div>
+                <span className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                  Reminder
+                </span>
+                {/* Show which sound is assigned (subtle) */}
+                {todo.notificationSound && todo.notificationSound !== "bell" && (
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <Volume2 size={9} className="text-gray-400" />
+                    <span className="text-[9px] text-gray-400 capitalize">{todo.notificationSound}</span>
+                  </div>
+                )}
+              </div>
             </div>
-            
-            <h3 className={`font-bold text-lg leading-tight mb-2 ${THEME_CLASSES.text.primary}`}>
-                {todo.title}
-            </h3>
-            
-            {todo.descriptions && todo.descriptions[0] && (
-                <p className={`text-xs line-clamp-2 mb-4 ${THEME_CLASSES.text.secondary}`}>
-                    {todo.descriptions[0]}
-                </p>
-            )}
+            <button
+              onClick={() => handleDismiss(todo.id)}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Dismiss reminder"
+            >
+              <X size={14} />
+            </button>
+          </div>
 
-            <div className="flex items-center gap-2 mt-4 pt-4 border-t dark:border-gray-800">
-                <button 
-                  onClick={() => handleSnooze(todo.id)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border transition-all ${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.primary}`}
-                >
-                    <Clock size={14} /> Snooze
-                </button>
-                <button 
-                  onClick={() => handleCompleteTask(todo.id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20"
-                >
-                    <CheckCircle2 size={14} /> Complete
-                </button>
+          {/* Task title */}
+          <h3 className={`font-bold text-base leading-tight mb-2 ${THEME_CLASSES.text.primary}`}>
+            {todo.title}
+          </h3>
+
+          {/* Description preview */}
+          {todo.descriptions?.[0] && (
+            <p className={`text-xs line-clamp-2 mb-4 ${THEME_CLASSES.text.secondary}`}>
+              {todo.descriptions[0]}
+            </p>
+          )}
+
+          {/* Scheduled time */}
+          {todo.scheduledTime && (
+            <div className={`flex items-center gap-1.5 mb-4 text-[10px] font-bold ${THEME_CLASSES.text.tertiary}`}>
+              <Clock size={10} />
+              <span>Scheduled at {todo.scheduledTime}</span>
             </div>
-         </div>
+          )}
+
+          {/* AI Reschedule Suggestion */}
+          {aiSuggestions[todo.id] && (
+            <div className="mb-4 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 space-y-2">
+              <div className="flex items-center gap-2">
+                <Sparkles size={12} className="text-blue-500" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">AI Suggestion</span>
+              </div>
+              <p className="text-[10px] leading-tight text-blue-700 dark:text-blue-300 italic">{aiSuggestions[todo.id].reason}</p>
+              <button
+                onClick={() => handleApplyReschedule(todo.id, aiSuggestions[todo.id].suggestedTime)}
+                className="w-full flex items-center justify-center gap-2 py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-bold shadow-sm active:scale-95 transition-all"
+              >
+                <RefreshCw size={10} /> Reschedule to {aiSuggestions[todo.id].suggestedTime}
+              </button>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 pt-3 border-t dark:border-gray-800">
+            <button
+              onClick={() => handleSnooze(todo)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border transition-all active:scale-95 ${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.primary}`}
+            >
+              <Clock size={13} /> Snooze 10m
+            </button>
+            <button
+              onClick={() => handleCompleteTask(todo.id)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95 shadow-md shadow-emerald-500/20"
+            >
+              <CheckCircle2 size={13} /> Done
+            </button>
+          </div>
+        </div>
       ))}
     </div>
   );

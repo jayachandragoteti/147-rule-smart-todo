@@ -5,12 +5,13 @@ import { createTodo, updateTodo } from "../features/todos/todoThunks";
 import { TODO_ACTION_TYPE, TODO_STATUS } from "../utils/todoConstants";
 import { VALIDATION, FORM_MESSAGES } from "../utils/constants";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
-import type { CreateTodoFormValues, TodoPriority, TodoRecurrence } from "../types/todo";
+import type { CreateTodoFormValues, TodoPriority, TodoRecurrence, NotificationSound } from "../types/todo";
+import { SOUND_OPTIONS, previewSound } from "../utils/soundEngine";
 import { useState, useEffect, type ReactNode } from "react";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { generate147Dates, RULE_147_LABELS } from "../utils/rule147";
 import { 
-  Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, ImageIcon, 
+  Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, ImageIcon, Volume2,
   type LucideIcon 
 } from "lucide-react";
 
@@ -47,6 +48,7 @@ const CreateTodo = () => {
       category: "Personal",
       recurrence: "none",
       reminderEnabled: true,
+      notificationSound: "bell" as NotificationSound,
       assignTo: "",
     },
   });
@@ -77,6 +79,7 @@ const CreateTodo = () => {
         category: editModeTodo.category || "Personal",
         recurrence: editModeTodo.recurrence || "none",
         reminderEnabled: editModeTodo.reminderEnabled ?? true,
+        notificationSound: editModeTodo.notificationSound ?? "bell",
         assignTo: editModeTodo.assignTo || "",
       });
       if (editModeTodo.posterImage) {
@@ -135,6 +138,7 @@ const CreateTodo = () => {
         category: data.category,
         recurrence: data.recurrence,
         reminderEnabled: data.reminderEnabled,
+        notificationSound: data.notificationSound ?? "bell",
         assignTo: data.assignTo?.trim() || "",
     };
 
@@ -197,6 +201,7 @@ const CreateTodo = () => {
 
   const watchPriority = useWatch({ control, name: "priority" });
   const watchReminder = useWatch({ control, name: "reminderEnabled" });
+  const watchSound = useWatch({ control, name: "notificationSound" });
 
   return (
     <PageWrapper>
@@ -468,6 +473,44 @@ const CreateTodo = () => {
                     <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Get alerted when it's time.</p>
                   </div>
                 </button>
+
+                {/* ── Notification Sound Picker (shown when reminder is on) ── */}
+                {watchReminder && (
+                  <div className="space-y-2">
+                    <label className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
+                      <Volume2 size={10} /> Notification Sound
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {SOUND_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => {
+                            setValue("notificationSound", opt.value as NotificationSound);
+                            previewSound(opt.value);
+                          }}
+                          className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all active:scale-95 ${
+                            watchSound === opt.value
+                              ? "bg-amber-50 dark:bg-amber-900/10 border-amber-500 ring-1 ring-amber-500"
+                              : `${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover}`
+                          }`}
+                        >
+                          <span className="text-base leading-none">{opt.emoji}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs font-bold truncate ${
+                              watchSound === opt.value ? "text-amber-700 dark:text-amber-300" : THEME_CLASSES.text.primary
+                            }`}>{opt.label}</p>
+                            <p className={`text-[9px] truncate ${THEME_CLASSES.text.tertiary}`}>{opt.description}</p>
+                          </div>
+                          {watchSound === opt.value && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    <p className={`text-[9px] ${THEME_CLASSES.text.tertiary}`}>Click to preview · Selected plays on reminder</p>
+                  </div>
+                )}
 
                 {/* Collaboration */}
                 <div className="space-y-3 pt-2">

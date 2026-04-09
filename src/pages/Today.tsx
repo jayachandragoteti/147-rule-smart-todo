@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
 import TodoCard from "../components/todos/TodoCard";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
@@ -10,8 +11,10 @@ import {
   Target,
   Zap,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from "lucide-react";
+
 
 const Today = () => {
   const dispatch = useAppDispatch();
@@ -129,9 +132,13 @@ const Today = () => {
                   You've completed all your tasks for today.
                 </p>
             </div>
-            <button className={`px-8 py-3 rounded-xl font-bold text-sm uppercase tracking-wide active:scale-95 transition-all ${THEME_CLASSES.button.primary}`}>
-                Add New Task
-            </button>
+            <Link
+              to="/create-todo"
+              className={`inline-flex items-center gap-2 px-8 py-3 rounded-xl font-bold text-sm uppercase tracking-wide active:scale-95 transition-all ${THEME_CLASSES.button.primary}`}
+            >
+              <Plus size={16} /> Add New Task
+            </Link>
+
           </div>
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">

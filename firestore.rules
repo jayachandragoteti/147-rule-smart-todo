@@ -3,24 +3,59 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 1. Todo Management: Users can only access their own todos subcollection
-    match /users/{userId}/todos/{todoId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // ─── Helpers ───────────────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    // 2. Journal Management: Users can only access journal entries where they are the owner
-    match /journals/{journalId} {
-      // Allow reading if the authenticated user's ID matches the document's userId field
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      
-      // Allow creation if the user is authenticated and is setting themselves as the owner
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      
-      // Allow updates/deletion only if the user owns the existing document
-      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // 3. Global Safety: Deny all other access by default
+    // ─── User-scoped Subcollections ─────────────────────────────────────────────
+    // All data lives under users/{uid}/ so users only see their own data.
+
+    match /users/{userId} {
+      // The user document itself (for profile data if ever needed)
+      allow read, write: if isOwner(userId);
+
+      // ── Todos ──────────────────────────────────────────────────────────────
+      match /todos/{todoId} {
+        allow read:   if isOwner(userId);
+        allow create: if isOwner(userId)
+                      && request.resource.data.title is string
+                      && request.resource.data.title.size() > 0
+                      && request.resource.data.createdAt is string;
+        allow update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+
+      // ── Journal / Diary Entries ─────────────────────────────────────────────
+      // FIXED: Previously rules matched flat /journals/{id} but code stores
+      // at users/{uid}/journals/{id}. Now correctly using subcollection path.
+      match /journals/{journalId} {
+        allow read:   if isOwner(userId);
+        allow create: if isOwner(userId)
+                      && request.resource.data.userId == userId
+                      && request.resource.data.content is string;
+        allow update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+
+      // ── Notes ───────────────────────────────────────────────────────────────
+      match /notes/{noteId} {
+        allow read:   if isOwner(userId);
+        allow create: if isOwner(userId)
+                      && request.resource.data.content is string
+                      && request.resource.data.createdAt is string;
+        allow update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // ─── Global Deny ────────────────────────────────────────────────────────────
+    // Block all access not explicitly granted above
     match /{document=**} {
       allow read, write: if false;
     }

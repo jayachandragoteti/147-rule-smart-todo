@@ -8,4 +8,4 @@ export type {
   CreateTodoFormValues,
 } from "./todo";
 export type { JournalEntry, CreateJournalFormValues } from "./journal";
-
+export type { Note, CreateNoteFormValues } from "./note";

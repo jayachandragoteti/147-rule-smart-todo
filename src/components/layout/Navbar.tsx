@@ -40,7 +40,24 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
             <span className="text-[9px] font-medium uppercase tracking-wider opacity-40">1 · 4 · 7 Productivity</span>
           </div>
         </Link>
+
+        {/* Desktop Nav Links */}
+        <nav className="hidden md:flex items-center gap-1 ml-4">
+          <Link 
+            to="/dashboard" 
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:bg-gray-100 dark:hover:bg-gray-800 ${THEME_CLASSES.text.secondary}`}
+          >
+            Dashboard
+          </Link>
+          <Link 
+            to="/today" 
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:bg-gray-100 dark:hover:bg-gray-800 ${THEME_CLASSES.text.secondary}`}
+          >
+            Focus
+          </Link>
+        </nav>
       </div>
+
 
       <div className="flex items-center gap-4">
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">

@@ -5,6 +5,8 @@ export interface JournalEntry {
   content: string;
   title: string;
   todoIds: string[]; // Related task tags
+  mood?: "happy" | "neutral" | "sad" | "stressed" | "focused";
+  aiSummary?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -14,4 +16,5 @@ export type CreateJournalFormValues = {
   content: string;
   date: string;
   todoIds: string[];
+  mood?: string;
 };

@@ -16,8 +16,13 @@ import {
   Info,
   Edit3,
   RefreshCcw,
+  Bell,
+  Sparkles,
+  RefreshCw,
   type LucideIcon
 } from "lucide-react";
+import { summarizeContent } from "../services/aiService";
+import { SOUND_OPTIONS } from "../utils/soundEngine";
 import PageWrapper from "../components/layout/PageWrapper";
 import { useAppSelector, useAppDispatch, useToast } from "../app/hooks";
 import { updateTodo, deleteTodo, createTodo } from "../features/todos/todoThunks";
@@ -35,6 +40,8 @@ const TodoDetails = () => {
   const dispatch = useAppDispatch();
   const toast = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
 
   const handleMarkComplete = async () => {
     if (!todo) return;
@@ -111,6 +118,21 @@ const TodoDetails = () => {
       navigate("/todos");
     } catch {
       toast.error("Failed to delete task");
+    }
+  };
+
+  const handleAIAnalysis = async () => {
+    if (!todo) return;
+    setIsAiProcessing(true);
+    try {
+      const content = `${todo.title}\n${todo.descriptions.join("\n")}`;
+      const analysis = await summarizeContent(content);
+      setAiAnalysis(analysis);
+      toast.success("AI Insights generated");
+    } catch {
+      toast.error("Failed to generate AI insights");
+    } finally {
+      setIsAiProcessing(false);
     }
   };
 
@@ -303,6 +325,47 @@ const TodoDetails = () => {
                             )}
                         </div>
 
+                        {/* AI Insights Section */}
+                        {(todo.apply147Rule || aiAnalysis) && (
+                            <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-100 dark:border-blue-800/30 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles size={16} className="text-blue-500" />
+                                        <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.primary}`}>AI Productivity Assistant</h3>
+                                    </div>
+                                    {!aiAnalysis && (
+                                        <button 
+                                            onClick={handleAIAnalysis}
+                                            disabled={isAiProcessing}
+                                            className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                        >
+                                            {isAiProcessing ? <RefreshCw size={10} className="animate-spin" /> : <RefreshCw size={10} />}
+                                            Analyze Task
+                                        </button>
+                                    )}
+                                </div>
+                                {aiAnalysis ? (
+                                    <p className={`text-sm leading-relaxed italic ${THEME_CLASSES.text.secondary}`}>
+                                        "{aiAnalysis}"
+                                    </p>
+                                ) : (
+                                    <p className={`text-[11px] ${THEME_CLASSES.text.tertiary}`}>
+                                        AI can suggest optimized 1-4-7 intervals or summarize your notes for faster revision.
+                                    </p>
+                                )}
+                                {todo.apply147Rule && (
+                                    <div className="flex flex-wrap gap-2 pt-2">
+                                        <button className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700/50 rounded-lg text-[10px] font-bold text-blue-600 hover:shadow-md transition-all">
+                                            🚀 Optimize Intervals
+                                        </button>
+                                        <button className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700/50 rounded-lg text-[10px] font-bold text-blue-600 hover:shadow-md transition-all">
+                                            📋 Generate Summary
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Descriptions */}
                         {todo.descriptions.length > 0 && (
                             <div className="space-y-6">
@@ -433,6 +496,22 @@ const TodoDetails = () => {
                                   <span className={`text-xs font-bold text-purple-500`}>{todo.assignTo}</span>
                               </div>
                             )}
+
+                            {/* Notification Sound */}
+                            {todo.reminderEnabled && (() => {
+                              const soundOpt = SOUND_OPTIONS.find(s => s.value === (todo.notificationSound ?? "bell"));
+                              return (
+                                <div className="flex items-center justify-between pt-3 border-t border-dashed dark:border-gray-800">
+                                  <div className="flex items-center gap-2">
+                                    <Bell size={12} className="text-amber-500" />
+                                    <span className={`text-[10px] font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Alert Sound</span>
+                                  </div>
+                                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                    {soundOpt?.emoji} {soundOpt?.label ?? "Bell"}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                         </div>
                     </div>
                 </div>
