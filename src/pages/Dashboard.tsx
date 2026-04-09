@@ -94,6 +94,7 @@ const Dashboard = () => {
       icon: Target,
       color: "text-blue-500",
       bg: "bg-blue-50 dark:bg-blue-900/20",
+      path: "/todos"
     },
     {
       label: "Today's Tasks",
@@ -101,6 +102,7 @@ const Dashboard = () => {
       icon: Zap,
       color: "text-amber-500",
       bg: "bg-amber-50 dark:bg-amber-900/20",
+      path: "/today"
     },
     {
       label: "Recurring",
@@ -108,6 +110,7 @@ const Dashboard = () => {
       icon: TrendingUp,
       color: "text-emerald-500",
       bg: "bg-emerald-50 dark:bg-emerald-900/20",
+      path: "/todos"
     },
     {
       label: "1-4-7 Rule",
@@ -115,8 +118,14 @@ const Dashboard = () => {
       icon: RefreshCw,
       color: "text-purple-500",
       bg: "bg-purple-50 dark:bg-purple-900/20",
+      path: "/todos"
     },
   ];
+
+  const inProgressTodos = useMemo(
+    () => todos.filter((t) => t.status === "inprogress"),
+    [todos]
+  );
 
   return (
     <PageWrapper>
@@ -154,10 +163,11 @@ const Dashboard = () => {
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {statCards.map(({ label, value, icon: Icon, color, bg }) => (
-            <div
+          {statCards.map(({ label, value, icon: Icon, color, bg, path }) => (
+            <Link
               key={label}
-              className={`rounded-xl p-6 border transition-all duration-300 hover:shadow-md ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+              to={path}
+              className={`block rounded-xl p-6 border transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
             >
               <div className="flex items-center justify-between mb-4">
                 <span className={`text-xs font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
@@ -170,8 +180,27 @@ const Dashboard = () => {
               <p className={`text-3xl font-bold ${THEME_CLASSES.text.primary}`}>
                 {value}
               </p>
-            </div>
+            </Link>
           ))}
+        </div>
+      )}
+
+      {/* Currently Working On */}
+      {inProgressTodos.length > 0 && (
+        <div className="mb-10 p-6 rounded-3xl border bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border-blue-200 dark:border-blue-800/30 shadow-lg shadow-blue-500/5">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/30">
+               <Zap size={20} className="text-white animate-pulse" />
+            </div>
+            <h3 className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
+              Currently Working On
+            </h3>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+             {inProgressTodos.map((todo) => (
+                <TodoCard key={todo.id} todo={todo} />
+             ))}
+          </div>
         </div>
       )}
 
@@ -229,7 +258,7 @@ const Dashboard = () => {
                  <ListTodo size={20} className="text-white" />
               </div>
               <h3 className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
-                Current Tasks
+                Recent Tasks
               </h3>
             </div>
             <Link to="/todos" className={`text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all ${THEME_CLASSES.text.link}`}>

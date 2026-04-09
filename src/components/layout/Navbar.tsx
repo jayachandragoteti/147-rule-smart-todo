@@ -7,11 +7,14 @@ import { THEME_CLASSES } from "../../utils/themeUtils";
 
 import type { RootState } from "../../app/store";
 
+import { useState } from "react";
+
 interface NavbarProps {
   onMenuClick?: () => void;
 }
 
 const Navbar = ({ onMenuClick }: NavbarProps) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dispatch = useAppDispatch();
   const toast = useToast();
   const { user } = useAppSelector((state: RootState) => state.auth);
@@ -28,8 +31,8 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
         </button>
 
         <Link to="/" className="flex items-center gap-3 group transition-transform hover:scale-[1.02]">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow">
-            <Zap size={20} fill="currentColor" />
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow">
+            <Zap size={16} fill="currentColor" />
           </div>
           <div className="flex flex-col">
             <span className="text-base font-bold tracking-tight leading-none text-gray-900 dark:text-white">
@@ -55,13 +58,13 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
                 <span className={`text-xs font-semibold leading-none ${THEME_CLASSES.text.primary}`}>{user.displayName?.split(' ')[0] || user.email?.split('@')[0]}</span>
                 <span className={`text-[10px] font-medium opacity-50 ${THEME_CLASSES.text.tertiary}`}>My Account</span>
             </div>
-            <div className="relative group cursor-pointer">
-                <div className="w-9 h-9 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-xl flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden group-hover:border-blue-500/50 transition-colors">
-                    <User size={18} className="opacity-60" />
+            <div className="relative cursor-pointer" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+                <div className="w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-xl flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden hover:border-blue-500/50 transition-colors">
+                    <User size={16} className="opacity-60" />
                 </div>
                 
-                {/* Dropdown Placeholder/Action */}
-                <div className="absolute top-full right-0 mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-1 group-hover:translate-y-0">
+                {/* Dropdown Action */}
+                <div className={`absolute top-full right-0 mt-2 w-48 transition-all transform z-50 ${isDropdownOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-1'}`}>
                     <div className={`p-2 rounded-2xl border shadow-2xl ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
                         <button
                             onClick={() => {

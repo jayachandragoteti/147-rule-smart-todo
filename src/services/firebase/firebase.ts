@@ -4,7 +4,7 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -19,10 +19,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+});
 export const storage = getStorage(app);
 
-// Persist auth state in localStorage (awaited to avoid race conditions)
+// Persist auth state in localStorage
 setPersistence(auth, browserLocalPersistence).catch((err) => {
   console.error("Firebase persistence error:", err);
 });

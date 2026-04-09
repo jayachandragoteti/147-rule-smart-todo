@@ -6,6 +6,7 @@ import AppRoutes from "./routes/AppRoutes";
 import ToastContainer from "./components/ui/ToastContainer";
 import IFrameViewer from "./components/ui/IFrameViewer";
 import ReminderSystem from "./components/ui/ReminderSystem";
+import ScrollToTop from "./components/layout/ScrollToTop";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 
 const App = () => {
@@ -40,6 +41,7 @@ const App = () => {
 
   return (
     <>
+      <ScrollToTop />
       <AppRoutes />
       <ToastContainer />
       <IFrameViewer />

@@ -16,9 +16,9 @@ const Layout = () => {
     <div className="min-h-screen flex flex-col transition-colors duration-300">
       <Navbar onMenuClick={openSidebar} />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 items-start">
         {/* Desktop Sidebar */}
-        <aside className={`hidden md:block w-64 border-r ${THEME_CLASSES.surface.base} ${THEME_CLASSES.border.base}`}>
+        <aside className={`hidden md:block w-64 border-r sticky top-16 h-[calc(100vh-4rem)] overflow-hidden ${THEME_CLASSES.surface.base} ${THEME_CLASSES.border.base}`}>
           <Sidebar />
         </aside>
 
@@ -36,7 +36,7 @@ const Layout = () => {
           />
 
           <div
-            className={`absolute left-0 top-0 h-full w-64 ${THEME_CLASSES.surface.base} shadow-xl transform transition-transform duration-300 ease-in-out ${
+            className={`absolute left-0 top-0 h-full w-64 flex flex-col ${THEME_CLASSES.surface.base} shadow-xl transform transition-transform duration-300 ease-in-out ${
               isOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >
@@ -50,7 +50,7 @@ const Layout = () => {
               </button>
             </div>
 
-            <div className="p-4">
+            <div className="p-4 flex-1 h-[calc(100%-4rem)] overflow-hidden">
               <Sidebar onNavigate={closeSidebar} />
             </div>
           </div>
