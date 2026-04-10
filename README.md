@@ -1,102 +1,47 @@
-# 147 Rule Smart Todo
+# 📋 147-Rule Smart Todo
 
-A productivity web application built around the **1-4-7 spaced repetition rule** for effective learning. When you create a task and enable the 147 Rule, it automatically schedules reviews on **Day 1**, **Day 4**, and **Day 7** — reinforcing knowledge through scientifically-proven interval repetition.
+A high-performance personal productivity platform designed for focus, long-term retention, and efficient daily management. This application integrates task management, journaling, and quick capture notes using the scientifically-backed **1-4-7 Spaced Repetition Rule**.
 
-## ✨ Features
+## ✨ Key Features
 
-- **1-4-7 Rule Engine** — Automatic spaced repetition scheduling for learning tasks
-- **Task Management** — Full CRUD with rich details (descriptions, links, images)
-- **Today's View** — See exactly what needs your attention today
-- **Dashboard** — Overview stats for total, pending, completed, and 147-active tasks
-- **Search & Filter** — Quickly find tasks by title, description, or status
-- **Dark/Light Theme** — Persisted theme preference with OS detection
-- **Firebase Auth** — Email/password authentication with protected routes
-- **Responsive Design** — Mobile-first layout with slide-out sidebar
+### 📋 Task Management & 1-4-7 Rule
+- **Spaced Repetition Engine**: Automatically schedules revision intervals (1 day, 4 days, 7 days) to maximize memory retention.
+- **Flexible Recurrence**: Support for Daily, Weekly, and Monthly recurring tasks.
+- **Priority System**: Categorize tasks from Low to Urgent with visual priority indicators.
+- **Drag-and-Drop Reordering**: Intuitively organize your task list for the day.
 
-## 🛠 Tech Stack
+### 📖 Heartspace (Diary)
+- **Private Sanctuary**: A dedicated module for daily long-form journaling.
+- **Calendar Navigation**: Easily browse through your memories and past entries using an interactive calendar.
+- **Task Linking**: Connect your journal entries to specific tasks or learning objectives.
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19 · TypeScript · Vite 7 |
-| State | Redux Toolkit |
-| Styling | TailwindCSS v4 |
-| Forms | react-hook-form |
-| Routing | react-router-dom v7 |
-| Backend | Firebase (Auth · Firestore · Storage) |
-| Icons | lucide-react |
+### 📝 Quick Notes
+- **Sticky Capture**: A rapid-entry system for fleeting ideas, checklists, and references.
+- **Category Tags**: Organize notes with custom categories like Work, Personal, or Ideas.
 
-## 🚀 Getting Started
+### ⏰ Reminder & Audio Alerts
+- **Smart Notifications**: Browser-based alerts ensure you never miss a scheduled task.
+- **Custom Soundscapes**: Synthesized notification sounds (Bell, Chime, Melody, etc.) generated entirely in-browser via the Web Audio API.
 
-### Prerequisites
+### 🔗 Embedded Browser Viewer
+- **Side-by-Side Workflow**: Open web links within the application using a draggable, resizable IFrame panel.
+- **Focus Preservation**: Read resources or watch tutorials without switching tabs.
 
-- Node.js 18+
-- A Firebase project with Auth and Firestore enabled
+## 🚀 Quick Setup
 
-### Setup
+1. **Clone the repository**
+2. **Install dependencies**: `npm install`
+3. **Configure Firebase**:
+   - Create a `.env` file based on `.env.example`.
+   - Add your Firebase project credentials.
+4. **Run development server**: `npm run dev`
+5. **Build for production**: `npm run build`
 
-```bash
-# Install dependencies
-npm install
+## 🎨 Modern Aesthetics
+The application features a premium, responsive design with:
+- **Glassmorphism UI**: Subtle depth and translucency effects.
+- **Dark Mode Optimization**: Eye-friendly interface designed for focused work.
+- **Micro-animations**: Smooth transitions and interactive feedback for a professional experience.
 
-# Copy environment file and fill in your Firebase config
-cp .env.example .env.local
-
-# Start dev server
-npm run dev
-```
-
-### Environment Variables
-
-Create a `.env.local` file with your Firebase project values:
-
-```env
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-```
-
-## 📁 Project Structure
-
-```
-src/
-├── app/              # Redux store, hooks, root reducer
-├── components/
-│   ├── layout/       # Layout, Navbar, Sidebar, Footer
-│   └── todos/        # TodoCard
-├── features/
-│   ├── auth/         # Auth slice & thunks
-│   ├── todos/        # Todo slice & thunks
-│   └── ui/           # Theme slice & toggle
-├── pages/            # Route pages (Dashboard, Today, Todos, etc.)
-├── routes/           # AppRoutes & ProtectedRoute
-├── services/firebase/# Firebase config, auth & todo services
-├── types/            # TypeScript type definitions
-└── utils/            # Constants, date utils, rule147, theme utils
-```
-
-## 📖 The 1-4-7 Rule
-
-The 1-4-7 Rule is a simplified spaced repetition technique:
-
-1. **Day 1** — Learn the material for the first time
-2. **Day 4** — First review (3 days later)
-3. **Day 7** — Second review (6 days later)
-
-This approach helps transfer knowledge from short-term to long-term memory through strategically timed reviews.
-
-## 🔒 Firebase Deployment
-
-```bash
-# Build for production
-npm run build
-
-# Deploy to Firebase Hosting
-firebase deploy
-```
-
-## 📝 License
-
-MIT
+---
+Built with ❤️ for lifelong learners.

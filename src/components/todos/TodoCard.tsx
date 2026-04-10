@@ -5,7 +5,7 @@ import { get147Label, getNextSeriesDate } from "../../utils/rule147";
 import { formatDate } from "../../utils/dateUtils";
 import { ExternalLink, CheckCircle, Clock, Link as LinkIcon, AlertCircle, RefreshCcw } from "lucide-react";
 import { useAppDispatch, useToast } from "../../app/hooks";
-import { updateTodo } from "../../features/todos/todoThunks";
+import { updateTodo, completeTodo } from "../../features/todos/todoThunks";
 import { openIFrame } from "../../features/ui/uiSlice";
 import { TODO_STATUS } from "../../utils/todoConstants";
 
@@ -47,33 +47,8 @@ const TodoCard = ({ todo }: Props) => {
     e.stopPropagation();
 
     try {
-      if (todo.seriesDates && todo.seriesDates.length > 0) {
-        const nextDate = getNextSeriesDate(todo.seriesDates, todo.scheduledDate);
-        if (nextDate) {
-          await dispatch(
-            updateTodo({
-              id: todo.id,
-              updates: { scheduledDate: nextDate, status: TODO_STATUS.PENDING },
-            })
-          ).unwrap();
-          toast.success(`Advanced to ${get147Label(todo.seriesDates, nextDate)}`);
-          return;
-        }
-
-        await dispatch(
-          updateTodo({
-            id: todo.id,
-            updates: { status: TODO_STATUS.COMPLETED, apply147Rule: false },
-          })
-        ).unwrap();
-        toast.success("Series completed!");
-        return;
-      }
-
-      await dispatch(
-        updateTodo({ id: todo.id, updates: { status: TODO_STATUS.COMPLETED } })
-      ).unwrap();
-      toast.success("Task completed!");
+      await dispatch(completeTodo(todo.id)).unwrap();
+      toast.success("Done!");
     } catch (err) {
       toast.error("Failed to update task");
     }

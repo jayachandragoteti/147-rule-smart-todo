@@ -44,7 +44,6 @@ export interface Todo {
   notificationSound: NotificationSound;
   order: number;
   assignTo?: string;
-  snoozeCount?: number;
 }
 
 export type CreateTodoFormValues = {

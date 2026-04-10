@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import ProtectedRoute from "./ProtectedRoute";
-import Dashboard from "../pages/Dashboard";
 import Home from "../pages/Home";
 import Today from "../pages/Today";
 import Login from "../pages/Auth/Login";
@@ -21,7 +20,6 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/today" element={<Today />} />
           <Route path="/todos" element={<Todos />} />
           <Route path="/todo/:id" element={<TodoDetails />} />

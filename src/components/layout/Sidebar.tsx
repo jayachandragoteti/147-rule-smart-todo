@@ -1,6 +1,5 @@
 import { NavLink } from "react-router-dom";
 import { 
-  LayoutDashboard, 
   CalendarCheck, 
   ListTodo, 
   PlusCircle, 
@@ -20,7 +19,6 @@ interface SidebarProps {
 
 const navItems = [
   { to: "/",           label: "Home",       icon: Home,          color: "text-blue-500",    group: "Main" },
-  { to: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard, color: "text-amber-500", group: "Main" },
   { to: "/today",      label: "Today",      icon: CalendarCheck, color: "text-emerald-500", group: "Main" },
   { to: "/todos",      label: "All Tasks",  icon: ListTodo,      color: "text-indigo-500",  group: "Tasks" },
   { to: "/create-todo", label: "New Task",  icon: PlusCircle,    color: "text-blue-500",    group: "Tasks" },

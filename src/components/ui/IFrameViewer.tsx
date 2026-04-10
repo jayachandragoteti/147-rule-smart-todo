@@ -1,9 +1,8 @@
-import { X, Minimize2, Maximize2, ExternalLink, Scaling, Sparkles, RefreshCw } from "lucide-react";
+import { X, Minimize2, Maximize2, ExternalLink, Scaling } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { closeIFrame, toggleIFrameMinimize, toggleIFrameMaximize } from "../../features/ui/uiSlice";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { summarizeLink } from "../../services/aiService";
 
 const IFrameViewer = () => {
   const dispatch = useAppDispatch();
@@ -16,11 +15,8 @@ const IFrameViewer = () => {
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef<{ startX: number; startY: number; initX: number; initY: number } | null>(null);
-  const [aiSummary, setAiSummary] = useState<string | null>(null);
-  const [isSummarizing, setIsSummarizing] = useState(false);
   const positionRef = useRef(position);
 
-  // Keep positionRef in sync with state
   positionRef.current = position;
 
   useEffect(() => {
@@ -34,32 +30,14 @@ const IFrameViewer = () => {
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
-      if (!isMaximized && !isMinimized) {
-        setPosition({
-          x: Math.max(10, window.innerWidth - size.width - 20),
-          y: Math.max(10, window.innerHeight - size.height - 20),
-        });
-      }
-      
-      // AI Link Summarization
-      const fetchSummary = async () => {
-        setIsSummarizing(true);
-        setAiSummary(null);
-        try {
-          const summary = await summarizeLink(url, title);
-          setAiSummary(summary);
-        } catch (err) {
-          console.error("AI Summarizer failed:", err);
-        } finally {
-          setIsSummarizing(false);
-        }
-      };
-      fetchSummary();
+    if (isOpen && !isMaximized && !isMinimized) {
+      setPosition({
+        x: Math.max(10, window.innerWidth - size.width - 20),
+        y: Math.max(10, window.innerHeight - size.height - 20),
+      });
     }
-  }, [isOpen, url, title]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ─── Drag handlers using refs (avoids stale closure) ───────────────────────
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDraggingRef.current || !dragStartRef.current) return;
     let newX = dragStartRef.current.initX + (e.clientX - dragStartRef.current.startX);
@@ -112,7 +90,6 @@ const IFrameViewer = () => {
         isMaximized ? "rounded-none sm:rounded-xl" : "rounded-xl"
       } overflow-hidden`}
     >
-      {/* Header */}
       <div
         className={`flex items-center justify-between px-3 py-2 border-b select-none ${THEME_CLASSES.border.base} ${THEME_CLASSES.surface.secondary} ${isMaximized || isMinimized ? "" : "cursor-move"}`}
         onMouseDown={handleMouseDown}
@@ -128,14 +105,12 @@ const IFrameViewer = () => {
           <button
             onClick={(e) => { e.stopPropagation(); dispatch(toggleIFrameMinimize()); }}
             className={`p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${THEME_CLASSES.text.secondary}`}
-            title={isMinimized ? "Restore" : "Minimize"}
           >
             <Minimize2 size={12} />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); dispatch(toggleIFrameMaximize()); }}
             className={`p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${THEME_CLASSES.text.secondary}`}
-            title={isMaximized ? "Restore down" : "Maximize"}
           >
             {isMaximized ? <Scaling size={12} /> : <Maximize2 size={12} />}
           </button>
@@ -148,38 +123,13 @@ const IFrameViewer = () => {
         </div>
       </div>
 
-      {/* Body */}
       {!isMinimized && (
         <div className="flex-1 bg-white relative w-full h-full">
-          {/* Transparent overlay prevents iframe from swallowing drag events */}
           <div
             className="absolute inset-0 z-10 bg-transparent"
             onMouseDown={handleMouseDown}
             style={{ pointerEvents: isDragging ? "auto" : "none" }}
           />
-
-          {/* AI Summary Sidebar/Header overlay */}
-          {(isSummarizing || aiSummary) && (
-            <div className={`absolute bottom-4 left-4 right-4 z-20 p-3 rounded-xl border border-blue-500/20 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-xl transition-all duration-300 ${isMinimized ? "hidden" : "block"}`}>
-               <div className="flex items-start gap-2">
-                 <div className="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                    {isSummarizing ? <RefreshCw size={12} className="text-blue-500 animate-spin" /> : <Sparkles size={12} className="text-blue-500" />}
-                 </div>
-                 <div className="flex-1">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-0.5">AI Link Insights</p>
-                    <p className={`text-[10px] leading-relaxed font-medium ${THEME_CLASSES.text.primary}`}>
-                      {isSummarizing ? "Synthesizing content overview..." : aiSummary}
-                    </p>
-                 </div>
-                 {!isSummarizing && (
-                   <button onClick={() => setAiSummary(null)} className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white">
-                      <X size={10} />
-                   </button>
-                 )}
-               </div>
-            </div>
-          )}
-
           <iframe
             src={url}
             title={title}

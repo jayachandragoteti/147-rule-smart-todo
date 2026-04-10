@@ -7,6 +7,39 @@ import type { NotificationSound } from "../types/todo";
  * No external audio files are needed.
  */
 
+// Shared AudioContext to avoid multiple instances and handle suspended state
+let sharedCtx: AudioContext | null = null;
+
+const getAudioContext = () => {
+  if (typeof window === "undefined") return null as any;
+  if (!sharedCtx) {
+    sharedCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+  return sharedCtx;
+};
+
+/**
+ * Resumes and unlocks the audio context. 
+ * Should be called from a user gesture (click/tap).
+ */
+export const resumeAudioContext = async (): Promise<boolean> => {
+  const ctx = getAudioContext();
+  if (!ctx) return false;
+  
+  if (ctx.state === "suspended") {
+    await ctx.resume();
+  }
+  
+  // Create and play a silent buffer to unlock audio on some mobile browsers
+  const buffer = ctx.createBuffer(1, 1, 22050);
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctx.destination);
+  source.start(0);
+  
+  return ctx.state === "running";
+};
+
 type SoundDef = {
   label: string;
   emoji: string;
@@ -155,11 +188,10 @@ export const playNotificationSound = (
 ): void => {
   if (!enabled) return;
   try {
-    const ctx = new window.AudioContext();
+    const ctx = getAudioContext();
+    // If suspended, it might not play. We hope it was resumed by a prior user gesture.
     const def = SOUNDS[sound] ?? SOUNDS.bell;
     def.play(ctx);
-    // Auto-close context after 3s to free resources
-    setTimeout(() => ctx.close().catch(() => {}), 3000);
   } catch (e) {
     console.warn("Audio not supported or blocked:", e);
   }
@@ -167,7 +199,9 @@ export const playNotificationSound = (
 
 /**
  * Preview a sound (used in settings/form UI)
+ * Also ensures context is resumed.
  */
-export const previewSound = (sound: NotificationSound): void => {
+export const previewSound = async (sound: NotificationSound): Promise<void> => {
+  await resumeAudioContext();
   playNotificationSound(sound, true);
 };

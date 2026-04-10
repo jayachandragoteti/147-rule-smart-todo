@@ -103,3 +103,20 @@ body {
 ::selection {
   @apply bg-blue-500/20;
 }
+
+/* ========================================
+   GLOBAL INPUT FIXES
+   ======================================== */
+
+input,
+textarea,
+select {
+  @apply max-w-full box-border;
+  min-width: 0; /* Ensures flex/grid items can shrink */
+}
+
+/* Fix for Safari/iOS date/time input sizing */
+input[type="date"],
+input[type="time"] {
+  min-height: 2.5rem;
+}

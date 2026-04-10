@@ -10,22 +10,18 @@ import {
   Tag, 
   Link as LinkIcon,
   Clock,
-  Zap,
   Target,
   Repeat,
   Info,
   Edit3,
   RefreshCcw,
   Bell,
-  Sparkles,
-  RefreshCw,
   type LucideIcon
 } from "lucide-react";
-import { summarizeContent } from "../services/aiService";
 import { SOUND_OPTIONS } from "../utils/soundEngine";
 import PageWrapper from "../components/layout/PageWrapper";
 import { useAppSelector, useAppDispatch, useToast } from "../app/hooks";
-import { updateTodo, deleteTodo, createTodo } from "../features/todos/todoThunks";
+import { updateTodo, deleteTodo, createTodo, completeTodo } from "../features/todos/todoThunks";
 import { TODO_STATUS } from "../utils/todoConstants";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { get147Label, getNextSeriesDate } from "../utils/rule147";
@@ -40,39 +36,12 @@ const TodoDetails = () => {
   const dispatch = useAppDispatch();
   const toast = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isAiProcessing, setIsAiProcessing] = useState(false);
-  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
 
   const handleMarkComplete = async () => {
     if (!todo) return;
     try {
-      if (todo.seriesDates && todo.seriesDates.length > 0) {
-        const nextDate = getNextSeriesDate(todo.seriesDates, todo.scheduledDate);
-        if (nextDate) {
-          await dispatch(
-            updateTodo({
-              id: todo.id,
-              updates: { scheduledDate: nextDate, status: TODO_STATUS.PENDING },
-            })
-          ).unwrap();
-          toast.success(`Advanced to ${get147Label(todo.seriesDates, nextDate)}`);
-          return;
-        }
-
-        await dispatch(
-          updateTodo({
-            id: todo.id,
-            updates: { status: TODO_STATUS.COMPLETED, apply147Rule: false },
-          })
-        ).unwrap();
-        toast.success("Series completed!");
-        return;
-      }
-
-      await dispatch(
-        updateTodo({ id: todo.id, updates: { status: TODO_STATUS.COMPLETED } })
-      ).unwrap();
-      toast.success("Task completed!");
+      await dispatch(completeTodo(todo.id)).unwrap();
+      toast.success("Task updated!");
     } catch {
       toast.error("Failed to update task");
     }
@@ -121,49 +90,25 @@ const TodoDetails = () => {
     }
   };
 
-  const handleAIAnalysis = async () => {
-    if (!todo) return;
-    setIsAiProcessing(true);
-    try {
-      const content = `${todo.title}\n${todo.descriptions.join("\n")}`;
-      const analysis = await summarizeContent(content);
-      setAiAnalysis(analysis);
-      toast.success("AI Insights generated");
-    } catch {
-      toast.error("Failed to generate AI insights");
-    } finally {
-      setIsAiProcessing(false);
-    }
-  };
-
   if (!todo) {
     return (
       <PageWrapper>
-        <div
-          className={`border rounded-3xl p-12 text-center shadow-lg ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
-        >
-          <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Info size={40} className="text-gray-400" />
+        <div className={`border rounded-3xl p-12 text-center shadow-lg ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+          <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
+              <Info size={40} />
           </div>
-          <h2 className={`text-2xl font-bold mb-2 ${THEME_CLASSES.text.primary}`}>Task Not Found</h2>
-          <p className={`mb-8 ${THEME_CLASSES.text.tertiary}`}>
-            The requested task could not be located in your database.
-          </p>
-          <button
-            onClick={() => navigate("/todos")}
-            className="px-8 py-3 bg-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
-          >
-            Back to List
-          </button>
+          <h2 className="text-2xl font-bold mb-2">Task Not Found</h2>
+          <p className="mb-8 opacity-50">The requested task could not be located.</p>
+          <button onClick={() => navigate("/todos")} className="px-8 py-3 bg-blue-600 text-white rounded-2xl font-bold">Back to List</button>
         </div>
       </PageWrapper>
     );
   }
 
   const statusConfig: Record<string, { label: string; color: string; icon: LucideIcon }> = {
-    pending: { label: "Pending", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", icon: Clock },
-    inprogress: { label: "Working", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", icon: Zap },
-    completed: { label: "Completed", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", icon: CheckCircle },
+    pending: { label: "Pending", color: "bg-amber-100 text-amber-700", icon: Clock },
+    inprogress: { label: "Working", color: "bg-blue-100 text-blue-700", icon: Repeat },
+    completed: { label: "Completed", color: "bg-emerald-100 text-emerald-700", icon: CheckCircle },
   };
 
   const currentStatus = statusConfig[todo.status] || statusConfig.pending;
@@ -172,14 +117,9 @@ const TodoDetails = () => {
   return (
     <PageWrapper>
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* Top bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 px-2">
-          <button
-            onClick={() => navigate("/todos")}
-            className={`flex items-center gap-2 font-bold text-sm transition-colors hover:text-blue-500 ${THEME_CLASSES.text.tertiary}`}
-          >
-            <ArrowLeft size={18} />
-            BACK TO LIST
+          <button onClick={() => navigate("/todos")} className={`flex items-center gap-2 font-bold text-sm ${THEME_CLASSES.text.tertiary}`}>
+            <ArrowLeft size={18} /> BACK
           </button>
 
           <div className="flex items-center gap-3">
@@ -187,228 +127,90 @@ const TodoDetails = () => {
               <button
                 onClick={handleMarkComplete}
                 disabled={loading}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-50"
+                className="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold active:scale-95 disabled:opacity-50"
               >
-                <CheckCircle size={16} />
-                {todo.seriesDates && todo.seriesDates.length > 0
-                  ? getNextSeriesDate(todo.seriesDates, todo.scheduledDate)
-                    ? "NEXT REVIEW"
-                    : "FINISH SERIES"
-                  : "COMPLETE TASK"}
+                {todo.seriesDates && todo.seriesDates.length > 0 ? "NEXT REVIEW" : "COMPLETE"}
               </button>
             ) : (
-              <button
-                onClick={handleReopenTask}
-                disabled={loading}
-                className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-50"
-              >
-                <RefreshCcw size={16} />
-                REOPEN TASK
-              </button>
+              <button onClick={handleReopenTask} className="px-4 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-bold active:scale-95">REOPEN</button>
             )}
-
-            <button
-              onClick={handleDuplicate}
-              disabled={loading}
-              className={`flex items-center justify-center p-2.5 border rounded-xl transition-all hover:border-blue-500 hover:text-blue-500 active:scale-95 disabled:opacity-50 ${THEME_CLASSES.border.base} ${THEME_CLASSES.surface.card}`}
-              title="Duplicate Task"
-            >
-              <Copy size={16} />
-            </button>
-
-            <button
-              onClick={() => navigate(`/edit-todo/${todo.id}`)}
-              disabled={loading}
-              className={`flex items-center justify-center p-2.5 border rounded-xl transition-all hover:border-blue-500 hover:text-blue-500 active:scale-95 disabled:opacity-50 ${THEME_CLASSES.border.base} ${THEME_CLASSES.surface.card}`}
-              title="Edit Task"
-            >
-              <Edit3 size={16} />
-            </button>
-
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center justify-center p-2.5 text-red-500 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 rounded-xl transition-all hover:bg-red-500 hover:text-white active:scale-95"
-              title="Delete Task"
-            >
-              <Trash2 size={16} />
-            </button>
+            <button onClick={handleDuplicate} className="p-2.5 border rounded-xl"><Copy size={16} /></button>
+            <button onClick={() => navigate(`/edit-todo/${todo.id}`)} className="p-2.5 border rounded-xl"><Edit3 size={16} /></button>
+            <button onClick={() => setShowDeleteConfirm(true)} className="p-2.5 bg-red-50 text-red-500 border border-red-200 rounded-xl"><Trash2 size={16} /></button>
           </div>
         </div>
 
-        {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-            <div
-              className={`max-w-md w-full rounded-[2.5rem] p-10 space-y-6 shadow-2xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
-            >
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-3xl text-red-600">
-                  <AlertTriangle size={32} />
-                </div>
-                <div className="space-y-2">
-                    <h3 className={`text-xl font-bold ${THEME_CLASSES.text.primary}`}>
-                      Delete Task?
-                    </h3>
-                    <p className={`text-sm leading-relaxed ${THEME_CLASSES.text.secondary}`}>
-                      This action is irreversible. The task "{todo.title}" will be permanently removed.
-                    </p>
-                </div>
+            <div className={`max-w-md w-full rounded-3xl p-10 space-y-6 border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+              <div className="text-center space-y-4">
+                <div className="p-4 bg-red-100 text-red-600 rounded-2xl mx-auto w-fit"><AlertTriangle size={32} /></div>
+                <h3 className="text-xl font-bold">Delete Task?</h3>
+                <p className="text-sm opacity-50">Task "{todo.title}" will be permanently removed.</p>
               </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className={`flex-1 px-4 py-3 rounded-xl text-sm font-bold border ${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.primary}`}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={loading}
-                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-sm font-bold shadow-xl shadow-red-500/20"
-                >
-                  {loading ? "DELETING..." : "CONFIRM DELETE"}
-                </button>
+              <div className="flex gap-3">
+                <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3 border rounded-xl font-bold">Cancel</button>
+                <button onClick={handleDelete} className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold">Delete</button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Main Content Container */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Main Section */}
             <div className="lg:col-span-2 space-y-8">
                 <div className={`border rounded-2xl overflow-hidden shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
                     {todo.posterImage && (
-                        <div className="w-full h-96 relative">
-                            <img
-                              src={todo.posterImage}
-                              alt={todo.title}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                            <div className="absolute bottom-6 left-8 right-8">
-                                <h2 className="text-3xl font-black text-white leading-tight drop-shadow-lg">
-                                    {todo.title}
-                                </h2>
-                            </div>
+                        <div className="w-full h-80 relative">
+                            <img src={todo.posterImage} alt={todo.title} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            <h2 className="absolute bottom-6 left-8 text-3xl font-black text-white">{todo.title}</h2>
                         </div>
                     )}
 
-                    <div className="p-10 space-y-10">
-                        {!todo.posterImage && (
-                            <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
-                                {todo.title}
-                            </h2>
-                        )}
+                    <div className="p-8 space-y-8">
+                        {!todo.posterImage && <h2 className="text-3xl font-bold">{todo.title}</h2>}
 
-                        {/* Status Bar */}
-                        <div className="flex gap-3 flex-wrap items-center">
-                            <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-[10px] uppercase tracking-widest ${currentStatus.color}`}>
-                                <currentStatus.icon size={14} />
-                                {currentStatus.label}
-                            </div>
-                            <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold text-[10px] uppercase tracking-widest">
-                                <Target size={14} />
-                                {todo.actionType}
-                            </div>
-                            {todo.apply147Rule && (
-                                <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 font-black text-[10px] uppercase tracking-widest">
-                                    <Repeat size={14} />
-                                    1-4-7 Rule
-                                </div>
-                            )}
-                            {todo.recurrence && todo.recurrence !== 'none' && (
-                                <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 font-black text-[10px] uppercase tracking-widest">
-                                    <Repeat size={14} />
-                                    {todo.recurrence}
-                                </div>
-                            )}
+                        <div className="flex gap-3 flex-wrap">
+                            <div className={`px-4 py-2 rounded-2xl font-black text-[10px] uppercase tracking-widest ${currentStatus.color}`}>{currentStatus.label}</div>
+                            <div className="px-4 py-2 rounded-2xl bg-gray-100 text-gray-600 font-bold text-[10px] uppercase tracking-widest">{todo.category}</div>
+                            {todo.apply147Rule && <div className="px-4 py-2 rounded-2xl bg-indigo-100 text-indigo-700 font-black text-[10px] uppercase tracking-widest">1-4-7 Rule</div>}
                         </div>
 
-                        {/* AI Insights Section */}
-                        {(todo.apply147Rule || aiAnalysis) && (
-                            <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-100 dark:border-blue-800/30 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Sparkles size={16} className="text-blue-500" />
-                                        <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.primary}`}>AI Productivity Assistant</h3>
-                                    </div>
-                                    {!aiAnalysis && (
-                                        <button 
-                                            onClick={handleAIAnalysis}
-                                            disabled={isAiProcessing}
-                                            className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-                                        >
-                                            {isAiProcessing ? <RefreshCw size={10} className="animate-spin" /> : <RefreshCw size={10} />}
-                                            Analyze Task
-                                        </button>
-                                    )}
+                        {todo.descriptions.length > 0 && (
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-black uppercase opacity-40">Notes</h3>
+                                <div className="space-y-4 pl-4 border-l-2 border-blue-500/10">
+                                    {todo.descriptions.map((desc, i) => <p key={i} className="text-lg leading-relaxed">{desc}</p>)}
                                 </div>
-                                {aiAnalysis ? (
-                                    <p className={`text-sm leading-relaxed italic ${THEME_CLASSES.text.secondary}`}>
-                                        "{aiAnalysis}"
-                                    </p>
-                                ) : (
-                                    <p className={`text-[11px] ${THEME_CLASSES.text.tertiary}`}>
-                                        AI can suggest optimized 1-4-7 intervals or summarize your notes for faster revision.
-                                    </p>
-                                )}
-                                {todo.apply147Rule && (
-                                    <div className="flex flex-wrap gap-2 pt-2">
-                                        <button className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700/50 rounded-lg text-[10px] font-bold text-blue-600 hover:shadow-md transition-all">
-                                            🚀 Optimize Intervals
-                                        </button>
-                                        <button className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700/50 rounded-lg text-[10px] font-bold text-blue-600 hover:shadow-md transition-all">
-                                            📋 Generate Summary
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         )}
 
-                        {/* Descriptions */}
-                        {todo.descriptions.length > 0 && (
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                                        <Info size={16} />
-                                    </div>
-                                    <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Notes</h3>
-                                </div>
-                                <div className="space-y-6 pl-11">
-                                    {todo.descriptions.map((desc, index) => (
-                                        <p key={index} className={`text-lg leading-relaxed ${THEME_CLASSES.text.secondary}`}>
-                                            {desc}
-                                        </p>
+                        {todo.galleryImages && todo.galleryImages.length > 0 && (
+                            <div className="space-y-4 pt-6 border-t border-dashed">
+                                <h3 className="text-xs font-black uppercase opacity-40">Gallery</h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {todo.galleryImages.map((img, i) => (
+                                        <div key={i} className="group relative aspect-square rounded-xl overflow-hidden border">
+                                            <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <button onClick={() => window.open(img, '_blank')} className="p-2 bg-white rounded-full text-black shadow-lg">
+                                                    <ExternalLink size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        {/* Links */}
                         {todo.links.length > 0 && (
-                            <div className="space-y-6 pt-10 border-t border-dashed">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
-                                        <LinkIcon size={16} />
-                                    </div>
-                                    <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Links & Assets</h3>
-                                </div>
-                                <div className="grid gap-4 sm:grid-cols-2 pl-11">
-                                    {todo.links.map((link) => (
-                                        <a
-                                          key={link.id}
-                                          href={link.url}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className={`block group/link border p-5 rounded-2xl transition-all hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/5 ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}
-                                        >
-                                          <p className={`font-bold text-sm mb-1 line-clamp-1 ${THEME_CLASSES.text.primary} group-hover/link:text-blue-500`}>
-                                            {link.title}
-                                          </p>
-                                          <p className={`text-[10px] truncate font-mono text-blue-500 opacity-60`}>
-                                            {link.url}
-                                          </p>
+                            <div className="space-y-4 pt-6 border-t border-dashed">
+                                <h3 className="text-xs font-black uppercase opacity-40">Links</h3>
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    {todo.links.map(link => (
+                                        <a key={link.id} href={link.url} target="_blank" rel="noreferrer" className="block p-4 border rounded-xl hover:border-blue-500 transition-all">
+                                            <p className="font-bold text-sm truncate">{link.title}</p>
+                                            <p className="text-[10px] font-mono text-blue-500 truncate">{link.url}</p>
                                         </a>
                                     ))}
                                 </div>
@@ -418,112 +220,46 @@ const TodoDetails = () => {
                 </div>
             </div>
 
-            {/* Right Side Column */}
             <div className="space-y-8">
-                {/* Timeline Panel */}
                 <div className={`border rounded-2xl p-6 shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-600">
-                            <Calendar size={20} />
-                        </div>
-                        <h3 className={`text-xs font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Task Timeline</h3>
-                    </div>
-
-                    <div className="space-y-8">
-                        <div className="relative pl-6 border-l-2 border-dashed border-gray-100 dark:border-gray-800">
-                            <div className="absolute -left-[9px] top-0 w-4 h-4 bg-blue-600 rounded-full border-4 border-white dark:border-gray-900 shadow-md shadow-blue-500/50" />
-                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Scheduled Date</p>
-                            <p className={`text-base font-bold ${THEME_CLASSES.text.primary}`}>
-                                {new Date(todo.scheduledDate).toLocaleDateString("en-US", {
-                                    month: "long",
-                                    day: "numeric",
-                                    year: "numeric"
-                                })}
-                            </p>
-                            <p className={`text-xs ${THEME_CLASSES.text.secondary}`}>
-                                {new Date(todo.scheduledDate).toLocaleDateString("en-US", { weekday: "long" })}
-                            </p>
+                    <h3 className="text-xs font-black uppercase opacity-40 mb-6 flex items-center gap-2"><Calendar size={14} /> Timeline</h3>
+                    <div className="space-y-6">
+                        <div className="pl-4 border-l-2 border-blue-500">
+                            <p className="text-[10px] font-black uppercase text-blue-600 mb-1">Scheduled Date</p>
+                            <p className="text-base font-bold">{formatDate(todo.scheduledDate)}</p>
                         </div>
 
                         {todo.seriesDates && todo.seriesDates.length > 0 && (
-                            <div className="space-y-4">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 flex items-center gap-2">
-                                    <Repeat size={10} /> 1-4-7 Review Schedule
-                                </p>
-                                <div className="grid grid-cols-1 gap-2">
+                            <div className="space-y-2">
+                                <p className="text-[10px] font-black uppercase opacity-40">Review Schedule</p>
+                                <div className="space-y-2">
                                   {todo.seriesDates.map((d, i) => {
-                                    const isCurrentDate =
-                                      new Date(d).toISOString() ===
-                                      new Date(todo.scheduledDate).toISOString();
+                                    const isCurrent = new Date(d).toISOString() === new Date(todo.scheduledDate).toISOString();
                                     return (
-                                      <div
-                                        key={i}
-                                        className={`px-4 py-3 rounded-2xl border transition-all flex items-center justify-between ${
-                                          isCurrentDate
-                                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500"
-                                            : `${THEME_CLASSES.border.base} ${THEME_CLASSES.text.secondary} opacity-50`
-                                        }`}
-                                      >
+                                      <div key={i} className={`p-3 rounded-xl border text-xs flex justify-between items-center ${isCurrent ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md ring-1 ring-blue-500' : 'opacity-40'}`}>
                                         <div className="flex flex-col">
-                                            <span className="font-bold text-xs">{formatDate(d)}</span>
-                                            <span className="uppercase tracking-widest text-[8px] font-black opacity-60">
-                                              {get147Label(todo.seriesDates!, d)}
-                                            </span>
+                                          <span className="font-bold">{formatDate(d)}</span>
+                                          <span className="uppercase text-[8px] font-black opacity-60">{get147Label(todo.seriesDates!, d)}</span>
                                         </div>
-                                        {isCurrentDate && <CheckCircle size={14} className="text-blue-500" />}
+                                        {isCurrent && <CheckCircle size={14} />}
                                       </div>
                                     );
                                   })}
                                 </div>
                             </div>
                         )}
-                        
-                        <div className="pt-6 border-t border-dashed">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-2">
-                                    <Tag size={12} className={THEME_CLASSES.text.tertiary} />
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Category</span>
-                                </div>
-                                <span className={`text-xs font-bold text-blue-500`}>{todo.category || 'Standard'}</span>
-                            </div>
-                            
-                            {todo.assignTo && (
-                              <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                      <div className={`w-3 h-3 rounded-full bg-blue-500/20 flex items-center justify-center`} />
-                                      <span className={`text-[10px] font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Assigned To</span>
-                                  </div>
-                                  <span className={`text-xs font-bold text-purple-500`}>{todo.assignTo}</span>
-                              </div>
-                            )}
-
-                            {/* Notification Sound */}
-                            {todo.reminderEnabled && (() => {
-                              const soundOpt = SOUND_OPTIONS.find(s => s.value === (todo.notificationSound ?? "bell"));
-                              return (
-                                <div className="flex items-center justify-between pt-3 border-t border-dashed dark:border-gray-800">
-                                  <div className="flex items-center gap-2">
-                                    <Bell size={12} className="text-amber-500" />
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Alert Sound</span>
-                                  </div>
-                                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
-                                    {soundOpt?.emoji} {soundOpt?.label ?? "Bell"}
-                                  </span>
-                                </div>
-                              );
-                            })()}
-                        </div>
                     </div>
                 </div>
 
-                {/* Meta data */}
-                <div className={`p-6 text-center space-y-2 opacity-50`}>
-                    <p className={`text-[9px] font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>Synced ID</p>
-                    <p className={`text-[9px] font-mono break-all font-medium ${THEME_CLASSES.text.tertiary}`}>{todo.id}</p>
-                    <p className={`text-[9px] pt-4`}>
-                        CREATED ON {new Date(todo.createdAt).toLocaleDateString()} AT {new Date(todo.createdAt).toLocaleTimeString()}
-                    </p>
-                </div>
+                {todo.reminderEnabled && (
+                  <div className={`p-6 border rounded-2xl ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+                     <h3 className="text-xs font-black uppercase opacity-40 mb-4 flex items-center gap-2"><Bell size={14} /> Alert</h3>
+                     <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold">{SOUND_OPTIONS.find(s => s.value === todo.notificationSound)?.label || "Bell"}</span>
+                        <span className="text-lg">{SOUND_OPTIONS.find(s => s.value === todo.notificationSound)?.emoji || "🔔"}</span>
+                     </div>
+                  </div>
+                )}
             </div>
         </div>
       </div>

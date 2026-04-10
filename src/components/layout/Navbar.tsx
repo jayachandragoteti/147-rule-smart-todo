@@ -1,4 +1,4 @@
-import { LogOut, LogIn, Menu, Zap, User } from "lucide-react";
+import { LogIn, Menu, Zap, User } from "lucide-react";
 import { useAppDispatch, useAppSelector, useToast } from "../../app/hooks";
 import { logoutThunk } from "../../features/auth/authThunks";
 import { Link } from "react-router-dom";
@@ -13,7 +13,6 @@ interface NavbarProps {
 }
 
 const Navbar = ({ onMenuClick }: NavbarProps) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dispatch = useAppDispatch();
   const toast = useToast();
   const { user } = useAppSelector((state: RootState) => state.auth);
@@ -44,12 +43,6 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
         {/* Desktop Nav Links */}
         <nav className="hidden md:flex items-center gap-1 ml-4">
           <Link 
-            to="/dashboard" 
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:bg-gray-100 dark:hover:bg-gray-800 ${THEME_CLASSES.text.secondary}`}
-          >
-            Dashboard
-          </Link>
-          <Link 
             to="/today" 
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:bg-gray-100 dark:hover:bg-gray-800 ${THEME_CLASSES.text.secondary}`}
           >
@@ -66,31 +59,18 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
 
         {user ? (
           <div className="flex items-center gap-3 pl-2">
-            <div className="flex flex-col items-end hidden md:flex">
-                <span className={`text-xs font-semibold leading-none ${THEME_CLASSES.text.primary}`}>{user.displayName?.split(' ')[0] || user.email?.split('@')[0]}</span>
-                <span className={`text-[10px] font-medium opacity-50 ${THEME_CLASSES.text.tertiary}`}>My Account</span>
-            </div>
-            <div className="relative cursor-pointer" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-                <div className="w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-xl flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden hover:border-blue-500/50 transition-colors">
-                    <User size={16} className="opacity-60" />
-                </div>
-                
-                {/* Dropdown Action */}
-                <div className={`absolute top-full right-0 mt-2 w-48 transition-all transform z-50 ${isDropdownOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-1'}`}>
-                    <div className={`p-2 rounded-2xl border shadow-2xl ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-                        <button
-                            onClick={() => {
-                                dispatch(logoutThunk());
-                                toast.success("Successfully logged out.");
-                            }}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 text-red-600 transition-colors text-sm font-bold"
-                        >
-                            <LogOut size={16} />
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <Link 
+              to="/profile" 
+              className="flex items-center gap-3 group transition-all"
+            >
+              <div className="flex flex-col items-end hidden md:flex">
+                  <span className={`text-xs font-semibold leading-none group-hover:text-blue-500 transition-colors ${THEME_CLASSES.text.primary}`}>{user.displayName?.split(' ')[0] || user.email?.split('@')[0]}</span>
+                  <span className={`text-[10px] font-medium opacity-50 ${THEME_CLASSES.text.tertiary}`}>My Account</span>
+              </div>
+              <div className="w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-xl flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden group-hover:border-blue-500 transition-colors">
+                  <User size={16} className="opacity-60" />
+              </div>
+            </Link>
           </div>
         ) : (
           <Link

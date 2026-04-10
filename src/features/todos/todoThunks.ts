@@ -6,7 +6,9 @@ import {
   updateTodoInFirestore,
   deleteTodoFromFirestore,
 } from "../../services/todoService";
-import { generate147Dates } from "../../utils/rule147";
+import { generate147Dates, getNextSeriesDate } from "../../utils/rule147";
+import { getNextRecurrenceDate } from "../../utils/dateUtils";
+import { TODO_STATUS } from "../../utils/todoConstants";
 import type { RootState } from "../../app/store";
 
 type NewTodo = Omit<Todo, "id" | "createdAt">;
@@ -100,6 +102,51 @@ export const deleteTodo = createAsyncThunk<
     return todoId;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to delete todo";
+    return thunkAPI.rejectWithValue(message);
+  }
+});
+
+export const completeTodo = createAsyncThunk<
+  Todo,
+  string,
+  { state: RootState }
+>("todo/completeTodo", async (todoId, thunkAPI) => {
+  try {
+    const uid = getUidOrReject(thunkAPI);
+    const state = thunkAPI.getState() as RootState;
+    const todo = state.todo.todos.find(t => t.id === todoId);
+    
+    if (!todo) throw new Error("Todo not found");
+
+    const updates: any = {};
+
+    // 1. Handle 1-4-7 Rule Series
+    if (todo.apply147Rule && todo.seriesDates && todo.seriesDates.length > 0) {
+      const nextDate = getNextSeriesDate(todo.seriesDates, todo.scheduledDate);
+      if (nextDate) {
+        updates.scheduledDate = nextDate;
+        updates.status = TODO_STATUS.PENDING;
+        return await updateTodoInFirestore(uid, todoId, updates);
+      }
+      // If series finished, complete it
+      updates.status = TODO_STATUS.COMPLETED;
+      updates.apply147Rule = false;
+    } 
+    // 2. Handle Recurrence (Daily, Weekly, Monthly)
+    else if (todo.recurrence && todo.recurrence !== "none") {
+      const nextDate = getNextRecurrenceDate(todo.scheduledDate, todo.recurrence as any);
+      updates.scheduledDate = nextDate;
+      updates.status = TODO_STATUS.PENDING;
+      return await updateTodoInFirestore(uid, todoId, updates);
+    } 
+    // 3. Normal Completion
+    else {
+      updates.status = TODO_STATUS.COMPLETED;
+    }
+
+    return await updateTodoInFirestore(uid, todoId, updates);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to complete todo";
     return thunkAPI.rejectWithValue(message);
   }
 });
