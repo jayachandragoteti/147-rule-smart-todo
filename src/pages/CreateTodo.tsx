@@ -5,13 +5,13 @@ import { createTodo, updateTodo } from "../features/todos/todoThunks";
 import { TODO_ACTION_TYPE, TODO_STATUS } from "../utils/todoConstants";
 import { VALIDATION, FORM_MESSAGES } from "../utils/constants";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
-import type { CreateTodoFormValues, TodoPriority, TodoRecurrence, NotificationSound } from "../types/todo";
+import type { CreateTodoFormValues, TodoPriority, TodoRecurrence, NotificationSound, TodoStatus, TodoActionType } from "../types/todo";
 import { SOUND_OPTIONS, previewSound } from "../utils/soundEngine";
 import { useState, useEffect, type ReactNode } from "react";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { generate147Dates, RULE_147_LABELS } from "../utils/rule147";
 import { 
-  Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, Volume2,
+  Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, Volume2, ImageIcon,
   type LucideIcon 
 } from "lucide-react";
 

@@ -48,7 +48,7 @@ const TodoCard = ({ todo }: Props) => {
     try {
       await dispatch(completeTodo(todo.id)).unwrap();
       toast.success("Done!");
-    } catch (err) {
+    } catch {
       toast.error("Failed to update task");
     }
   };

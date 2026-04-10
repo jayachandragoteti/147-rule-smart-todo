@@ -21,7 +21,7 @@ import { fetchNotes } from "../features/notes/notesSlice";
 import { fetchJournalEntries } from "../features/journal/journalSlice";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { isTodayDate } from "../utils/dateUtils";
-import type { Todo } from "../types/todo";
+import type { Todo, TodoStatus } from "../types/todo";
 import { format, isAfter } from "date-fns";
 import { get147Label } from "../utils/rule147";
 import StatsSection from "../components/dashboard/StatsSection";

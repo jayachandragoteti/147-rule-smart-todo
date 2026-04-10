@@ -12,6 +12,7 @@ import {
   Info,
   Edit3,
   Bell,
+  ExternalLink,
   type LucideIcon
 } from "lucide-react";
 import { SOUND_OPTIONS } from "../utils/soundEngine";
