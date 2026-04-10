@@ -156,53 +156,58 @@ const Home = () => {
   return (
     <PageWrapper>
       <div className="space-y-8 pb-12">
-        {/* Quick Capture & Today's Progress */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className={`lg:col-span-2 p-6 rounded-2xl border flex flex-col md:flex-row items-center gap-4 transition-all hover:shadow-lg ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-             <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 shrink-0">
-                <Plus size={24} />
-             </div>
-             <div className="flex-1 w-full space-y-1">
-                <h3 className={`text-sm font-bold ${THEME_CLASSES.text.primary}`}>Quick Task Capture</h3>
-                <div className="relative group">
-                  <input 
-                    type="text"
-                    placeholder="What needs to be done?"
-                    value={quickTitle}
-                    onChange={(e) => setQuickTitle(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleQuickAdd()}
-                    className={`w-full bg-transparent border-none p-0 focus:ring-0 text-lg placeholder:opacity-30 ${THEME_CLASSES.text.primary}`}
-                  />
-                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 transition-all duration-300 group-focus-within:w-full" />
-                </div>
-             </div>
-             <button 
-               onClick={handleQuickAdd}
-               disabled={!quickTitle.trim()}
-               className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-blue-500/20"
-             >
-               Add Task
-             </button>
-          </div>
-
-          <div className={`p-6 rounded-2xl border flex flex-col justify-center gap-3 ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
-            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-              <span className={THEME_CLASSES.text.tertiary}>Daily Completion</span>
-              <span className={THEME_CLASSES.text.primary}>{stats.progressPercent}%</span>
+        {/* Greeting Header */}
+        <div className="space-y-2">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className={`text-xs font-semibold uppercase tracking-widest opacity-40 ${THEME_CLASSES.text.tertiary}`}>
+                {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+              </p>
+              <h1 className={`text-2xl font-black tracking-tight leading-tight ${THEME_CLASSES.text.primary}`}>
+                {(() => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; })()},{" "}
+                <span className="text-blue-500">{user?.displayName?.split(" ")[0] || user?.email?.split("@")[0] || "there"}</span> 👋
+              </h1>
             </div>
-            <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-               <div 
-                 className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-1000 ease-out"
-                 style={{ width: `${stats.progressPercent}%` }}
-               />
-            </div>
-            <p className={`text-[10px] italic ${THEME_CLASSES.text.tertiary}`}>
-              {stats.progressPercent >= 100 ? "Amazing work today! 👏" : "Keep going, you're doing great!"}
-            </p>
+            <span className={`text-2xl font-black tabular-nums ${THEME_CLASSES.text.primary}`}>{stats.progressPercent}%</span>
           </div>
+          {/* Today's Progress Bar */}
+          <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-1000 ease-out"
+              style={{ width: `${stats.progressPercent}%` }}
+            />
+          </div>
+          <p className={`text-[10px] font-medium opacity-40 ${THEME_CLASSES.text.tertiary}`}>
+            {stats.completedToday} of {stats.todayTotal} tasks done today
+          </p>
         </div>
 
-        {/* Main Grid */}
+        {/* Quick Task Capture — compact single row */}
+        <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+          <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
+            <Plus size={16} />
+          </div>
+          <div className="relative flex-1 group">
+            <input
+              type="text"
+              placeholder="Capture a task quickly…"
+              value={quickTitle}
+              onChange={(e) => setQuickTitle(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleQuickAdd()}
+              className={`w-full bg-transparent border-none p-0 focus:ring-0 text-sm placeholder:opacity-30 ${THEME_CLASSES.text.primary}`}
+            />
+            <div className="absolute bottom-0 left-0 w-0 h-px bg-blue-500 transition-all duration-300 group-focus-within:w-full" />
+          </div>
+          <button
+            onClick={handleQuickAdd}
+            disabled={!quickTitle.trim()}
+            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white rounded-xl font-bold text-xs transition-all active:scale-95 shadow-md shadow-blue-500/20 shrink-0"
+          >
+            Add
+          </button>
+        </div>
+
+        {/* Main Grid — Today's Tasks + Notifications */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Today's Tasks */}
           <div className={`lg:col-span-2 border rounded-2xl shadow-sm overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
@@ -246,23 +251,8 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Side Panel */}
+          {/* Notifications */}
           <div className="space-y-6">
-             <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Tasks", value: todos.length, icon: Target, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
-                { label: "Completed", value: todos.filter(t => t.status === "completed").length, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-              ].map(({ label, value, icon: Icon, color, bg }) => (
-                <div key={label} className={`p-4 rounded-xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`text-[9px] font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>{label}</span>
-                    <div className={`p-1.5 rounded-lg ${bg}`}><Icon size={12} className={color} /></div>
-                  </div>
-                  <p className={`text-xl font-black ${THEME_CLASSES.text.primary}`}>{value}</p>
-                </div>
-              ))}
-            </div>
-
             {upcomingReminders.length > 0 && (
               <div className={`border rounded-2xl shadow-sm overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
                 <div className={`flex items-center gap-2 px-4 py-3 border-b ${THEME_CLASSES.border.base}`}>
@@ -282,7 +272,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Bottom Modules */}
+        {/* Bottom Modules — Learning, Heartspace, Notes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
            {/* 1-4-7 Learning */}
            <div className={`border rounded-2xl shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
@@ -345,6 +335,22 @@ const Home = () => {
                ) : <p className="text-xs text-center py-4 opacity-50">No notes captured.</p>}
              </div>
            </div>
+        </div>
+
+        {/* Task Summary — bottom of page */}
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: "Total Tasks", value: todos.length, icon: Target, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
+            { label: "Completed", value: todos.filter(t => t.status === "completed").length, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
+          ].map(({ label, value, icon: Icon, color, bg }) => (
+            <div key={label} className={`p-4 rounded-xl border flex items-center gap-3 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+              <div className={`p-2 rounded-xl ${bg}`}><Icon size={14} className={color} /></div>
+              <div>
+                <p className={`text-xs font-bold uppercase tracking-widest opacity-50 ${THEME_CLASSES.text.tertiary}`}>{label}</p>
+                <p className={`text-xl font-black leading-tight ${THEME_CLASSES.text.primary}`}>{value}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </PageWrapper>
