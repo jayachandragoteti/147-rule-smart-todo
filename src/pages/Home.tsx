@@ -24,7 +24,6 @@ import { isTodayDate } from "../utils/dateUtils";
 import type { Todo, TodoStatus } from "../types/todo";
 import { format, isAfter } from "date-fns";
 import { get147Label } from "../utils/rule147";
-import StatsSection from "../components/dashboard/StatsSection";
 
 const Home = () => {
   const dispatch = useAppDispatch();
@@ -157,9 +156,6 @@ const Home = () => {
   return (
     <PageWrapper>
       <div className="space-y-8 pb-12">
-        {/* Statistics Grid */}
-        <StatsSection todos={todos} />
-
         {/* Quick Capture & Today's Progress */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className={`lg:col-span-2 p-6 rounded-2xl border flex flex-col md:flex-row items-center gap-4 transition-all hover:shadow-lg ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
