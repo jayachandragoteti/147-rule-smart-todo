@@ -7,14 +7,10 @@ import {
   AlertTriangle, 
   Copy, 
   Calendar, 
-  Tag, 
-  Link as LinkIcon,
   Clock,
-  Target,
   Repeat,
   Info,
   Edit3,
-  RefreshCcw,
   Bell,
   type LucideIcon
 } from "lucide-react";
@@ -24,7 +20,7 @@ import { useAppSelector, useAppDispatch, useToast } from "../app/hooks";
 import { updateTodo, deleteTodo, createTodo, completeTodo } from "../features/todos/todoThunks";
 import { TODO_STATUS } from "../utils/todoConstants";
 import { THEME_CLASSES } from "../utils/themeUtils";
-import { get147Label, getNextSeriesDate } from "../utils/rule147";
+import { get147Label } from "../utils/rule147";
 import { formatDate } from "../utils/dateUtils";
 
 const TodoDetails = () => {
@@ -54,7 +50,7 @@ const TodoDetails = () => {
         updateTodo({ id: todo.id, updates: { status: TODO_STATUS.PENDING } })
       ).unwrap();
       toast.success("Task reopened successfully!");
-    } catch (err) {
+    } catch {
       toast.error("Failed to reopen task");
     }
   };
@@ -62,7 +58,7 @@ const TodoDetails = () => {
   const handleDuplicate = async () => {
     if (!todo) return;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // Re-add logic or similar
       const { id: _, createdAt: __, ...reproducedData } = todo;
       const today = new Date().toISOString();
       await dispatch(

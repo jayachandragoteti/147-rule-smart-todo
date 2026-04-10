@@ -44,6 +44,13 @@ const Todos = () => {
 
   // Local state for instant drag/drop feedback before server sync
   const [optimisticTodos, setOptimisticTodos] = useState<Todo[] | null>(null);
+  const [prevTodos, setPrevTodos] = useState(todos);
+
+  // Sync optimistic state when Redux update arrives
+  if (todos !== prevTodos) {
+    setPrevTodos(todos);
+    setOptimisticTodos(null);
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -55,10 +62,6 @@ const Todos = () => {
       dispatch(fetchTodos());
     }
   }, [isAuthChecked, dispatch]);
-
-  useEffect(() => {
-     setOptimisticTodos(null); // Reset when Redux updates
-  }, [todos]);
 
   const filteredAndSortedTodos = useMemo(() => {
     let result = [...(optimisticTodos || todos)];

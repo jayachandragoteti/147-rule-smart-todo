@@ -11,7 +11,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { generate147Dates, RULE_147_LABELS } from "../utils/rule147";
 import { 
-  Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, ImageIcon, Volume2,
+  Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, Volume2,
   type LucideIcon 
 } from "lucide-react";
 
@@ -118,6 +118,7 @@ const CreateTodo = () => {
   };
 
   const onSubmit = async (data: CreateTodoFormValues) => {
+    const timestamp = Date.now();
     const todoData = {
         scheduledDate: data.scheduledDate,
         scheduledTime: data.scheduledTime,
@@ -129,7 +130,7 @@ const CreateTodo = () => {
         links: data.links
           .filter((l) => l.title.trim() && l.url.trim())
           .map((link, index) => ({
-            id: `${Date.now()}-${index}`,
+            id: `${timestamp}-${index}`,
             title: link.title.trim(),
             url: link.url.trim(),
           })),
@@ -153,13 +154,13 @@ const CreateTodo = () => {
        }
     } else {
        // Create mode
-       const createPayload = {
-         ...todoData,
-         galleryImages: [],
-         status: TODO_STATUS.PENDING as any,
-         actionType: TODO_ACTION_TYPE.LEARNING as any,
-         order: Date.now(),
-       };
+        const createPayload = {
+          ...todoData,
+          galleryImages: [],
+          status: TODO_STATUS.PENDING as TodoStatus,
+          actionType: TODO_ACTION_TYPE.LEARNING as TodoActionType,
+          order: timestamp,
+        };
        const resultAction = await dispatch(createTodo(createPayload));
        if (createTodo.fulfilled.match(resultAction)) {
          toast.success("Task created successfully!");

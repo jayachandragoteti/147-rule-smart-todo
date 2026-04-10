@@ -7,14 +7,11 @@ import {
   BookOpen,
   StickyNote,
   Bell,
-  Zap,
+  RefreshCw,
   Target,
-  TrendingUp,
   ArrowRight,
   Calendar,
-  ExternalLink,
   ChevronRight,
-  Star,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
@@ -24,8 +21,7 @@ import { fetchNotes } from "../features/notes/notesSlice";
 import { fetchJournalEntries } from "../features/journal/journalSlice";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { isTodayDate } from "../utils/dateUtils";
-import { openIFrame } from "../features/ui/uiSlice";
-import type { TodoStatus, Todo } from "../types/todo";
+import type { Todo } from "../types/todo";
 import { format, isAfter } from "date-fns";
 import { get147Label } from "../utils/rule147";
 import StatsSection from "../components/dashboard/StatsSection";
@@ -52,14 +48,6 @@ const Home = () => {
       dispatch(fetchJournalEntries(user.uid));
     }
   }, [isAuthChecked, user, dispatch]);
-
-  // Greeting
-  const greeting = useMemo(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
-  }, []);
 
   // Stats
   const stats = useMemo(() => {
@@ -125,7 +113,7 @@ const Home = () => {
     setUpdatingId(id);
     try {
       if (currentStatus === "completed") {
-        await dispatch(updateTodo({ id, updates: { status: "pending" as any } })).unwrap();
+        await dispatch(updateTodo({ id, updates: { status: "pending" as TodoStatus } })).unwrap();
         toast.success("Task reopened");
       } else {
         await dispatch(completeTodo(id)).unwrap();

@@ -1,13 +1,12 @@
 import { Link } from "react-router-dom";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import type { Todo, TodoRecurrence } from "../../types/todo";
-import { get147Label, getNextSeriesDate } from "../../utils/rule147";
+import { get147Label } from "../../utils/rule147";
 import { formatDate } from "../../utils/dateUtils";
 import { ExternalLink, CheckCircle, Clock, Link as LinkIcon, AlertCircle, RefreshCcw } from "lucide-react";
 import { useAppDispatch, useToast } from "../../app/hooks";
-import { updateTodo, completeTodo } from "../../features/todos/todoThunks";
+import { completeTodo } from "../../features/todos/todoThunks";
 import { openIFrame } from "../../features/ui/uiSlice";
-import { TODO_STATUS } from "../../utils/todoConstants";
 
 interface Props {
   todo: Todo;

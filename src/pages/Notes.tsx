@@ -1,13 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Search,
   Plus,
   Pin,
   PinOff,
   Trash2,
   Edit3,
-  StickyNote,
-  Tag,
   X,
   Check,
 } from "lucide-react";

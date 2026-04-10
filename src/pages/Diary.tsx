@@ -11,6 +11,7 @@ import {
   Heart,
   Link as LinkIcon,
   Trash2,
+  BookOpen
 } from "lucide-react";
 import { 
   format, 
@@ -22,12 +23,11 @@ import {
   subMonths, 
   startOfWeek,
 } from "date-fns";
-import { BookOpen } from "lucide-react";
 import PageWrapper from "../components/layout/PageWrapper";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import { fetchJournalEntries, addJournalEntry, updateJournalEntry, deleteJournalEntry } from "../features/journal/journalSlice";
 import { THEME_CLASSES } from "../utils/themeUtils";
-import type { JournalEntry } from "../types";
+import type { JournalEntry, CreateJournalFormValues } from "../types";
 
 const Diary = () => {
   const dispatch = useAppDispatch();
@@ -77,7 +77,7 @@ const Diary = () => {
         return;
     }
     
-    const data: any = {
+    const data: CreateJournalFormValues = {
       title: title || "New Entry",
       content,
       date: selectedDate.toISOString(),

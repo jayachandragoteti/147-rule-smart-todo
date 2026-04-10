@@ -1,20 +1,16 @@
 import { LogIn, Menu, Zap, User } from "lucide-react";
-import { useAppDispatch, useAppSelector, useToast } from "../../app/hooks";
-import { logoutThunk } from "../../features/auth/authThunks";
+import { useAppSelector } from "../../app/hooks";
 import { Link } from "react-router-dom";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 
 import type { RootState } from "../../app/store";
 
-import { useState } from "react";
 
 interface NavbarProps {
   onMenuClick?: () => void;
 }
 
 const Navbar = ({ onMenuClick }: NavbarProps) => {
-  const dispatch = useAppDispatch();
-  const toast = useToast();
   const { user } = useAppSelector((state: RootState) => state.auth);
 
   return (

@@ -24,21 +24,19 @@ export default defineConfig([
     },
 
     rules: {
-      // ✅ Allow 'any' type
+      // 🛠 Catch unused variables and imports
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true 
+      }],
+
+      // 🎨 Relax rules for type flexibility
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
 
-      // ✅ Allow unused variables
-      '@typescript-eslint/no-unused-vars': 'off',
-
-      // ✅ Allow empty functions
-      '@typescript-eslint/no-empty-function': 'off',
-
-      // ✅ Allow require() in TS
-      '@typescript-eslint/no-var-requires': 'off',
-
-      // Optional: Relax general JS strictness
-      'no-console': 'off',
-      'no-debugger': 'off',
+      // 🧹 Remove debugger in production
+      'no-debugger': 'error',
     },
   },
 ])

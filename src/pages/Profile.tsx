@@ -49,7 +49,7 @@ const Profile = () => {
         email: user.email || ""
       });
       toast.success("Profile updated successfully");
-    } catch (err) {
+    } catch {
       toast.error("Failed to update profile");
     } finally {
       setSaving(false);

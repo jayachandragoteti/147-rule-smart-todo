@@ -10,10 +10,11 @@ import type { NotificationSound } from "../types/todo";
 // Shared AudioContext to avoid multiple instances and handle suspended state
 let sharedCtx: AudioContext | null = null;
 
-const getAudioContext = () => {
-  if (typeof window === "undefined") return null as any;
+const getAudioContext = (): AudioContext => {
+  if (typeof window === "undefined") return null as unknown as AudioContext;
   if (!sharedCtx) {
-    sharedCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    sharedCtx = new AudioContextClass();
   }
   return sharedCtx;
 };
