@@ -13,7 +13,7 @@ const Footer = () => {
 
         <div className="flex flex-col items-center space-y-2 text-center">
             <div className={`text-sm font-black uppercase tracking-[0.3em] ${THEME_CLASSES.text.primary}`}>
-                147 MISSION CONTROL
+                137 MISSION CONTROL
             </div>
             <div className={`text-[10px] font-medium tracking-widest opacity-40 uppercase ${THEME_CLASSES.text.tertiary}`}>
                 Syncing Human Potential with Digital Precision

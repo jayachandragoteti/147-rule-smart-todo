@@ -9,7 +9,7 @@ import type { CreateTodoFormValues, TodoPriority, TodoRecurrence, NotificationSo
 import { SOUND_OPTIONS, previewSound } from "../utils/soundEngine";
 import { useState, useEffect, type ReactNode } from "react";
 import { THEME_CLASSES } from "../utils/themeUtils";
-import { generate147Dates, RULE_147_LABELS } from "../utils/rule147";
+import { generate137Dates, RULE_137_LABELS } from "../utils/rule137";
 import { 
   Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, Volume2, ImageIcon,
   type LucideIcon 
@@ -43,7 +43,7 @@ const CreateTodo = () => {
       descriptions: [{ value: "" }],
       posterImage: "",
       links: [],
-      apply147Rule: false,
+      apply137Rule: false,
       priority: "medium",
       category: "Personal",
       recurrence: "none",
@@ -74,7 +74,7 @@ const CreateTodo = () => {
         descriptions: editModeTodo.descriptions?.length ? editModeTodo.descriptions.map(d => ({ value: d })) : [{ value: "" }],
         posterImage: editModeTodo.posterImage || "",
         links: editModeTodo.links || [],
-        apply147Rule: editModeTodo.apply147Rule || false,
+        apply137Rule: editModeTodo.apply137Rule || false,
         priority: editModeTodo.priority || "medium",
         category: editModeTodo.category || "Personal",
         recurrence: editModeTodo.recurrence || "none",
@@ -134,7 +134,7 @@ const CreateTodo = () => {
             title: link.title.trim(),
             url: link.url.trim(),
           })),
-        apply147Rule: data.apply147Rule,
+        apply137Rule: data.apply137Rule,
         priority: data.priority,
         category: data.category,
         recurrence: data.recurrence,
@@ -172,15 +172,15 @@ const CreateTodo = () => {
   };
 
   const scheduledDateValue = useWatch({ control, name: "scheduledDate" });
-  const apply147Value = useWatch({ control, name: "apply147Rule" });
+  const apply137Value = useWatch({ control, name: "apply137Rule" });
   const recurrenceValue = useWatch({ control, name: "recurrence" });
 
   let previewDates: { label: string; date: string }[] = [];
-  if (apply147Value && scheduledDateValue) {
+  if (apply137Value && scheduledDateValue) {
     const base = new Date(scheduledDateValue);
-    const dates = generate147Dates(base);
+    const dates = generate137Dates(base);
     previewDates = dates.map((d, i) => ({
-      label: RULE_147_LABELS[i],
+      label: RULE_137_LABELS[i],
       date: new Date(d).toDateString(),
     }));
   }
@@ -425,26 +425,26 @@ const CreateTodo = () => {
                   </div>
                 </div>
 
-                {/* 147 Rule */}
+                {/* 137 Rule */}
                 <div className="space-y-3">
                   <button
                     type="button"
-                    onClick={() => setValue("apply147Rule", !apply147Value)}
+                    onClick={() => setValue("apply137Rule", !apply137Value)}
                     className={`w-full p-3 rounded-xl border text-left transition-all flex items-start gap-3 ${
-                      apply147Value ? "bg-purple-100/50 dark:bg-purple-900/10 border-purple-500 ring-1 ring-purple-500" : THEME_CLASSES.border.base
+                      apply137Value ? "bg-purple-100/50 dark:bg-purple-900/10 border-purple-500 ring-1 ring-purple-500" : THEME_CLASSES.border.base
                     }`}
                   >
-                    <div className={`p-2 rounded-lg ${apply147Value ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                    <div className={`p-2 rounded-lg ${apply137Value ? 'bg-purple-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>
                       <Repeat size={16} />
                     </div>
                     <div className="flex-1">
-                      <p className={`text-sm font-bold ${apply147Value ? 'text-purple-700 dark:text-purple-300' : THEME_CLASSES.text.primary}`}>1-4-7 Rule</p>
+                      <p className={`text-sm font-bold ${apply137Value ? 'text-purple-700 dark:text-purple-300' : THEME_CLASSES.text.primary}`}>1-3-7 Rule</p>
                       <p className={`text-[10px] leading-tight ${THEME_CLASSES.text.tertiary}`}>Spaced repetition for retention.</p>
                     </div>
                   </button>
 
-                  {/* 147 Previews */}
-                  {apply147Value && previewDates.length > 0 && (
+                  {/* 137 Previews */}
+                  {apply137Value && previewDates.length > 0 && (
                     <div className="px-2 pt-1 space-y-2">
                       <div className="grid gap-2">
                         {previewDates.map((pd, i) => (

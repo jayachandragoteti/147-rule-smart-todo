@@ -64,7 +64,7 @@ const Todos = () => {
   }, [isAuthChecked, dispatch]);
 
   const filteredAndSortedTodos = useMemo(() => {
-    let result = [...(optimisticTodos || todos)].filter(t => !t.apply147Rule);
+    let result = [...(optimisticTodos || todos)].filter(t => !t.apply137Rule);
 
     if (statusFilter !== "all") {
       result = result.filter((t) => t.status === statusFilter);

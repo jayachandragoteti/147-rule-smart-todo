@@ -6,7 +6,7 @@ import {
   updateTodoInFirestore,
   deleteTodoFromFirestore,
 } from "../../services/todoService";
-import { generate147Dates, getNextSeriesDate } from "../../utils/rule147";
+import { generate137Dates, getNextSeriesDate } from "../../utils/rule137";
 import { getNextRecurrenceDate } from "../../utils/dateUtils";
 import { TODO_STATUS } from "../../utils/todoConstants";
 import type { RootState } from "../../app/store";
@@ -50,8 +50,8 @@ export const createTodo = createAsyncThunk<
     const baseDate = new Date(todoData.scheduledDate);
     const baseISODate = baseDate.toISOString();
 
-    if (todoData.apply147Rule) {
-      const seriesDates = generate147Dates(baseDate);
+    if (todoData.apply137Rule) {
+      const seriesDates = generate137Dates(baseDate);
       todosToCreate.push({
         ...todoData,
         scheduledDate: baseISODate,
@@ -79,7 +79,7 @@ export const createTodo = createAsyncThunk<
 
 export const updateTodo = createAsyncThunk<
   Todo,
-  { id: string; updates: Partial<NewTodo & { status?: string; apply147Rule?: boolean }> },
+  { id: string; updates: Partial<NewTodo & { status?: string; apply137Rule?: boolean }> },
   { state: RootState }
 >("todo/updateTodo", async ({ id, updates }, thunkAPI) => {
   try {
@@ -120,8 +120,8 @@ export const completeTodo = createAsyncThunk<
 
     const updates: any = {};
 
-    // 1. Handle 1-4-7 Rule Series
-    if (todo.apply147Rule && todo.seriesDates && todo.seriesDates.length > 0) {
+    // 1. Handle 1-3-7 Rule Series
+    if (todo.apply137Rule && todo.seriesDates && todo.seriesDates.length > 0) {
       const nextDate = getNextSeriesDate(todo.seriesDates, todo.scheduledDate);
       if (nextDate) {
         updates.scheduledDate = nextDate;
@@ -130,7 +130,7 @@ export const completeTodo = createAsyncThunk<
       }
       // If series finished, complete it
       updates.status = TODO_STATUS.COMPLETED;
-      updates.apply147Rule = false;
+      updates.apply137Rule = false;
     } 
     // 2. Handle Recurrence (Daily, Weekly, Monthly)
     else if (todo.recurrence && todo.recurrence !== "none") {

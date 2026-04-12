@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Bell, LogOut, Check, Save } from "lucide-react";
+import { User, Bell, LogOut, Check, Save, RefreshCw } from "lucide-react";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import PageWrapper from "../components/layout/PageWrapper";
 import { THEME_CLASSES } from "../utils/themeUtils";
@@ -156,6 +156,32 @@ const Profile = () => {
                     className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${notifications ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'}`}
                   >
                     <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${notifications ? 'translate-x-6' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+              </section>
+
+              {/* App Version & Refresh */}
+              <section className="pt-4 border-t border-dashed space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <RefreshCw size={16} className="text-emerald-500" />
+                  <h4 className={`text-xs font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>App Version</h4>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/20">
+                  <div className="space-y-0.5">
+                    <p className={`text-sm font-bold ${THEME_CLASSES.text.primary}`}>Fetch Latest Updates</p>
+                    <p className={`text-[10px] ${THEME_CLASSES.text.tertiary}`}>Refresh to load newly deployed changes or clear cache.</p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                        window.caches?.keys().then(keys => {
+                            keys.forEach(key => caches.delete(key));
+                        });
+                        window.location.reload();
+                    }}
+                    className="px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 dark:text-emerald-400 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all active:scale-95 whitespace-nowrap"
+                  >
+                    Update App
                   </button>
                 </div>
               </section>

@@ -50,7 +50,7 @@ export const createTodoInFirestore = async (
 export const updateTodoInFirestore = async (
   uid: string,
   id: string,
-  updates: Partial<NewTodo & { status?: string; apply147Rule?: boolean }>
+  updates: Partial<NewTodo & { status?: string; apply137Rule?: boolean }>
 ): Promise<Todo> => {
   const docRef = doc(db, "users", uid, "todos", id);
   await updateDoc(docRef, updates as Record<string, unknown>);

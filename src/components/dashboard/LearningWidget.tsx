@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { RefreshCw, ChevronRight } from "lucide-react";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import type { Todo } from "../../types/todo";
-import { get147Label } from "../../utils/rule147";
+import { get137Label } from "../../utils/rule137";
 
 interface Props {
   learningDueToday: Todo[];
@@ -30,7 +30,7 @@ const LearningWidget = ({ learningDueToday }: Props) => {
                   <p className="text-xs font-bold truncate">{todo.title}</p>
                   {todo.seriesDates && (
                     <p className="text-[9px] font-black text-purple-500 mt-1 uppercase tracking-tighter">
-                      {get147Label(todo.seriesDates, todo.scheduledDate)}
+                      {get137Label(todo.seriesDates, todo.scheduledDate)}
                     </p>
                   )}
                 </Link>

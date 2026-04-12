@@ -32,7 +32,7 @@ export interface Todo {
   actionType: TodoActionType;
   priority: TodoPriority;
   category: string;
-  apply147Rule: boolean;
+  apply137Rule: boolean;
   recurrence: TodoRecurrence;
   seriesDates?: string[];
   createdAt: string;
@@ -53,7 +53,7 @@ export type CreateTodoFormValues = {
   descriptions: { value: string }[];
   posterImage: string;
   links: { title: string; url: string }[];
-  apply147Rule: boolean;
+  apply137Rule: boolean;
   priority: TodoPriority;
   category: string;
   recurrence: TodoRecurrence;

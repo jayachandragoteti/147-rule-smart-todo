@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import type { Todo, TodoRecurrence } from "../../types/todo";
-import { get147Label } from "../../utils/rule147";
+import { get137Label } from "../../utils/rule137";
 import { formatDate } from "../../utils/dateUtils";
 import { ExternalLink, CheckCircle, Clock, Link as LinkIcon, AlertCircle, RefreshCcw } from "lucide-react";
 import { useAppDispatch, useToast } from "../../app/hooks";
@@ -38,7 +38,7 @@ const TodoCard = ({ todo }: Props) => {
 
   const seriesLabel =
     todo.seriesDates && todo.seriesDates.length > 0
-      ? get147Label(todo.seriesDates, todo.scheduledDate)
+      ? get137Label(todo.seriesDates, todo.scheduledDate)
       : null;
 
   const handleQuickComplete = async (e: React.MouseEvent) => {
@@ -128,10 +128,10 @@ const TodoCard = ({ todo }: Props) => {
             <Clock size={12} />
             <span>{formatDate(todo.scheduledDate)} {todo.scheduledTime || ""}</span>
           </div>
-          {todo.apply147Rule && (
+          {todo.apply137Rule && (
               <>
                 <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
-                <span className="text-purple-600 font-bold">1-4-7 Rule</span>
+                <span className="text-purple-600 font-bold">1-3-7 Rule</span>
               </>
           )}
         </div>

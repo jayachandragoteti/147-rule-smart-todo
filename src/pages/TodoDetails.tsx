@@ -21,7 +21,7 @@ import { useAppSelector, useAppDispatch, useToast } from "../app/hooks";
 import { updateTodo, deleteTodo, createTodo, completeTodo } from "../features/todos/todoThunks";
 import { TODO_STATUS } from "../utils/todoConstants";
 import { THEME_CLASSES } from "../utils/themeUtils";
-import { get147Label } from "../utils/rule147";
+import { get137Label } from "../utils/rule137";
 import { formatDate } from "../utils/dateUtils";
 
 const TodoDetails = () => {
@@ -170,7 +170,7 @@ const TodoDetails = () => {
                         <div className="flex gap-3 flex-wrap">
                             <div className={`px-4 py-2 rounded-2xl font-black text-[10px] uppercase tracking-widest ${currentStatus.color}`}>{currentStatus.label}</div>
                             <div className="px-4 py-2 rounded-2xl bg-gray-100 text-gray-600 font-bold text-[10px] uppercase tracking-widest">{todo.category}</div>
-                            {todo.apply147Rule && <div className="px-4 py-2 rounded-2xl bg-indigo-100 text-indigo-700 font-black text-[10px] uppercase tracking-widest">1-4-7 Rule</div>}
+                            {todo.apply137Rule && <div className="px-4 py-2 rounded-2xl bg-indigo-100 text-indigo-700 font-black text-[10px] uppercase tracking-widest">1-3-7 Rule</div>}
                         </div>
 
                         {todo.descriptions.length > 0 && (
@@ -236,7 +236,7 @@ const TodoDetails = () => {
                                       <div key={i} className={`p-3 rounded-xl border text-xs flex justify-between items-center ${isCurrent ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md ring-1 ring-blue-500' : 'opacity-40'}`}>
                                         <div className="flex flex-col">
                                           <span className="font-bold">{formatDate(d)}</span>
-                                          <span className="uppercase text-[8px] font-black opacity-60">{get147Label(todo.seriesDates!, d)}</span>
+                                          <span className="uppercase text-[8px] font-black opacity-60">{get137Label(todo.seriesDates!, d)}</span>
                                         </div>
                                         {isCurrent && <CheckCircle size={14} />}
                                       </div>

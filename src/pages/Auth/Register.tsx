@@ -120,7 +120,7 @@ const Register = () => {
             </Link>
           </p>
           <div className={`text-[9px] font-bold uppercase tracking-wider opacity-30 ${THEME_CLASSES.text.tertiary}`}>
-            Secure Signup // 147 Smart Todo
+            Secure Signup // 137 Smart Todo
           </div>
         </div>
       </div>
