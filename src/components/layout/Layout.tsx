@@ -5,6 +5,7 @@ import { THEME_CLASSES } from "../../utils/themeUtils";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
+import NotificationManager from "../notifications/NotificationManager";
 
 const Layout = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +15,7 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen flex flex-col transition-colors duration-300">
+      <NotificationManager />
       <Navbar onMenuClick={openSidebar} />
 
       <div className="flex flex-1 items-start">
