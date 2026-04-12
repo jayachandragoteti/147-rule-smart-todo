@@ -4,17 +4,16 @@ import {
   Circle,
   Clock,
   Plus,
-  BookOpen,
-  StickyNote,
-  Bell,
-  RefreshCw,
   Target,
   ArrowRight,
   Calendar,
-  ChevronRight,
+  Bell,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
+import NotesWidget from "../components/dashboard/NotesWidget";
+import HeartspaceWidget from "../components/dashboard/HeartspaceWidget";
+import LearningWidget from "../components/dashboard/LearningWidget";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import { fetchTodos, updateTodo, completeTodo } from "../features/todos/todoThunks";
 import { fetchNotes } from "../features/notes/notesSlice";
@@ -22,8 +21,11 @@ import { fetchJournalEntries } from "../features/journal/journalSlice";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { isTodayDate } from "../utils/dateUtils";
 import type { Todo, TodoStatus } from "../types/todo";
-import { format, isAfter } from "date-fns";
-import { get147Label } from "../utils/rule147";
+import { isAfter } from "date-fns";
+import {
+  selectTaskStats,
+  selectTodayTasks,
+} from "../features/todos/todoSelectors";
 
 const Home = () => {
   const dispatch = useAppDispatch();
@@ -49,28 +51,11 @@ const Home = () => {
   }, [isAuthChecked, user, dispatch]);
 
   // Stats
-  const stats = useMemo(() => {
-    const todayTasks = todos.filter((t) => {
-      if (t.seriesDates?.length) return t.seriesDates.some((d) => isTodayDate(d));
-      return isTodayDate(t.scheduledDate);
-    });
-    const completedToday = todayTasks.filter((t) => t.status === "completed").length;
-    const pendingToday = todayTasks.filter((t) => t.status !== "completed").length;
-    const learningTasks = todos.filter((t) => t.apply147Rule && t.status !== "completed").length;
-    const progressPercent = todayTasks.length > 0
-      ? Math.round((completedToday / todayTasks.length) * 100)
-      : 0;
-    return { todayTotal: todayTasks.length, completedToday, pendingToday, learningTasks, progressPercent };
-  }, [todos]);
+  const stats = useAppSelector(selectTaskStats);
 
   // Today's tasks (limit 5)
-  const todayTodos = useMemo(() =>
-    todos.filter((t) => {
-      if (t.seriesDates?.length) return t.seriesDates.some((d) => isTodayDate(d));
-      return isTodayDate(t.scheduledDate);
-    }).slice(0, 5),
-    [todos]
-  );
+  const todayTasks = useAppSelector(selectTodayTasks);
+  const todayTodos = useMemo(() => todayTasks.slice(0, 5), [todayTasks]);
 
   // Upcoming reminders
   const upcomingReminders = useMemo(() => {
@@ -207,6 +192,9 @@ const Home = () => {
           </button>
         </div>
 
+        {/* Top Area — Notes (Moved from bottom) */}
+        <NotesWidget latestNote={latestNote} />
+
         {/* Main Grid — Today's Tasks + Notifications */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Today's Tasks */}
@@ -272,70 +260,8 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Bottom Modules — Learning, Heartspace, Notes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-           {/* 1-4-7 Learning */}
-           <div className={`border rounded-2xl shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-               <div className="flex items-center gap-2">
-                 <RefreshCw size={16} className="text-purple-500" />
-                 <h3 className="font-bold text-sm">Learning Intervals</h3>
-               </div>
-               <Link to="/todos" className="text-[10px] font-bold text-purple-600 flex items-center gap-1">All <ChevronRight size={10} /></Link>
-             </div>
-             <div className="p-4 space-y-3">
-                {learningDueToday.length === 0 ? (
-                  <p className="text-xs text-center py-4 opacity-50">No learning tasks due</p>
-                ) : (
-                  learningDueToday.map(todo => (
-                    <Link key={todo.id} to={`/todo/${todo.id}`} className={`block p-3 rounded-xl border ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base} hover:border-purple-300 transition-colors`}>
-                      <p className="text-xs font-bold truncate">{todo.title}</p>
-                      {todo.seriesDates && <p className="text-[9px] font-black text-purple-500 mt-1 uppercase tracking-tighter">{get147Label(todo.seriesDates, todo.scheduledDate)}</p>}
-                    </Link>
-                  ))
-                )}
-             </div>
-           </div>
-
-           {/* Heartspace */}
-           <div className={`border rounded-2xl shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-               <div className="flex items-center gap-2">
-                 <BookOpen size={16} className="text-rose-500" />
-                 <h3 className="font-bold text-sm">Heartspace</h3>
-               </div>
-               <Link to="/heartspace" className="text-[10px] font-bold text-rose-600 flex items-center gap-1">Open <ChevronRight size={10} /></Link>
-             </div>
-             <div className="p-5">
-               {latestDiaryEntry ? (
-                 <div className="space-y-2">
-                    <p className="text-[10px] font-bold opacity-40">{format(new Date(latestDiaryEntry.date), "MMMM d")}</p>
-                    <p className="text-sm font-bold truncate">{latestDiaryEntry.title}</p>
-                    <p className="text-xs line-clamp-2 opacity-60 leading-relaxed">{latestDiaryEntry.content}</p>
-                 </div>
-               ) : <p className="text-xs text-center py-4 opacity-50">Your sanctuary is quiet.</p>}
-             </div>
-           </div>
-
-           {/* Notes */}
-           <div className={`border rounded-2xl shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-               <div className="flex items-center gap-2">
-                 <StickyNote size={16} className="text-amber-500" />
-                 <h3 className="font-bold text-sm">Notes</h3>
-               </div>
-               <Link to="/notes" className="text-[10px] font-bold text-amber-600 flex items-center gap-1">All <ChevronRight size={10} /></Link>
-             </div>
-             <div className="p-5">
-               {latestNote ? (
-                 <div className="space-y-2">
-                    <p className="text-sm font-bold truncate">{latestNote.title}</p>
-                    <p className="text-xs line-clamp-2 opacity-60 leading-relaxed">{latestNote.content}</p>
-                 </div>
-               ) : <p className="text-xs text-center py-4 opacity-50">No notes captured.</p>}
-             </div>
-           </div>
-        </div>
+        {/* Middle Modules — Learning */}
+        <LearningWidget learningDueToday={learningDueToday} />
 
         {/* Task Summary — bottom of page */}
         <div className="grid grid-cols-2 gap-3">
@@ -352,6 +278,9 @@ const Home = () => {
             </div>
           ))}
         </div>
+
+        {/* Heartspace - Moved to Bottom Area */}
+        <HeartspaceWidget latestDiaryEntry={latestDiaryEntry} />
       </div>
     </PageWrapper>
   );

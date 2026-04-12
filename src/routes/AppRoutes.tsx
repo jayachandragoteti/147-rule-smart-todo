@@ -12,6 +12,7 @@ import Diary from "../pages/Diary";
 import Notes from "../pages/Notes";
 import Profile from "../pages/Profile";
 import NotFound from "../pages/NotFound";
+import Learning from "../pages/Learning";
 
 const AppRoutes = () => {
   return (
@@ -22,6 +23,7 @@ const AppRoutes = () => {
           <Route path="/" element={<Home />} />
           <Route path="/today" element={<Today />} />
           <Route path="/todos" element={<Todos />} />
+          <Route path="/learning" element={<Learning />} />
           <Route path="/todo/:id" element={<TodoDetails />} />
           <Route path="/create-todo" element={<CreateTodo />} />
           <Route path="/edit-todo/:id" element={<CreateTodo />} />

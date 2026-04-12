@@ -28,7 +28,7 @@ type FilterStatus = TodoStatus | "all";
 type SortField = "createdAt" | "scheduledDate" | "title" | "order";
 type SortOrder = "asc" | "desc";
 
-const Todos = () => {
+const Learning = () => {
   const dispatch = useAppDispatch();
   const toast = useToast();
   const todos = useAppSelector((state) => state.todo.todos);
@@ -64,7 +64,7 @@ const Todos = () => {
   }, [isAuthChecked, dispatch]);
 
   const filteredAndSortedTodos = useMemo(() => {
-    let result = [...(optimisticTodos || todos)].filter(t => !t.apply147Rule);
+    let result = [...(optimisticTodos || todos)].filter(t => t.apply147Rule);
 
     if (statusFilter !== "all") {
       result = result.filter((t) => t.status === statusFilter);
@@ -150,10 +150,10 @@ const Todos = () => {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="space-y-1">
             <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
-                All Tasks
+                Learning Intervals
             </h2>
             <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>
-                Browse, filter, and manage all your tasks in one place.
+                Manage your 1-4-7 spaced repetition learning tasks here.
             </p>
         </div>
 
@@ -345,4 +345,4 @@ const Todos = () => {
   );
 };
 
-export default Todos;
+export default Learning;

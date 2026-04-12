@@ -8,6 +8,7 @@ import {
   Shield,
   StickyNote,
   Home,
+  BrainCircuit,
 } from "lucide-react";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import { useAppSelector } from "../../app/hooks";
@@ -21,9 +22,10 @@ const navItems = [
   { to: "/",           label: "Home",       icon: Home,          color: "text-blue-500",    group: "Main" },
   { to: "/today",      label: "Today",      icon: CalendarCheck, color: "text-emerald-500", group: "Main" },
   { to: "/todos",      label: "All Tasks",  icon: ListTodo,      color: "text-indigo-500",  group: "Tasks" },
+  { to: "/learning",   label: "Learning",   icon: BrainCircuit,  color: "text-purple-500",  group: "Tasks" },
   { to: "/create-todo", label: "New Task",  icon: PlusCircle,    color: "text-blue-500",    group: "Tasks" },
-  { to: "/heartspace", label: "Heartspace", icon: Heart,         color: "text-rose-400",    group: "Personal" },
   { to: "/notes",      label: "Notes",      icon: StickyNote,    color: "text-amber-500",   group: "Personal" },
+  { to: "/heartspace", label: "Heartspace", icon: Heart,         color: "text-rose-400",    group: "Personal" },
   { to: "/profile",    label: "Settings",   icon: Settings,      color: "text-blue-400",    group: "Personal" },
 ];
 
