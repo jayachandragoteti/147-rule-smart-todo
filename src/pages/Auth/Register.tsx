@@ -41,7 +41,7 @@ const Register = () => {
                 Create Account
             </h2>
             <p className={`text-sm font-medium ${THEME_CLASSES.text.tertiary}`}>
-                Start your journey with Smart Todo.
+                Start your journey with TodoSpace.
             </p>
           </div>
         </div>
@@ -120,7 +120,7 @@ const Register = () => {
             </Link>
           </p>
           <div className={`text-[9px] font-bold uppercase tracking-wider opacity-30 ${THEME_CLASSES.text.tertiary}`}>
-            Secure Signup // 137 Smart Todo
+            Secure Signup // TodoSpace
           </div>
         </div>
       </div>

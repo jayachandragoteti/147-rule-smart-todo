@@ -126,7 +126,7 @@ const Login = () => {
             </Link>
           </p>
           <div className={`text-[9px] font-medium uppercase tracking-wider opacity-30 ${THEME_CLASSES.text.tertiary}`}>
-            Secure · Smart Todo
+            Secure · TodoSpace
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
-# 🛠️ Developer Documentation: 147-Rule Smart Todo
+# 🛠️ Developer Documentation: TodoSpace
 
-This document outlines the architecture, data flow, and development standards for the 147-Rule Smart Todo platform.
+This document outlines the architecture, data flow, and development standards for the TodoSpace platform.
 
 ## 🏗️ Architecture Overview
 

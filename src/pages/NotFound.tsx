@@ -45,7 +45,7 @@ const NotFound = () => {
 
         <div className="pt-8 border-t border-dashed border-gray-100 dark:border-gray-800">
             <p className={`text-[10px] uppercase font-black tracking-[0.3em] opacity-30 ${THEME_CLASSES.text.tertiary}`}>
-                Error 404 // Smart Todo
+                Error 404 // TodoSpace
             </p>
         </div>
       </div>

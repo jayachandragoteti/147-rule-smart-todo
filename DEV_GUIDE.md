@@ -1,6 +1,6 @@
 # 🛠️ Developer Guide
 
-This guide provides an overview of the technical architecture and development workflow for the 147-Rule Smart Todo platform.
+This guide provides an overview of the technical architecture and development workflow for the TodoSpace platform.
 
 ## 🚀 Tech Stack
 - **Frontend**: React 19 (Vite)

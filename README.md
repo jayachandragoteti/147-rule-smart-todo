@@ -1,4 +1,4 @@
-# 📋 147-Rule Smart Todo
+# 📋 TodoSpace
 
 A high-performance personal productivity platform designed for focus, long-term retention, and efficient daily management. This application integrates task management, journaling, and quick capture notes using the scientifically-backed **1-4-7 Spaced Repetition Rule**.
 
