@@ -13,12 +13,13 @@ import {
   Edit3,
   Bell,
   ExternalLink,
+  Circle,
   type LucideIcon
 } from "lucide-react";
 import { SOUND_OPTIONS } from "../utils/soundEngine";
 import PageWrapper from "../components/layout/PageWrapper";
 import { useAppSelector, useAppDispatch, useToast } from "../app/hooks";
-import { updateTodo, deleteTodo, createTodo, completeTodo } from "../features/todos/todoThunks";
+import { updateTodo, deleteTodo, createTodo, completeTodo, toggleSubtaskStatus } from "../features/todos/todoThunks";
 import { TODO_STATUS } from "../utils/todoConstants";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { get137Label } from "../utils/rule137";
@@ -44,11 +45,21 @@ const TodoDetails = () => {
     }
   };
 
+  const handleToggleSubtask = async (subtaskId: string) => {
+    if (!todo) return;
+    try {
+      await dispatch(toggleSubtaskStatus({ todoId: todo.id, subtaskId })).unwrap();
+    } catch {
+      toast.error("Failed to toggle subtask");
+    }
+  };
+
   const handleReopenTask = async () => {
     if (!todo) return;
     try {
+      const resetSubtasks = todo.subtasks?.map(st => ({ ...st, completed: false })) || [];
       await dispatch(
-        updateTodo({ id: todo.id, updates: { status: TODO_STATUS.PENDING } })
+        updateTodo({ id: todo.id, updates: { status: TODO_STATUS.PENDING, subtasks: resetSubtasks } })
       ).unwrap();
       toast.success("Task reopened successfully!");
     } catch {
@@ -173,11 +184,35 @@ const TodoDetails = () => {
                             {todo.apply137Rule && <div className="px-4 py-2 rounded-2xl bg-indigo-100 text-indigo-700 font-black text-[10px] uppercase tracking-widest">1-3-7 Rule</div>}
                         </div>
 
-                        {todo.descriptions.length > 0 && (
+                        {todo.descriptions && todo.descriptions.length > 0 && (
                             <div className="space-y-4">
                                 <h3 className="text-xs font-black uppercase opacity-40">Notes</h3>
                                 <div className="space-y-4 pl-4 border-l-2 border-blue-500/10">
                                     {todo.descriptions.map((desc, i) => <p key={i} className="text-lg leading-relaxed">{desc}</p>)}
+                                </div>
+                            </div>
+                        )}
+
+                        {todo.subtasks && todo.subtasks.length > 0 && (
+                            <div className="space-y-4 pt-6 border-t border-dashed">
+                                <h3 className="text-xs font-black uppercase opacity-40 flex items-center justify-between">
+                                  <span>Subtasks</span>
+                                  <span>{todo.subtasks.filter(st => st.completed).length} / {todo.subtasks.length}</span>
+                                </h3>
+                                <div className="space-y-2">
+                                    {todo.subtasks.map((subtask) => (
+                                        <div key={subtask.id} className={`flex items-center gap-4 p-4 border rounded-xl transition-all hover:bg-gray-50 dark:hover:bg-gray-800/20 ${subtask.completed ? 'opacity-60 bg-gray-50/50 dark:bg-gray-800/10' : THEME_CLASSES.surface.card}`}>
+                                            <button
+                                                onClick={() => handleToggleSubtask(subtask.id)}
+                                                className={`flex-shrink-0 transition-colors ${subtask.completed ? "text-emerald-500" : "text-gray-300 hover:text-emerald-500"}`}
+                                            >
+                                                {subtask.completed ? <CheckCircle size={20} /> : <Circle size={20} />}
+                                            </button>
+                                            <span className={`text-base font-medium flex-1 ${subtask.completed ? "line-through " + THEME_CLASSES.text.tertiary : THEME_CLASSES.text.primary}`}>
+                                                {subtask.title}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}

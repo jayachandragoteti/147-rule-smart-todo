@@ -143,10 +143,67 @@ export const completeTodo = createAsyncThunk<
     else {
       updates.status = TODO_STATUS.COMPLETED;
     }
+    
+    // 4. Handle subtasks (mark all as completed)
+    if (todo.subtasks && todo.subtasks.length > 0) {
+      const updatedSubtasks = todo.subtasks.map(st => ({ ...st, completed: true }));
+      updates.subtasks = updatedSubtasks;
+    }
 
     return await updateTodoInFirestore(uid, todoId, updates);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to complete todo";
+    return thunkAPI.rejectWithValue(message);
+  }
+});
+
+export const toggleSubtaskStatus = createAsyncThunk<
+  Todo,
+  { todoId: string; subtaskId: string },
+  { state: RootState }
+>("todo/toggleSubtaskStatus", async ({ todoId, subtaskId }, thunkAPI) => {
+  try {
+    const uid = getUidOrReject(thunkAPI);
+    const state = thunkAPI.getState() as RootState;
+    const todo = state.todo.todos.find(t => t.id === todoId);
+    
+    if (!todo) throw new Error("Todo not found");
+
+    const subtasks = todo.subtasks || [];
+    const updatedSubtasks = subtasks.map(st => 
+      st.id === subtaskId ? { ...st, completed: !st.completed } : st
+    );
+
+    const allSubtasksCompleted = updatedSubtasks.length > 0 && updatedSubtasks.every(st => st.completed);
+    const anySubtaskUnchecked = updatedSubtasks.some(st => !st.completed);
+
+    const updates: any = { subtasks: updatedSubtasks };
+
+    if (allSubtasksCompleted && todo.status !== TODO_STATUS.COMPLETED) {
+       // Re-use complete logic
+       if (todo.apply137Rule && todo.seriesDates && todo.seriesDates.length > 0) {
+         const nextDate = getNextSeriesDate(todo.seriesDates, todo.scheduledDate);
+         if (nextDate) {
+           updates.scheduledDate = nextDate;
+           updates.status = TODO_STATUS.PENDING;
+         } else {
+           updates.status = TODO_STATUS.COMPLETED;
+           updates.apply137Rule = false;
+         }
+       } else if (todo.recurrence && todo.recurrence !== "none") {
+         const nextDate = getNextRecurrenceDate(todo.scheduledDate, todo.recurrence as any);
+         updates.scheduledDate = nextDate;
+         updates.status = TODO_STATUS.PENDING;
+       } else {
+         updates.status = TODO_STATUS.COMPLETED;
+       }
+    } else if (anySubtaskUnchecked && todo.status === TODO_STATUS.COMPLETED) {
+       updates.status = TODO_STATUS.PENDING;
+    }
+
+    return await updateTodoInFirestore(uid, todoId, updates);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to toggle subtask";
     return thunkAPI.rejectWithValue(message);
   }
 });

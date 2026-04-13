@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { Todo } from "../../types/todo";
-import { createTodo, deleteTodo, fetchTodos, updateTodo } from "./todoThunks";
+import { createTodo, deleteTodo, fetchTodos, updateTodo, completeTodo, toggleSubtaskStatus } from "./todoThunks";
 
 interface TodoState {
   todos: Todo[];
@@ -68,6 +68,38 @@ export const todoSlice = createSlice({
       .addCase(updateTodo.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as string) || "Failed to update todo";
+      })
+
+      // ── Complete todo ──
+      .addCase(completeTodo.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(completeTodo.fulfilled, (state, action) => {
+        state.loading = false;
+        state.todos = state.todos.map((t) =>
+          t.id === action.payload.id ? action.payload : t
+        );
+      })
+      .addCase(completeTodo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || "Failed to complete todo";
+      })
+
+      // ── Toggle subtask status ──
+      .addCase(toggleSubtaskStatus.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(toggleSubtaskStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        state.todos = state.todos.map((t) =>
+          t.id === action.payload.id ? action.payload : t
+        );
+      })
+      .addCase(toggleSubtaskStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || "Failed to toggle subtask status";
       })
 
       // ── Delete todo ──

@@ -128,6 +128,14 @@ const TodoCard = ({ todo }: Props) => {
             <Clock size={12} />
             <span>{formatDate(todo.scheduledDate)} {todo.scheduledTime || ""}</span>
           </div>
+          {todo.subtasks && todo.subtasks.length > 0 && (
+              <>
+                <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
+                <span className="font-bold">
+                  {todo.subtasks.filter(st => st.completed).length}/{todo.subtasks.length} Subtasks
+                </span>
+              </>
+          )}
           {todo.apply137Rule && (
               <>
                 <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full" />

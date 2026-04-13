@@ -15,6 +15,12 @@ export type NotificationSound =
   | "melody"   // Short 4-note melody — pleasant
   | "buzz";    // Buzz / vibration feel — low rumble
 
+export interface Subtask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface TodoLink {
   id: string;
   title: string;
@@ -25,6 +31,7 @@ export interface Todo {
   id: string;
   title: string;
   descriptions: string[];
+  subtasks?: Subtask[];
   posterImage?: string;
   galleryImages: string[];
   links: TodoLink[];
@@ -51,6 +58,7 @@ export type CreateTodoFormValues = {
   scheduledTime?: string;
   title: string;
   descriptions: { value: string }[];
+  subtasks: { id: string; title: string; completed: boolean }[];
   posterImage: string;
   links: { title: string; url: string }[];
   apply137Rule: boolean;

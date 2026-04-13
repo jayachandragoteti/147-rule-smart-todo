@@ -41,6 +41,7 @@ const CreateTodo = () => {
       scheduledTime: "09:00",
       title: "",
       descriptions: [{ value: "" }],
+      subtasks: [],
       posterImage: "",
       links: [],
       apply137Rule: false,
@@ -60,6 +61,12 @@ const CreateTodo = () => {
   } = useFieldArray({ control, name: "descriptions" });
 
   const {
+    fields: subtaskFields,
+    append: appendSubtask,
+    remove: removeSubtask,
+  } = useFieldArray({ control, name: "subtasks" });
+
+  const {
     fields: linkFields,
     append: appendLink,
     remove: removeLink,
@@ -72,6 +79,7 @@ const CreateTodo = () => {
         scheduledTime: editModeTodo.scheduledTime || "",
         title: editModeTodo.title || "",
         descriptions: editModeTodo.descriptions?.length ? editModeTodo.descriptions.map(d => ({ value: d })) : [{ value: "" }],
+        subtasks: editModeTodo.subtasks || [],
         posterImage: editModeTodo.posterImage || "",
         links: editModeTodo.links || [],
         apply137Rule: editModeTodo.apply137Rule || false,
@@ -126,6 +134,11 @@ const CreateTodo = () => {
         descriptions: data.descriptions
           .map((d) => d.value)
           .filter((d) => d.trim() !== ""),
+        subtasks: data.subtasks.filter((st) => st.title.trim() !== "").map((st, index) => ({
+             id: st.id || `${timestamp}-sub-${index}`,
+             title: st.title.trim(),
+             completed: st.completed || false
+        })),
         posterImage: data.posterImage && data.posterImage.trim() ? data.posterImage.trim() : "",
         links: data.links
           .filter((l) => l.title.trim() && l.url.trim())
@@ -288,6 +301,37 @@ const CreateTodo = () => {
                 className={`flex items-center gap-2 text-sm font-semibold py-2 px-1 hover:gap-3 transition-all ${THEME_CLASSES.text.link}`}
               >
                 <Plus size={16} /> Add Another Point
+              </button>
+            </div>
+
+            {/* Subtasks */}
+            <div className="space-y-3 pt-2">
+              <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
+                Subtasks
+              </label>
+              {subtaskFields.map((field, index) => (
+                <div key={field.id} className="relative group">
+                  <input
+                    type="text"
+                    {...register(`subtasks.${index}.title` as const)}
+                    placeholder="Subtask title..."
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm transition-all focus:ring-[3px] focus:ring-blue-500/10 ${THEME_CLASSES.input.base}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeSubtask(index)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 bg-red-100 dark:bg-red-900/40 text-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => appendSubtask({ id: "", title: "", completed: false })}
+                className={`flex items-center gap-2 text-sm font-semibold py-2 px-1 hover:gap-3 transition-all ${THEME_CLASSES.text.link}`}
+              >
+                <Plus size={16} /> Add Subtask
               </button>
             </div>
 

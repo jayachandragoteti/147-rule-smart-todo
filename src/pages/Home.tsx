@@ -15,7 +15,7 @@ import NotesWidget from "../components/dashboard/NotesWidget";
 import HeartspaceWidget from "../components/dashboard/HeartspaceWidget";
 import LearningWidget from "../components/dashboard/LearningWidget";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
-import { fetchTodos, updateTodo, completeTodo } from "../features/todos/todoThunks";
+import { fetchTodos, updateTodo, completeTodo, toggleSubtaskStatus } from "../features/todos/todoThunks";
 import { fetchNotes } from "../features/notes/notesSlice";
 import { fetchJournalEntries } from "../features/journal/journalSlice";
 import { THEME_CLASSES } from "../utils/themeUtils";
@@ -97,7 +97,9 @@ const Home = () => {
     setUpdatingId(id);
     try {
       if (currentStatus === "completed") {
-        await dispatch(updateTodo({ id, updates: { status: "pending" as TodoStatus } })).unwrap();
+        const todoToUpdate = todos.find(t => t.id === id);
+        const resetSubtasks = todoToUpdate?.subtasks?.map(st => ({ ...st, completed: false })) || [];
+        await dispatch(updateTodo({ id, updates: { status: "pending" as TodoStatus, subtasks: resetSubtasks } })).unwrap();
         toast.success("Task reopened");
       } else {
         await dispatch(completeTodo(id)).unwrap();
@@ -107,6 +109,14 @@ const Home = () => {
       toast.error("Failed to update status");
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleToggleSubtask = async (todoId: string, subtaskId: string) => {
+    try {
+      await dispatch(toggleSubtaskStatus({ todoId, subtaskId })).unwrap();
+    } catch {
+      toast.error("Failed to update subtask");
     }
   };
 
@@ -216,20 +226,40 @@ const Home = () => {
                 </div>
               ) : (
                 todayTodos.map((todo) => (
-                  <div key={todo.id} className="px-5 py-4 flex items-center gap-4 group hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
-                    <div className="flex-shrink-0">
-                      <StatusIcon todo={todo} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <Link to={`/todo/${todo.id}`}>
-                        <p className={`text-sm font-semibold truncate group-hover:text-blue-500 transition-colors ${THEME_CLASSES.text.primary} ${todo.status === "completed" ? "line-through opacity-40" : ""}`}>
-                          {todo.title}
+                  <div key={todo.id} className="flex flex-col border-b last:border-b-0 border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
+                    <div className="px-5 py-4 flex items-center gap-4 group">
+                      <div className="flex-shrink-0">
+                        <StatusIcon todo={todo} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <Link to={`/todo/${todo.id}`}>
+                          <p className={`text-sm font-semibold truncate group-hover:text-blue-500 transition-colors ${THEME_CLASSES.text.primary} ${todo.status === "completed" ? "line-through opacity-40" : ""}`}>
+                            {todo.title}
+                          </p>
+                        </Link>
+                        <p className={`text-[10px] mt-0.5 ${THEME_CLASSES.text.tertiary}`}>
+                          {todo.scheduledTime || "No time set"} · {todo.category}
                         </p>
-                      </Link>
-                      <p className={`text-[10px] mt-0.5 ${THEME_CLASSES.text.tertiary}`}>
-                        {todo.scheduledTime || "No time set"} · {todo.category}
-                      </p>
+                      </div>
                     </div>
+                    {/* Render Subtasks */}
+                    {todo.subtasks && todo.subtasks.length > 0 && (
+                      <div className="pl-14 pr-5 pb-3 space-y-1">
+                         {todo.subtasks.map(subtask => (
+                           <div key={subtask.id} className="flex items-center gap-3">
+                             <button
+                               onClick={() => handleToggleSubtask(todo.id, subtask.id)}
+                               className={`transition-colors flex-shrink-0 ${subtask.completed ? "text-emerald-500" : "text-gray-300 hover:text-emerald-500"}`}
+                             >
+                               {subtask.completed ? <CheckCircle2 size={14} /> : <Circle size={14} />}
+                             </button>
+                             <span className={`text-xs truncate ${subtask.completed ? "line-through opacity-40 " + THEME_CLASSES.text.tertiary : THEME_CLASSES.text.secondary}`}>
+                               {subtask.title}
+                             </span>
+                           </div>
+                         ))}
+                      </div>
+                    )}
                   </div>
                 ))
               )}
