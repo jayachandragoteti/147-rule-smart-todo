@@ -192,10 +192,7 @@ const Home = () => {
           </button>
         </div>
 
-        {/* Top Area — Notes (Moved from bottom) */}
-        <NotesWidget latestNote={latestNote} />
-
-        {/* Main Grid — Today's Tasks + Notifications */}
+        {/* Main Grid — Today's Tasks + Notifications (Todo) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Today's Tasks */}
           <div className={`lg:col-span-2 border rounded-2xl shadow-sm overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
@@ -260,11 +257,8 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Middle Modules — Learning */}
-        <LearningWidget learningDueToday={learningDueToday} />
-
-        {/* Task Summary — bottom of page */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Task Summary */}
+        <div className="grid grid-cols-2 gap-3 pb-2">
           {[
             { label: "Total Tasks", value: todos.length, icon: Target, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
             { label: "Completed", value: todos.filter(t => t.status === "completed").length, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
@@ -278,6 +272,16 @@ const Home = () => {
             </div>
           ))}
         </div>
+
+        {/* Learning */}
+        <LearningWidget learningDueToday={learningDueToday} />
+
+        {/* Notes */}
+        <NotesWidget latestNote={latestNote} />
+
+
+
+
 
         {/* Heartspace - Moved to Bottom Area */}
         <HeartspaceWidget latestDiaryEntry={latestDiaryEntry} />
