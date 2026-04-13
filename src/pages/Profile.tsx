@@ -5,6 +5,7 @@ import PageWrapper from "../components/layout/PageWrapper";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { logoutThunk } from "../features/auth/authThunks";
 import { getUserProfile, saveUserProfile } from "../services/firebase/profileService";
+import { clearBrowserCacheAndReload } from "../utils/cacheUtils";
 
 const Profile = () => {
   const { user } = useAppSelector((state) => state.auth);
@@ -173,12 +174,7 @@ const Profile = () => {
                     <p className={`text-[10px] ${THEME_CLASSES.text.tertiary}`}>Refresh to load newly deployed changes or clear cache.</p>
                   </div>
                   <button 
-                    onClick={() => {
-                        window.caches?.keys().then(keys => {
-                            keys.forEach(key => caches.delete(key));
-                        });
-                        window.location.reload();
-                    }}
+                    onClick={clearBrowserCacheAndReload}
                     className="px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 dark:text-emerald-400 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all active:scale-95 whitespace-nowrap"
                   >
                     Update App
