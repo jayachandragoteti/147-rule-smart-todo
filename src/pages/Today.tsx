@@ -4,7 +4,7 @@ import PageWrapper from "../components/layout/PageWrapper";
 import TodoCard from "../components/todos/TodoCard";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { fetchTodos } from "../features/todos/todoThunks";
-import { selectTodayTasks } from "../features/todos/todoSelectors";
+import { selectTodayTasks, selectTaskStats } from "../features/todos/todoSelectors";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { 
   Sparkles, 
@@ -15,7 +15,6 @@ import {
   Plus
 } from "lucide-react";
 
-
 const Today = () => {
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state) => state.todo.loading);
@@ -23,6 +22,7 @@ const Today = () => {
   const isAuthChecked = useAppSelector((state) => state.auth.isAuthChecked);
 
   const todayTodos = useAppSelector(selectTodayTasks);
+  const stats = useAppSelector(selectTaskStats);
 
   useEffect(() => {
     if (isAuthChecked) {
@@ -30,13 +30,7 @@ const Today = () => {
     }
   }, [isAuthChecked, dispatch]);
 
-  const completedCount = todayTodos.filter(
-    (t) => t.status === "completed"
-  ).length;
-
-  const progressPercent = todayTodos.length > 0 
-    ? Math.round((completedCount / todayTodos.length) * 100) 
-    : 0;
+  const { completedToday: completedCount, progressPercent } = stats;
 
   return (
     <PageWrapper>

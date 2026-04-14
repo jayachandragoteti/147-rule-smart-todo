@@ -29,6 +29,26 @@ export const formatDate = (dateString: string): string => {
 };
 
 /**
+ * Check if a date string is in the future (after today)
+ */
+export const isFutureDate = (dateString: string): boolean => {
+  if (!dateString) return false;
+  const target = toDateOnlyString(dateString);
+  const today = toDateOnlyString(new Date().toISOString());
+  return target > today;
+};
+
+/**
+ * Check if a date string is in the past (before today)
+ */
+export const isPastDate = (dateString: string): boolean => {
+  if (!dateString) return false;
+  const target = toDateOnlyString(dateString);
+  const today = toDateOnlyString(new Date().toISOString());
+  return target < today;
+};
+
+/**
  * Calculate the next recurrence date
  */
 export const getNextRecurrenceDate = (currentDate: string, recurrence: "daily" | "weekly" | "monthly"): string => {

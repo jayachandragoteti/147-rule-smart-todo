@@ -1,6 +1,6 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store";
-import { isTodayDate } from "../../utils/dateUtils";
+import { isTodayDate, isFutureDate } from "../../utils/dateUtils";
 
 // Base Selector
 export const selectAllTodos = (state: RootState) => state.todo.todos;
@@ -27,9 +27,11 @@ export const selectTodayTasks = createSelector(
         return isTodayDate(t.scheduledDate);
       })
       .sort((a, b) => {
-        // Pending first
-        if (a.status !== "completed" && b.status === "completed") return -1;
-        if (a.status === "completed" && b.status !== "completed") return 1;
+        const aDone = a.status === "completed" || (a.seriesDates?.length ? isFutureDate(a.scheduledDate) : false);
+        const bDone = b.status === "completed" || (b.seriesDates?.length ? isFutureDate(b.scheduledDate) : false);
+        
+        if (!aDone && bDone) return -1;
+        if (aDone && !bDone) return 1;
         return 0;
       })
 );
@@ -38,10 +40,13 @@ export const selectTodayTasks = createSelector(
 export const selectTaskStats = createSelector(
   [selectTodayTasks],
   (todayTasks) => {
-    const completedToday = todayTasks.filter((t) => t.status === "completed").length;
-    const pendingToday = todayTasks.filter((t) => t.status !== "completed").length;
+    const completedToday = todayTasks.filter((t) => {
+      if (t.status === "completed") return true;
+      if (t.seriesDates?.length) return isFutureDate(t.scheduledDate);
+      if (t.recurrence && t.recurrence !== "none") return isFutureDate(t.scheduledDate);
+      return false;
+    }).length;
     
-    // Recalculating learning tasks to get total
     const progressPercent = todayTasks.length > 0
       ? Math.round((completedToday / todayTasks.length) * 100)
       : 0;
@@ -49,7 +54,7 @@ export const selectTaskStats = createSelector(
     return {
       todayTotal: todayTasks.length,
       completedToday,
-      pendingToday,
+      pendingToday: todayTasks.length - completedToday,
       progressPercent,
     };
   }

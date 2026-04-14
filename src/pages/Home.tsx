@@ -19,7 +19,7 @@ import { fetchTodos, updateTodo, completeTodo, toggleSubtaskStatus } from "../fe
 import { fetchNotes } from "../features/notes/notesSlice";
 import { fetchJournalEntries } from "../features/journal/journalSlice";
 import { THEME_CLASSES } from "../utils/themeUtils";
-import { isTodayDate } from "../utils/dateUtils";
+import { isTodayDate, isFutureDate } from "../utils/dateUtils";
 import type { Todo, TodoStatus } from "../types/todo";
 import { isAfter } from "date-fns";
 import {
@@ -130,9 +130,16 @@ const Home = () => {
     if (updatingId === todo.id) {
       return <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />;
     }
+    
+    const isDone = todo.status === "completed" || 
+                  (todo.seriesDates?.length ? isFutureDate(todo.scheduledDate) : false) ||
+                  (todo.recurrence !== "none" ? isFutureDate(todo.scheduledDate) : false);
+
+    if (isDone) {
+      return <CheckCircle2 size={16} className="text-emerald-500" />;
+    }
+
     switch (todo.status) {
-      case "completed":
-        return <CheckCircle2 size={16} className="text-emerald-500" />;
       case "inprogress":
         return <Clock size={16} className="text-amber-500" />;
       default:
@@ -233,7 +240,7 @@ const Home = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <Link to={`/todo/${todo.id}`}>
-                          <p className={`text-sm font-semibold truncate group-hover:text-blue-500 transition-colors ${THEME_CLASSES.text.primary} ${todo.status === "completed" ? "line-through opacity-40" : ""}`}>
+                          <p className={`text-sm font-semibold truncate group-hover:text-blue-500 transition-colors ${THEME_CLASSES.text.primary} ${(todo.status === "completed" || (todo.seriesDates?.length && isFutureDate(todo.scheduledDate))) ? "line-through opacity-40" : ""}`}>
                             {todo.title}
                           </p>
                         </Link>

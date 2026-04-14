@@ -3,6 +3,7 @@ import { RefreshCw, ChevronRight } from "lucide-react";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import type { Todo } from "../../types/todo";
 import { get137Label } from "../../utils/rule137";
+import { isFutureDate } from "../../utils/dateUtils";
 
 interface Props {
   learningDueToday: Todo[];
@@ -25,16 +26,19 @@ const LearningWidget = ({ learningDueToday }: Props) => {
             {learningDueToday.length === 0 ? (
               <p className="text-xs text-center py-4 opacity-50">No learning tasks due</p>
             ) : (
-              learningDueToday.map(todo => (
-                <Link key={todo.id} to={`/todo/${todo.id}`} className={`block p-3 rounded-xl border ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base} hover:border-purple-300 transition-colors ${todo.status === "completed" ? "opacity-40" : ""}`}>
-                  <p className={`text-xs font-bold truncate ${todo.status === "completed" ? "line-through" : ""}`}>{todo.title}</p>
-                  {todo.seriesDates && (
-                    <p className={`text-[9px] font-black mt-1 uppercase tracking-tighter ${todo.status === "completed" ? "text-gray-400" : "text-purple-500"}`}>
-                      {get137Label(todo.seriesDates, todo.scheduledDate)}
-                    </p>
-                  )}
-                </Link>
-              ))
+              learningDueToday.map(todo => {
+                const isDone = todo.status === "completed" || (todo.seriesDates?.length && isFutureDate(todo.scheduledDate));
+                return (
+                  <Link key={todo.id} to={`/todo/${todo.id}`} className={`block p-3 rounded-xl border ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base} hover:border-purple-300 transition-colors ${isDone ? "opacity-40" : ""}`}>
+                    <p className={`text-xs font-bold truncate ${isDone ? "line-through" : ""}`}>{todo.title}</p>
+                    {todo.seriesDates && (
+                      <p className={`text-[9px] font-black mt-1 uppercase tracking-tighter ${isDone ? "text-gray-400" : "text-purple-500"}`}>
+                        {get137Label(todo.seriesDates, todo.scheduledDate)}
+                      </p>
+                    )}
+                  </Link>
+                );
+              })
             )}
          </div>
        </div>

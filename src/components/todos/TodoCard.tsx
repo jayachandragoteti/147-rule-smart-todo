@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 import type { Todo, TodoRecurrence } from "../../types/todo";
 import { get137Label } from "../../utils/rule137";
-import { formatDate } from "../../utils/dateUtils";
+import { formatDate, isFutureDate } from "../../utils/dateUtils";
 import { ExternalLink, CheckCircle, Clock, Link as LinkIcon, AlertCircle, RefreshCcw } from "lucide-react";
 import { useAppDispatch, useToast } from "../../app/hooks";
 import { completeTodo } from "../../features/todos/todoThunks";
@@ -59,7 +59,9 @@ const TodoCard = ({ todo }: Props) => {
     dispatch(openIFrame({ url, title }));
   };
 
-  const isCompleted = todo.status === "completed";
+  const isCompleted = todo.status === "completed" || 
+                     (todo.seriesDates?.length ? isFutureDate(todo.scheduledDate) : false) ||
+                     (todo.recurrence !== "none" ? isFutureDate(todo.scheduledDate) : false);
 
   return (
     <div
