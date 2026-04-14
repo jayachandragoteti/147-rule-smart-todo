@@ -30,7 +30,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           </div>
           <div className="flex flex-col">
             <span className="text-base font-bold tracking-tight leading-none text-gray-900 dark:text-white">
-              TodoSpace
+              137
             </span>
             <span className="text-[9px] font-medium uppercase tracking-wider opacity-40">1 · 4 · 7 Productivity</span>
           </div>

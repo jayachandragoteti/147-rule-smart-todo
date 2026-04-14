@@ -53,9 +53,9 @@ const Home = () => {
   // Stats
   const stats = useAppSelector(selectTaskStats);
 
-  // Today's tasks (limit 5)
+  // Today's tasks (show all)
   const todayTasks = useAppSelector(selectTodayTasks);
-  const todayTodos = useMemo(() => todayTasks.slice(0, 5), [todayTasks]);
+  const todayTodos = todayTasks;
 
   // Upcoming reminders
   const upcomingReminders = useMemo(() => {
