@@ -73,10 +73,10 @@ const Home = () => {
       .slice(0, 3);
   }, [todos]);
 
-  // 1-3-7 learning tasks due today
+  // 1-3-7 learning tasks due today (show all)
   const learningDueToday = useMemo(() =>
     todos.filter((t) => {
-      if (!t.apply137Rule || t.status === "completed") return false;
+      if (!t.apply137Rule) return false;
       if (!t.seriesDates?.length) return isTodayDate(t.scheduledDate);
       return t.seriesDates.some((d) => isTodayDate(d));
     }).slice(0, 3),

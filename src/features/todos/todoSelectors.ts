@@ -17,14 +17,21 @@ export const selectLearningTodos = createSelector(
   (todos) => todos.filter((t) => t.apply137Rule)
 );
 
-// Today's specific tasks
+// Today's specific tasks - show all, but sort completed to bottom
 export const selectTodayTasks = createSelector(
   [selectAllTodos],
   (todos) =>
-    todos.filter((t) => {
-      if (t.seriesDates?.length) return t.seriesDates.some((d) => isTodayDate(d));
-      return isTodayDate(t.scheduledDate);
-    })
+    todos
+      .filter((t) => {
+        if (t.seriesDates?.length) return t.seriesDates.some((d) => isTodayDate(d));
+        return isTodayDate(t.scheduledDate);
+      })
+      .sort((a, b) => {
+        // Pending first
+        if (a.status !== "completed" && b.status === "completed") return -1;
+        if (a.status === "completed" && b.status !== "completed") return 1;
+        return 0;
+      })
 );
 
 // Stats for dashboard

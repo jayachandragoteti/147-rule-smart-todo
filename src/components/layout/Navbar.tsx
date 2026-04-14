@@ -30,16 +30,16 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           </div>
           <div className="flex flex-col">
             <span className="text-base font-bold tracking-tight leading-none text-gray-900 dark:text-white">
-              137
+              Todo Space
             </span>
-            <span className="text-[9px] font-medium uppercase tracking-wider opacity-40">1 · 4 · 7 Productivity</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider opacity-40">1 · 3 · 7 Productivity</span>
           </div>
         </Link>
 
         {/* Desktop Nav Links */}
         <nav className="hidden md:flex items-center gap-1 ml-4">
-          <Link 
-            to="/today" 
+          <Link
+            to="/today"
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:bg-gray-100 dark:hover:bg-gray-800 ${THEME_CLASSES.text.secondary}`}
           >
             Focus
@@ -50,21 +50,21 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
 
       <div className="flex items-center gap-4">
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">
-            <span className="text-[10px] font-semibold uppercase tracking-widest opacity-60">Synced</span>
+          <span className="text-[10px] font-semibold uppercase tracking-widest opacity-60">Synced</span>
         </div>
 
         {user ? (
           <div className="flex items-center gap-3 pl-2">
-            <Link 
-              to="/profile" 
+            <Link
+              to="/profile"
               className="flex items-center gap-3 group transition-all"
             >
               <div className="flex flex-col items-end hidden md:flex">
-                  <span className={`text-xs font-semibold leading-none group-hover:text-blue-500 transition-colors ${THEME_CLASSES.text.primary}`}>{user.displayName?.split(' ')[0] || user.email?.split('@')[0]}</span>
-                  <span className={`text-[10px] font-medium opacity-50 ${THEME_CLASSES.text.tertiary}`}>My Account</span>
+                <span className={`text-xs font-semibold leading-none group-hover:text-blue-500 transition-colors ${THEME_CLASSES.text.primary}`}>{user.displayName?.split(' ')[0] || user.email?.split('@')[0]}</span>
+                <span className={`text-[10px] font-medium opacity-50 ${THEME_CLASSES.text.tertiary}`}>My Account</span>
               </div>
               <div className="w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-xl flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden group-hover:border-blue-500 transition-colors">
-                  <User size={16} className="opacity-60" />
+                <User size={16} className="opacity-60" />
               </div>
             </Link>
           </div>

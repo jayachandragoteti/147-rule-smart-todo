@@ -26,10 +26,10 @@ const LearningWidget = ({ learningDueToday }: Props) => {
               <p className="text-xs text-center py-4 opacity-50">No learning tasks due</p>
             ) : (
               learningDueToday.map(todo => (
-                <Link key={todo.id} to={`/todo/${todo.id}`} className={`block p-3 rounded-xl border ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base} hover:border-purple-300 transition-colors`}>
-                  <p className="text-xs font-bold truncate">{todo.title}</p>
+                <Link key={todo.id} to={`/todo/${todo.id}`} className={`block p-3 rounded-xl border ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base} hover:border-purple-300 transition-colors ${todo.status === "completed" ? "opacity-40" : ""}`}>
+                  <p className={`text-xs font-bold truncate ${todo.status === "completed" ? "line-through" : ""}`}>{todo.title}</p>
                   {todo.seriesDates && (
-                    <p className="text-[9px] font-black text-purple-500 mt-1 uppercase tracking-tighter">
+                    <p className={`text-[9px] font-black mt-1 uppercase tracking-tighter ${todo.status === "completed" ? "text-gray-400" : "text-purple-500"}`}>
                       {get137Label(todo.seriesDates, todo.scheduledDate)}
                     </p>
                   )}

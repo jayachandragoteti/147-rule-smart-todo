@@ -4,7 +4,7 @@ import PageWrapper from "../components/layout/PageWrapper";
 import TodoCard from "../components/todos/TodoCard";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { fetchTodos } from "../features/todos/todoThunks";
-import { isTodayDate } from "../utils/dateUtils";
+import { selectTodayTasks } from "../features/todos/todoSelectors";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { 
   Sparkles, 
@@ -18,27 +18,17 @@ import {
 
 const Today = () => {
   const dispatch = useAppDispatch();
-  const allTodos = useAppSelector((state) => state.todo.todos);
   const loading = useAppSelector((state) => state.todo.loading);
   const error = useAppSelector((state) => state.todo.error);
   const isAuthChecked = useAppSelector((state) => state.auth.isAuthChecked);
+
+  const todayTodos = useAppSelector(selectTodayTasks);
 
   useEffect(() => {
     if (isAuthChecked) {
       dispatch(fetchTodos());
     }
   }, [isAuthChecked, dispatch]);
-
-  const todayTodos = useMemo(
-    () =>
-      allTodos.filter((todo) => {
-        if (todo.seriesDates && todo.seriesDates.length > 0) {
-          return todo.seriesDates.some((d) => isTodayDate(d));
-        }
-        return isTodayDate(todo.scheduledDate);
-      }),
-    [allTodos]
-  );
 
   const completedCount = todayTodos.filter(
     (t) => t.status === "completed"
