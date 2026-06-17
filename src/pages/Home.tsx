@@ -10,10 +10,11 @@ import {
   BookOpen,
   StickyNote,
   PlayCircle,
-  Edit,
+  Eye,
   CheckCheck,
   Loader2,
   Search,
+  ChevronDown,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
@@ -76,6 +77,7 @@ const Home = () => {
   const upcomingTasks   = useAppSelector(selectUpcomingTasks);
 
   const [updatingId,       setUpdatingId]       = useState<string | null>(null);
+  const [statusDropdownId, setStatusDropdownId] = useState<string | null>(null);
   const [quickTab,         setQuickTab]         = useState<QuickAddTab>("task");
   const [quickText,        setQuickText]        = useState("");
   const [savingNote,       setSavingNote]       = useState(false);
@@ -168,6 +170,17 @@ const Home = () => {
     }
   };
 
+  const handleStatusChangeById = async (todo: Todo, newStatus: TodoStatus) => {
+    setUpdatingId(todo.id);
+    try {
+      await dispatch(updateTodo({ id: todo.id, updates: { status: newStatus } })).unwrap();
+    } catch {
+      toast.error("Failed to update status");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   // ── Quick Add ─────────────────────────────────────────────────────────────
   const handleQuickAdd = async () => {
     if (!quickText.trim()) return;
@@ -202,18 +215,20 @@ const Home = () => {
     const revLabel   = isRevision && todo.seriesDates?.length
       ? get137Label(todo.seriesDates, todo.scheduledDate)
       : null;
+    const isDropdownOpen = statusDropdownId === todo.id;
 
     return (
       <div
-        className={`group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+        className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
           isDone
             ? `opacity-60 ${THEME_CLASSES.surface.hover}`
             : `${THEME_CLASSES.surface.hover} hover:shadow-sm`
         }`}
+        onClick={() => isDropdownOpen && setStatusDropdownId(null)}
       >
-        {/* Status cycle button */}
+        {/* Status indicator circle */}
         <button
-          onClick={() => handleCycleStatus(todo)}
+          onClick={(e) => { e.stopPropagation(); handleCycleStatus(todo); }}
           disabled={isUpdating}
           className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all active:scale-90 ${
             isDone
@@ -222,7 +237,7 @@ const Home = () => {
               ? "border-[#f59e0b] bg-[#f59e0b]/10 text-[#f59e0b]"
               : "border-gray-200 dark:border-white/10 hover:border-[#4f8cff] hover:bg-[#4f8cff]/10 hover:text-[#4f8cff] text-transparent"
           }`}
-          title={`Status: ${cfg.label} — click to advance`}
+          title="Quick complete"
         >
           {isUpdating ? (
             <Loader2 size={12} className="animate-spin text-[#4f8cff]" />
@@ -235,7 +250,7 @@ const Home = () => {
           )}
         </button>
 
-        {/* Title (clickable → task detail) + meta */}
+        {/* Title + meta */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <Link
@@ -246,7 +261,6 @@ const Home = () => {
             >
               {todo.title}
             </Link>
-            {/* Priority dot */}
             <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${priorityDot[todo.priority] ?? priorityDot.medium}`} />
           </div>
           <div className="flex items-center gap-2 mt-0.5">
@@ -266,32 +280,60 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Right: status pill (always visible, click to cycle) + edit link */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            onClick={() => handleCycleStatus(todo)}
-            disabled={isUpdating}
-            title="Click to change status"
-            className={`status-pill ${cfg.className} cursor-pointer hover:opacity-80 transition-opacity active:scale-95`}
-          >
-            {cfg.icon} {cfg.label}
-          </button>
+        {/* Right: status dropdown + View button */}
+        <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <div className="relative">
+            <button
+              onClick={() => setStatusDropdownId(isDropdownOpen ? null : todo.id)}
+              disabled={isUpdating}
+              className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${cfg.className} ${THEME_CLASSES.border.base} hover:opacity-80 active:scale-95`}
+            >
+              {isUpdating ? <Loader2 size={9} className="animate-spin" /> : cfg.icon}
+              <span className="hidden sm:inline">{cfg.label}</span>
+              <ChevronDown size={9} className={`transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+            </button>
+            {isDropdownOpen && (
+              <div className={`absolute right-0 top-full mt-1 w-40 rounded-xl border shadow-xl z-50 overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+                {([
+                  { value: "pending",    label: "To Do",       dot: "bg-[#606878]" },
+                  { value: "inprogress", label: "In Progress", dot: "bg-[#f59e0b]" },
+                  { value: "completed",  label: "Completed",   dot: "bg-[#22c55e]" },
+                ] as { value: TodoStatus; label: string; dot: string }[]).map((opt) => {
+                  const blocked = opt.value === "completed" && (todo.subtasks?.some((st) => !st.completed) ?? false);
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => { if (!blocked) { handleStatusChangeById(todo, opt.value as TodoStatus); setStatusDropdownId(null); } }}
+                      disabled={blocked}
+                      title={blocked ? "Complete all subtasks first" : undefined}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold transition-all ${
+                        blocked ? "opacity-40 cursor-not-allowed"
+                        : todo.status === opt.value ? `${statusConfig[opt.value]?.className} opacity-80`
+                        : `${THEME_CLASSES.text.secondary} ${THEME_CLASSES.button.hover}`
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                      {opt.label}
+                      {todo.status === opt.value && <CheckCircle2 size={10} className="ml-auto" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <Link
             to={`/todo/${todo.id}`}
-            className={`p-1.5 rounded-lg ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.tertiary} hover:text-[#4f8cff] transition-colors`}
-            title="View details"
+            className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${THEME_CLASSES.border.base} ${THEME_CLASSES.text.tertiary} ${THEME_CLASSES.button.hover} hover:text-[#4f8cff] hover:border-[#4f8cff]/30`}
+            title="View task"
           >
-            <Edit size={13} />
+            <Eye size={11} />
+            <span className="hidden sm:inline">View</span>
           </Link>
-        </div>
-
-        {/* Always-visible actions for mobile */}
-        <div className="sm:hidden flex items-center gap-1 shrink-0">
-          <span className={`status-pill ${cfg.className}`}>{cfg.label}</span>
         </div>
       </div>
     );
   };
+
 
   // ── Section wrapper ────────────────────────────────────────────────────────
   const Section = ({
@@ -659,14 +701,52 @@ const Home = () => {
                               )}
                             </div>
 
-                            {/* Hover actions */}
-                            <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <span className={`status-pill ${cfg.className}`}>{cfg.label}</span>
+                            {/* Status dropdown + View */}
+                            <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <div className="relative">
+                                <button
+                                  onClick={() => setStatusDropdownId(statusDropdownId === todo.id ? null : todo.id)}
+                                  disabled={isUpdating}
+                                  className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${cfg.className} ${THEME_CLASSES.border.base} hover:opacity-80`}
+                                >
+                                  {isUpdating ? <Loader2 size={9} className="animate-spin" /> : cfg.icon}
+                                  <ChevronDown size={9} className={`transition-transform ${statusDropdownId === todo.id ? "rotate-180" : ""}`} />
+                                </button>
+                                {statusDropdownId === todo.id && (
+                                  <div className={`absolute right-0 top-full mt-1 w-40 rounded-xl border shadow-xl z-50 overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+                                    {([
+                                      { value: "pending",    label: "To Do",       dot: "bg-[#606878]" },
+                                      { value: "inprogress", label: "In Progress", dot: "bg-[#f59e0b]" },
+                                      { value: "completed",  label: "Completed",   dot: "bg-[#22c55e]" },
+                                    ] as { value: TodoStatus; label: string; dot: string }[]).map((opt) => {
+                                      const blocked = opt.value === "completed" && (todo.subtasks?.some((st) => !st.completed) ?? false);
+                                      return (
+                                        <button
+                                          key={opt.value}
+                                          onClick={() => { if (!blocked) { handleStatusChangeById(todo, opt.value as TodoStatus); setStatusDropdownId(null); } }}
+                                          disabled={blocked}
+                                          title={blocked ? "Complete all subtasks first" : undefined}
+                                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold transition-all ${
+                                            blocked ? "opacity-40 cursor-not-allowed"
+                                            : todo.status === opt.value ? `${statusConfig[opt.value]?.className} opacity-80`
+                                            : `${THEME_CLASSES.text.secondary} ${THEME_CLASSES.button.hover}`
+                                          }`}
+                                        >
+                                          <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                                          {opt.label}
+                                          {todo.status === opt.value && <CheckCircle2 size={10} className="ml-auto" />}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
                               <Link
                                 to={`/todo/${todo.id}`}
-                                className={`p-1.5 rounded-lg ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.tertiary} hover:text-[#4f8cff]`}
+                                className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${THEME_CLASSES.border.base} ${THEME_CLASSES.text.tertiary} ${THEME_CLASSES.button.hover} hover:text-[#4f8cff] hover:border-[#4f8cff]/30`}
+                                title="View task"
                               >
-                                <Edit size={12} />
+                                <Eye size={11} />
                               </Link>
                             </div>
                           </div>

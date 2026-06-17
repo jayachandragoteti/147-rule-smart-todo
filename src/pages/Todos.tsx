@@ -16,9 +16,9 @@ import {
   Edit,
   ChevronDown,
   ListFilter,
+  Eye,
 } from "lucide-react";
 import type { Todo, TodoPriority, TodoStatus } from "../types/todo";
-import { Eye } from "lucide-react";
 
 type FilterStatus   = "all" | TodoStatus;
 type FilterPriority = "all" | TodoPriority;
@@ -289,13 +289,14 @@ const Todos = () => {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span
-                          className={`text-sm font-medium truncate ${
-                            isDone ? "line-through" : THEME_CLASSES.text.primary
+                        <Link
+                          to={`/todo/${todo.id}`}
+                          className={`text-sm font-medium truncate hover:text-[#4f8cff] transition-colors ${
+                            isDone ? THEME_CLASSES.text.tertiary : THEME_CLASSES.text.primary
                           }`}
                         >
                           {todo.title}
-                        </span>
+                        </Link>
                         <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${priorityDot[todo.priority] ?? priorityDot.medium}`} />
                         {todo.apply137Rule && (
                           <span className="shrink-0 text-[10px] font-semibold text-[#818cf8] bg-[#818cf8]/10 px-1.5 py-0.5 rounded-full">
