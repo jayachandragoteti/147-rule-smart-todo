@@ -207,7 +207,7 @@ const Home = () => {
       <div
         className={`group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
           isDone
-            ? `opacity-50 ${THEME_CLASSES.surface.hover}`
+            ? `opacity-60 ${THEME_CLASSES.surface.hover}`
             : `${THEME_CLASSES.surface.hover} hover:shadow-sm`
         }`}
       >
@@ -220,7 +220,7 @@ const Home = () => {
               ? "border-[#22c55e] bg-[#22c55e]/10 text-[#22c55e]"
               : todo.status === "inprogress"
               ? "border-[#f59e0b] bg-[#f59e0b]/10 text-[#f59e0b]"
-              : "border-gray-200 dark:border-white/10 hover:border-[#4f8cff] hover:bg-[#4f8cff]/10 text-transparent hover:text-[#4f8cff]"
+              : "border-gray-200 dark:border-white/10 hover:border-[#4f8cff] hover:bg-[#4f8cff]/10 hover:text-[#4f8cff] text-transparent"
           }`}
           title={`Status: ${cfg.label} — click to advance`}
         >
@@ -235,16 +235,17 @@ const Home = () => {
           )}
         </button>
 
-        {/* Title + meta */}
+        {/* Title (clickable → task detail) + meta */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span
-              className={`text-sm font-medium truncate ${
-                isDone ? `line-through ${THEME_CLASSES.text.tertiary}` : THEME_CLASSES.text.primary
+            <Link
+              to={`/todo/${todo.id}`}
+              className={`text-sm font-medium truncate hover:text-[#4f8cff] transition-colors ${
+                isDone ? THEME_CLASSES.text.tertiary : THEME_CLASSES.text.primary
               }`}
             >
               {todo.title}
-            </span>
+            </Link>
             {/* Priority dot */}
             <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${priorityDot[todo.priority] ?? priorityDot.medium}`} />
           </div>
@@ -265,11 +266,16 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Right actions */}
-        <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className={`status-pill ${cfg.className} gap-1`}>
+        {/* Right: status pill (always visible, click to cycle) + edit link */}
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={() => handleCycleStatus(todo)}
+            disabled={isUpdating}
+            title="Click to change status"
+            className={`status-pill ${cfg.className} cursor-pointer hover:opacity-80 transition-opacity active:scale-95`}
+          >
             {cfg.icon} {cfg.label}
-          </span>
+          </button>
           <Link
             to={`/todo/${todo.id}`}
             className={`p-1.5 rounded-lg ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.tertiary} hover:text-[#4f8cff] transition-colors`}
@@ -340,10 +346,46 @@ const Home = () => {
           <p className={`text-xs sm:text-sm italic ${THEME_CLASSES.text.tertiary} line-clamp-1`}>"{quote}"</p>
         </div>
 
+        {/* ── Today's Progress — moved to top ── */}
+        <div className="animate-fade-in-up" style={{ animationDelay: "40ms" }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Total",       value: stats.total,      icon: <Target size={15} />,      color: "text-[#4f8cff] bg-[#4f8cff]/10" },
+              { label: "Completed",   value: stats.completed,   icon: <CheckCheck size={15} />,  color: "text-[#22c55e] bg-[#22c55e]/10" },
+              { label: "In Progress", value: stats.inProgress,  icon: <PlayCircle size={15} />,  color: "text-[#f59e0b] bg-[#f59e0b]/10" },
+              { label: "Pending",     value: stats.pending,     icon: <Flame size={15} />,       color: "text-[#a0a6b5] bg-white/5" },
+            ].map(({ label, value, icon, color }) => (
+              <div
+                key={label}
+                className={`flex items-center gap-3 p-3.5 rounded-xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+              >
+                <div className={`p-2 rounded-lg ${color}`}>{icon}</div>
+                <div>
+                  <p className={`text-xl font-bold leading-none ${THEME_CLASSES.text.primary}`}>{value}</p>
+                  <p className={`text-[10px] mt-0.5 font-medium ${THEME_CLASSES.text.tertiary}`}>{label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Progress bar */}
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className={`text-[11px] font-medium ${THEME_CLASSES.text.tertiary}`}>Today's progress</span>
+              <span className={`text-[11px] font-bold ${THEME_CLASSES.text.primary}`}>{stats.progressPercent}%</span>
+            </div>
+            <div className="h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#4f8cff] to-[#22c55e] rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${stats.progressPercent}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* ── Quick Add Area ── */}
         <div
           className={`rounded-2xl border p-4 space-y-3 animate-fade-in-up ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
-          style={{ animationDelay: "40ms" }}
+          style={{ animationDelay: "80ms" }}
         >
           {/* Tabs */}
           <div className="flex gap-1">
@@ -395,7 +437,7 @@ const Home = () => {
         </div>
 
         {/* ── Today's Tasks (ALL including completed) ── */}
-        <div className="animate-fade-in-up" style={{ animationDelay: "80ms" }}>
+        <div className="animate-fade-in-up" style={{ animationDelay: "120ms" }}>
           <div className={`rounded-2xl border overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
             {/* Section header */}
             <div className={`flex items-center justify-between px-5 py-3.5 border-b ${THEME_CLASSES.border.base}`}>
@@ -592,9 +634,14 @@ const Home = () => {
                             {/* Info */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className={`text-sm font-medium truncate ${isDone ? `line-through ${THEME_CLASSES.text.tertiary}` : THEME_CLASSES.text.primary}`}>
+                                <Link
+                                  to={`/todo/${todo.id}`}
+                                  className={`text-sm font-medium truncate hover:text-[#4f8cff] transition-colors ${
+                                    isDone ? THEME_CLASSES.text.tertiary : THEME_CLASSES.text.primary
+                                  }`}
+                                >
                                   {todo.title}
-                                </span>
+                                </Link>
                                 {scheduleBadge && (
                                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${scheduleBadge.color}`}>
                                     {scheduleBadge.label}
@@ -645,47 +692,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* ── Daily Stats (moved below tasks) ── */}
-        <div className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Total",       value: stats.total,      icon: <Target size={15} />,      color: "text-[#4f8cff] bg-[#4f8cff]/10" },
-              { label: "Completed",   value: stats.completed,   icon: <CheckCheck size={15} />,  color: "text-[#22c55e] bg-[#22c55e]/10" },
-              { label: "In Progress", value: stats.inProgress,  icon: <PlayCircle size={15} />,  color: "text-[#f59e0b] bg-[#f59e0b]/10" },
-              { label: "Pending",     value: stats.pending,     icon: <Flame size={15} />,       color: "text-[#a0a6b5] bg-white/5" },
-            ].map(({ label, value, icon, color }) => (
-              <div
-                key={label}
-                className={`flex items-center gap-3 p-3.5 rounded-xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
-              >
-                <div className={`p-2 rounded-lg ${color}`}>{icon}</div>
-                <div>
-                  <p className={`text-xl font-bold leading-none ${THEME_CLASSES.text.primary}`}>{value}</p>
-                  <p className={`text-[10px] mt-0.5 font-medium ${THEME_CLASSES.text.tertiary}`}>{label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Progress bar */}
-          <div className="mt-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className={`text-[11px] font-medium ${THEME_CLASSES.text.tertiary}`}>
-                Today's progress
-              </span>
-              <span className={`text-[11px] font-bold ${THEME_CLASSES.text.primary}`}>
-                {stats.progressPercent}%
-              </span>
-            </div>
-            <div className="h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-[#4f8cff] to-[#22c55e] rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${stats.progressPercent}%` }}
-              />
-            </div>
-          </div>
-        </div>
 
         {/* ── Recent Journal Entry ── */}
         {latestJournal && (

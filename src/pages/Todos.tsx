@@ -74,23 +74,7 @@ const Todos = () => {
     return list;
   }, [todos, search, filterStatus, filterPriority, sortKey]);
 
-  const handleCycle = async (todo: Todo) => {
-    setUpdatingId(todo.id);
-    try {
-      if (todo.status === "pending") {
-        await dispatch(updateTodo({ id: todo.id, updates: { status: "inprogress" as TodoStatus } })).unwrap();
-      } else if (todo.status === "inprogress") {
-        await dispatch(completeTodo(todo.id)).unwrap();
-        toast.success("Task completed! 🎉");
-      } else {
-        await dispatch(updateTodo({ id: todo.id, updates: { status: "pending" as TodoStatus } })).unwrap();
-      }
-    } catch {
-      toast.error("Failed to update task");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
+
 
   const handleStatusChange = async (todo: Todo, newStatus: TodoStatus) => {
     setStatusDropdownId(null);
@@ -281,7 +265,7 @@ const Todos = () => {
                   >
                     {/* Status toggle */}
                     <button
-                      onClick={() => handleCycle(todo)}
+                      onClick={() => handleStatusChange(todo, todo.status === "pending" ? "inprogress" : todo.status === "inprogress" ? "completed" : "pending")}
                       disabled={isUpdating}
                       className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all active:scale-90 ${
                         isDone

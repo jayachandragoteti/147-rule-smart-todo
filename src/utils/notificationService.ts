@@ -156,18 +156,14 @@ export const setNotificationsEnabled = async (
 ): Promise<NotificationPermissionStatus> => {
   if (!enabled) {
     // Nothing to unregister locally; the SW keeps running for PWA caching.
-    // We just return "default" so the UI reflects "off".
     return "default";
   }
 
   const permission = await requestNotificationPermission();
   if (permission === "granted") {
     await registerServiceWorker();
-    // Fire a quick verification notification so the user knows it works
-    showInstantNotification(
-      "TodoSpace Notifications Active ✅",
-      "You'll get reminders for your tasks!"
-    );
+    // Silently registered — no auto-fire toast/notification here.
+    // The ReminderSystem will show the first real reminder when it's due.
   }
   return permission;
 };

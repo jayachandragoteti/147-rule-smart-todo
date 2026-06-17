@@ -76,6 +76,8 @@ const uiSlice = createSlice({
     },
     addToast: (state, action: PayloadAction<Omit<Toast, "id">>) => {
       const id = Date.now().toString();
+      // Keep at most 5 toasts — remove oldest if needed
+      if (state.toasts.length >= 5) state.toasts.shift();
       state.toasts.push({ ...action.payload, id });
     },
     removeToast: (state, action: PayloadAction<string>) => {

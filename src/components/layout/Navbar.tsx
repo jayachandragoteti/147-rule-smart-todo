@@ -1,7 +1,8 @@
-import { Menu } from "lucide-react";
-import { useAppSelector } from "../../app/hooks";
+import { Menu, Bell, BellOff } from "lucide-react";
+import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { Link } from "react-router-dom";
 import { THEME_CLASSES } from "../../utils/themeUtils";
+import { toggleSound } from "../../features/ui/uiSlice";
 import type { RootState } from "../../app/store";
 
 interface NavbarProps {
@@ -9,7 +10,9 @@ interface NavbarProps {
 }
 
 const Navbar = ({ onMenuClick }: NavbarProps) => {
-  const { user } = useAppSelector((state: RootState) => state.auth);
+  const { user }       = useAppSelector((state: RootState) => state.auth);
+  const soundEnabled   = useAppSelector((state) => state.ui.soundEnabled);
+  const dispatch       = useAppDispatch();
 
   return (
     <header
@@ -42,8 +45,21 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
         </Link>
       </div>
 
-      {/* Right: Sync indicator + User */}
-      <div className="flex items-center gap-3">
+      {/* Right: Sound toggle + Sync + User */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* ── Global sound mute toggle ── */}
+        <button
+          onClick={() => dispatch(toggleSound())}
+          title={soundEnabled ? "Mute notification sounds" : "Unmute notification sounds"}
+          aria-label={soundEnabled ? "Mute sounds" : "Unmute sounds"}
+          className={`p-2 rounded-xl transition-all active:scale-90 ${THEME_CLASSES.button.hover} ${
+            soundEnabled ? THEME_CLASSES.text.secondary : "text-[#ef4444]"
+          }`}
+        >
+          {soundEnabled ? <Bell size={16} /> : <BellOff size={16} />}
+        </button>
+
+        {/* Sync pill */}
         <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/3">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           <span className={`text-[10px] font-semibold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
