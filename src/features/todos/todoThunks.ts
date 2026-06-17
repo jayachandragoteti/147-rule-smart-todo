@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { Todo } from "../../types/todo";
+import type { Todo, PartialTodoUpdate } from "../../types/todo";
 import {
   createTodoInFirestore,
   fetchTodosFromFirestore,
@@ -79,7 +79,7 @@ export const createTodo = createAsyncThunk<
 
 export const updateTodo = createAsyncThunk<
   Todo,
-  { id: string; updates: Partial<NewTodo & { status?: string; apply137Rule?: boolean }> },
+  { id: string; updates: PartialTodoUpdate },
   { state: RootState }
 >("todo/updateTodo", async ({ id, updates }, thunkAPI) => {
   try {

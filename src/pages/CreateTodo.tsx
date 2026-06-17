@@ -232,38 +232,41 @@ const CreateTodo = () => {
           <div className={`lg:col-span-2 space-y-5 p-5 border rounded-xl shadow-sm ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
             {/* Title */}
             <div>
-              <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
-                Task Title
-              </label>
-              <input
-                type="text"
-                placeholder="What needs to be done?"
-                {...register("title", {
-                  required: FORM_MESSAGES.REQUIRED_TITLE,
-                  minLength: { value: VALIDATION.TITLE_MIN_LENGTH, message: FORM_MESSAGES.MIN_TITLE },
-                })}
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm focus:ring-[3px] focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base} ${errors.title ? 'border-red-500' : ''}`}
-              />
+                <label htmlFor="todo-title" className={`block text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
+                  Task Title
+                </label>
+                <input
+                  id="todo-title"
+                  type="text"
+                  placeholder="What needs to be done?"
+                  {...register("title", {
+                    required: FORM_MESSAGES.REQUIRED_TITLE,
+                    minLength: { value: VALIDATION.TITLE_MIN_LENGTH, message: FORM_MESSAGES.MIN_TITLE },
+                  })}
+                  className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm focus:ring-[3px] focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base} ${errors.title ? 'border-red-500' : ''}`}
+                />
               {errors.title && <p className="text-xs text-red-500 mt-2 ml-1 font-medium">{errors.title.message as ReactNode}</p>}
             </div>
 
             {/* Date & Time Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
+                  <label htmlFor="todo-date" className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
                     <Clock size={14} /> Scheduled Date
                   </label>
                   <input
+                    id="todo-date"
                     type="date"
                     {...register("scheduledDate", { required: FORM_MESSAGES.REQUIRED_DATE })}
                     className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm focus:ring-[3px] focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base}`}
                   />
                 </div>
                 <div>
-                  <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
+                  <label htmlFor="todo-time" className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
                     <Clock size={14} /> Time
                   </label>
                   <input
+                    id="todo-time"
                     type="time"
                     {...register("scheduledTime")}
                     className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm focus:ring-[3px] focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base}`}
@@ -337,11 +340,12 @@ const CreateTodo = () => {
 
             {/* posterImage */}
             <div className="space-y-3">
-              <label className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
+              <label htmlFor="todo-poster" className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-1 ${THEME_CLASSES.text.tertiary}`}>
                 <ImageIcon size={14} /> Task Image URL
               </label>
               <div className="flex flex-col gap-3">
                 <input
+                  id="todo-poster"
                   type="text"
                   placeholder="https://images.unsplash.com/..."
                   {...register("posterImage", { validate: validateImageUrl })}
@@ -563,6 +567,7 @@ const CreateTodo = () => {
                     Assign To
                   </label>
                   <input
+                    id="todo-assign"
                     type="text"
                     placeholder="teammate@company.com..."
                     {...register("assignTo")}
@@ -591,7 +596,7 @@ const CreateTodo = () => {
                   className="flex-[2] flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all hover:shadow-blue-500/30 disabled:opacity-50"
                 >
                   {loading && <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                  {loading ? (id ? "Updating..." : "Creating...") : (id ? "Update Action" : "Deploy Task")}
+                    {loading ? (id ? "Updating..." : "Creating...") : (id ? "Update Task" : "Create Task")}
                 </button>
                 <button
                   type="button"

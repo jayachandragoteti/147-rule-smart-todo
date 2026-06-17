@@ -54,12 +54,13 @@ const Login = () => {
         <div className="space-y-6">
           {/* Email */}
           <div className="space-y-2">
-            <label className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
+            <label htmlFor="login-email" className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
               Email Address
             </label>
             <div className="relative group">
                 <Mail size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${THEME_CLASSES.text.tertiary} group-focus-within:text-blue-500`} />
                 <input
+                  id="login-email"
                   type="email"
                   placeholder="your@email.com"
                   value={email}
@@ -72,12 +73,13 @@ const Login = () => {
 
           {/* Password */}
           <div className="space-y-2">
-            <label className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
+            <label htmlFor="login-password" className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
               Password
             </label>
             <div className="relative group">
                 <Lock size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${THEME_CLASSES.text.tertiary} group-focus-within:text-blue-500`} />
                 <input
+                  id="login-password"
                   type="password"
                   placeholder="Your password"
                   value={password}

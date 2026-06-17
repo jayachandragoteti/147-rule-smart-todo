@@ -50,12 +50,13 @@ const Register = () => {
         <div className="space-y-6">
           {/* Email */}
           <div className="space-y-2">
-            <label className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
-              Email ADDRESS
+            <label htmlFor="register-email" className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
+              Email Address
             </label>
             <div className="relative group">
                 <Mail size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${THEME_CLASSES.text.tertiary} group-focus-within:text-emerald-500`} />
                 <input
+                  id="register-email"
                   type="email"
                   placeholder="Enter your email"
                   value={email}
@@ -67,12 +68,13 @@ const Register = () => {
 
           {/* Password */}
           <div className="space-y-2">
-            <label className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
+            <label htmlFor="register-password" className={`block text-[10px] font-bold uppercase tracking-widest ml-1 ${THEME_CLASSES.text.secondary}`}>
               Password
             </label>
             <div className="relative group">
                 <Lock size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${THEME_CLASSES.text.tertiary} group-focus-within:text-emerald-500`} />
                 <input
+                  id="register-password"
                   type="password"
                   placeholder="Create a strong password"
                   value={password}

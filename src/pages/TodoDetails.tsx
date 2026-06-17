@@ -142,9 +142,9 @@ const TodoDetails = () => {
             ) : (
               <button onClick={handleReopenTask} className="px-4 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-bold active:scale-95">REOPEN</button>
             )}
-            <button onClick={handleDuplicate} className="p-2.5 border rounded-xl"><Copy size={16} /></button>
-            <button onClick={() => navigate(`/edit-todo/${todo.id}`)} className="p-2.5 border rounded-xl"><Edit3 size={16} /></button>
-            <button onClick={() => setShowDeleteConfirm(true)} className="p-2.5 bg-red-50 text-red-500 border border-red-200 rounded-xl"><Trash2 size={16} /></button>
+            <button aria-label="Duplicate task" title="Duplicate task" onClick={handleDuplicate} className="p-2.5 border rounded-xl"><Copy size={16} /></button>
+            <button aria-label="Edit task" title="Edit task" onClick={() => navigate(`/edit-todo/${todo.id}`)} className="p-2.5 border rounded-xl"><Edit3 size={16} /></button>
+            <button aria-label="Delete task" title="Delete task" onClick={() => setShowDeleteConfirm(true)} className="p-2.5 bg-red-50 text-red-500 border border-red-200 rounded-xl"><Trash2 size={16} /></button>
           </div>
         </div>
 
@@ -228,6 +228,9 @@ const TodoDetails = () => {
                                                 <button onClick={() => window.open(img, '_blank')} className="p-2 bg-white rounded-full text-black shadow-lg">
                                                     <ExternalLink size={16} />
                                                 </button>
+                                                <button aria-label={`Open gallery image ${i + 1}`} title="Open image" onClick={() => window.open(img, '_blank')} className="p-2 bg-white rounded-full text-black shadow-lg">
+                                                    <ExternalLink size={16} />
+                                                  </button>
                                             </div>
                                         </div>
                                     ))}

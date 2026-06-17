@@ -69,3 +69,12 @@ export type CreateTodoFormValues = {
   notificationSound: NotificationSound;
   assignTo?: string;
 };
+
+/**
+ * A strongly-typed shape for partial todo updates used by thunks/services.
+ * Excludes immutable fields like `id` and `createdAt`.
+ */
+export type PartialTodoUpdate = Partial<Omit<Todo, "id" | "createdAt" | "galleryImages">> & {
+  status?: TodoStatus;
+  apply137Rule?: boolean;
+};

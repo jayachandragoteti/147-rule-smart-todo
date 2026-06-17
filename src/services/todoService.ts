@@ -8,23 +8,43 @@ import {
   getDoc,
   query,
   orderBy,
+  limit as fbLimit,
+  startAfter as fbStartAfter,
+  getDoc as fbGetDoc,
 } from "firebase/firestore";
-import type { Todo } from "../types/todo";
+import type { Todo, PartialTodoUpdate } from "../types/todo";
 import { db } from "./firebase/firebase";
 
 type NewTodo = Omit<Todo, "id" | "createdAt">;
 
 export const fetchTodosFromFirestore = async (
-  uid: string
+  uid: string,
+  options?: { limit?: number; startAfterId?: string }
 ): Promise<Todo[]> => {
   const todosRef = collection(db, "users", uid, "todos");
-  const q = query(todosRef, orderBy("createdAt", "desc"));
+  const clauses: any[] = [orderBy("createdAt", "desc")];
+  if (options?.limit) clauses.push(fbLimit(options.limit));
+
+  let q;
+  if (options?.startAfterId) {
+    // Resolve the document to start after
+    const startDocRef = doc(db, "users", uid, "todos", options.startAfterId);
+    const startSnap = await getDoc(startDocRef);
+    if (startSnap.exists()) {
+      q = query(todosRef, ...clauses, fbStartAfter(startSnap));
+    } else {
+      q = query(todosRef, ...clauses);
+    }
+  } else {
+    q = query(todosRef, ...clauses);
+  }
+
   const querySnapshot = await getDocs(q);
   const todos: Todo[] = [];
   querySnapshot.forEach((docSnap) => {
     todos.push({
       id: docSnap.id,
-      ...docSnap.data(),
+      ...(docSnap.data() as Omit<Todo, "id">),
     } as Todo);
   });
   return todos;
@@ -50,7 +70,7 @@ export const createTodoInFirestore = async (
 export const updateTodoInFirestore = async (
   uid: string,
   id: string,
-  updates: Partial<NewTodo & { status?: string; apply137Rule?: boolean }>
+  updates: PartialTodoUpdate
 ): Promise<Todo> => {
   const docRef = doc(db, "users", uid, "todos", id);
   await updateDoc(docRef, updates as Record<string, unknown>);
