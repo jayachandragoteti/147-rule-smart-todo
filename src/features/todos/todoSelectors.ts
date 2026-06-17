@@ -85,3 +85,36 @@ export const selectExtendedTaskStats = createSelector(
     return { total, completed, inProgress, pending, progressPercent };
   }
 );
+
+/**
+ * Upcoming / Scheduled tasks selector
+ *
+ * Returns all tasks whose next due date is in the future (not today, not past),
+ * covering:
+ *   - Regular tasks scheduled on a future date
+ *   - 1-3-7 revision tasks waiting for Day 3 or Day 7 (scheduledDate is future)
+ *   - Recurring tasks (daily / weekly / monthly) whose scheduledDate advanced past today
+ *
+ * Excludes tasks that are already "completed" with no further occurrences.
+ * Sorted by nearest scheduledDate first.
+ */
+export const selectUpcomingTasks = createSelector(
+  [selectAllTodos],
+  (todos) =>
+    todos
+      .filter((t) => {
+        // Skip tasks that are permanently done (non-recurring, non-series, completed)
+        if (t.status === "completed" && !t.apply137Rule && t.recurrence === "none") return false;
+
+        // For 1-3-7 series tasks: show if the next scheduledDate is in the future
+        if (t.apply137Rule) return isFutureDate(t.scheduledDate);
+
+        // For recurring tasks: show if scheduledDate is in the future
+        if (t.recurrence && t.recurrence !== "none") return isFutureDate(t.scheduledDate);
+
+        // For regular tasks: show if scheduledDate is in the future (not today) and not completed
+        return isFutureDate(t.scheduledDate) && t.status !== "completed";
+      })
+      .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime())
+);
+
