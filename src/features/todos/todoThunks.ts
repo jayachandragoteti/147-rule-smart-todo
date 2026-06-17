@@ -26,12 +26,12 @@ const getUidOrReject = (
 
 export const fetchTodos = createAsyncThunk<
   Todo[],
-  void,
+  { limit?: number; startAfterId?: string } | void,
   { state: RootState }
->("todo/fetchTodos", async (_, thunkAPI) => {
+>("todo/fetchTodos", async (opts, thunkAPI) => {
   try {
     const uid = getUidOrReject(thunkAPI);
-    return await fetchTodosFromFirestore(uid);
+    return await fetchTodosFromFirestore(uid, opts as any);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to fetch todos";
     return thunkAPI.rejectWithValue(message);

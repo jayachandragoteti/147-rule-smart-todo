@@ -126,9 +126,9 @@ const Notes = () => {
         note.isPinned ? "ring-1 ring-amber-400/40" : ""
       }`}
     >
-      {note.isPinned && (
+          {note.isPinned && (
         <div className="absolute top-3 right-3 p-1 bg-amber-100 dark:bg-amber-900/30 rounded-md">
-          <Pin size={12} className="text-amber-600 dark:text-amber-400" />
+          <Pin size={12} className="text-amber-600 dark:text-amber-400" aria-hidden />
         </div>
       )}
 
@@ -158,7 +158,7 @@ const Notes = () => {
           {format(new Date(note.updatedAt), "MMM d, h:mm a")}
         </span>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {deleteConfirmId === note.id ? (
+              {deleteConfirmId === note.id ? (
             <>
               <button onClick={() => setDeleteConfirmId(null)} className="p-1.5 text-gray-400 hover:text-gray-700">
                 <X size={13} />
@@ -170,15 +170,17 @@ const Notes = () => {
           ) : (
             <>
               <button
+                aria-label={note.isPinned ? "Unpin note" : "Pin note"}
+                title={note.isPinned ? "Unpin note" : "Pin note"}
                 onClick={() => handleTogglePin(note)}
                 className={`p-1.5 rounded-lg transition-colors ${note.isPinned ? "text-amber-500" : "text-gray-400 hover:text-amber-500"}`}
               >
                 {note.isPinned ? <PinOff size={13} /> : <Pin size={13} />}
               </button>
-              <button onClick={() => openEdit(note)} className="p-1.5 text-gray-400 hover:text-blue-500">
+              <button aria-label="Edit note" title="Edit note" onClick={() => openEdit(note)} className="p-1.5 text-gray-400 hover:text-blue-500">
                 <Edit3 size={13} />
               </button>
-              <button onClick={() => setDeleteConfirmId(note.id)} className="p-1.5 text-gray-400 hover:text-red-500">
+              <button aria-label="Delete note" title="Delete note" onClick={() => setDeleteConfirmId(note.id)} className="p-1.5 text-gray-400 hover:text-red-500">
                 <Trash2 size={13} />
               </button>
             </>

@@ -334,18 +334,20 @@ const Diary = () => {
               <div className="space-y-4 flex-1 flex flex-col">
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-50">Entry Title</label>
-                    <input
-                      type="text"
-                      placeholder="Title..."
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className={`w-full bg-transparent text-xl font-bold border-none focus:ring-0 outline-none ${THEME_CLASSES.text.primary}`}
-                    />
-                  </div>
+                      <label htmlFor="diary-title" className="text-[10px] font-bold uppercase tracking-widest opacity-50">Entry Title</label>
+                      <input
+                        id="diary-title"
+                        type="text"
+                        placeholder="Title..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className={`w-full bg-transparent text-xl font-bold border-none focus:ring-0 outline-none ${THEME_CLASSES.text.primary}`}
+                      />
+                    </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-50">Entry Date</label>
+                    <label htmlFor="diary-date" className="text-[10px] font-bold uppercase tracking-widest opacity-50">Entry Date</label>
                     <input
+                      id="diary-date"
                       type="date"
                       value={format(selectedDate, "yyyy-MM-dd")}
                       max={format(new Date(), "yyyy-MM-dd")}
