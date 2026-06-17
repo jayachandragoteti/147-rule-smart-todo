@@ -10,7 +10,6 @@ import {
   orderBy,
   limit as fbLimit,
   startAfter as fbStartAfter,
-  getDoc as fbGetDoc,
 } from "firebase/firestore";
 import type { Todo, PartialTodoUpdate } from "../types/todo";
 import { db } from "./firebase/firebase";

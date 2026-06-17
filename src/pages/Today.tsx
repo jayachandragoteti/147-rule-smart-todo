@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
 import TodoCard from "../components/todos/TodoCard";
@@ -6,8 +6,8 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { fetchTodos } from "../features/todos/todoThunks";
 import { selectTodayTasks, selectTaskStats } from "../features/todos/todoSelectors";
 import { THEME_CLASSES } from "../utils/themeUtils";
-import { 
-  Sparkles, 
+import {
+  Sparkles,
   Target,
   Zap,
   CheckCircle2,
