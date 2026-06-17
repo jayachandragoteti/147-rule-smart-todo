@@ -14,7 +14,6 @@ import {
   CheckCheck,
   Loader2,
   Search,
-  ChevronDown,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
@@ -30,6 +29,7 @@ import {
 } from "../features/todos/todoSelectors";
 import { get137Label } from "../utils/rule137";
 import type { Todo, TodoStatus } from "../types/todo";
+import StatusDropdown from "../components/ui/StatusDropdown";
 
 // ─── Motivational quotes ───────────────────────────────────────────────────
 const QUOTES = [
@@ -77,7 +77,6 @@ const Home = () => {
   const upcomingTasks   = useAppSelector(selectUpcomingTasks);
 
   const [updatingId,       setUpdatingId]       = useState<string | null>(null);
-  const [statusDropdownId, setStatusDropdownId] = useState<string | null>(null);
   const [quickTab,         setQuickTab]         = useState<QuickAddTab>("task");
   const [quickText,        setQuickText]        = useState("");
   const [savingNote,       setSavingNote]       = useState(false);
@@ -211,11 +210,9 @@ const Home = () => {
   const TaskRow = ({ todo, isRevision }: { todo: Todo; isRevision?: boolean }) => {
     const isUpdating = updatingId === todo.id;
     const isDone     = todo.status === "completed";
-    const cfg        = statusConfig[todo.status] ?? statusConfig.pending;
     const revLabel   = isRevision && todo.seriesDates?.length
       ? get137Label(todo.seriesDates, todo.scheduledDate)
       : null;
-    const isDropdownOpen = statusDropdownId === todo.id;
 
     return (
       <div
@@ -224,7 +221,6 @@ const Home = () => {
             ? `opacity-60 ${THEME_CLASSES.surface.hover}`
             : `${THEME_CLASSES.surface.hover} hover:shadow-sm`
         }`}
-        onClick={() => isDropdownOpen && setStatusDropdownId(null)}
       >
         {/* Status indicator circle */}
         <button
@@ -282,45 +278,12 @@ const Home = () => {
 
         {/* Right: status dropdown + View button */}
         <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-          <div className="relative">
-            <button
-              onClick={() => setStatusDropdownId(isDropdownOpen ? null : todo.id)}
-              disabled={isUpdating}
-              className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${cfg.className} ${THEME_CLASSES.border.base} hover:opacity-80 active:scale-95`}
-            >
-              {isUpdating ? <Loader2 size={9} className="animate-spin" /> : cfg.icon}
-              <span className="hidden sm:inline">{cfg.label}</span>
-              <ChevronDown size={9} className={`transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
-            </button>
-            {isDropdownOpen && (
-              <div className={`absolute right-0 top-full mt-1 w-40 rounded-xl border shadow-xl z-50 overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-                {([
-                  { value: "pending",    label: "To Do",       dot: "bg-[#606878]" },
-                  { value: "inprogress", label: "In Progress", dot: "bg-[#f59e0b]" },
-                  { value: "completed",  label: "Completed",   dot: "bg-[#22c55e]" },
-                ] as { value: TodoStatus; label: string; dot: string }[]).map((opt) => {
-                  const blocked = opt.value === "completed" && (todo.subtasks?.some((st) => !st.completed) ?? false);
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => { if (!blocked) { handleStatusChangeById(todo, opt.value as TodoStatus); setStatusDropdownId(null); } }}
-                      disabled={blocked}
-                      title={blocked ? "Complete all subtasks first" : undefined}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold transition-all ${
-                        blocked ? "opacity-40 cursor-not-allowed"
-                        : todo.status === opt.value ? `${statusConfig[opt.value]?.className} opacity-80`
-                        : `${THEME_CLASSES.text.secondary} ${THEME_CLASSES.button.hover}`
-                      }`}
-                    >
-                      <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                      {opt.label}
-                      {todo.status === opt.value && <CheckCircle2 size={10} className="ml-auto" />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <StatusDropdown
+            currentStatus={todo.status as TodoStatus}
+            isUpdating={isUpdating}
+            blocked={todo.subtasks?.some((st) => !st.completed) ?? false}
+            onChange={(newStatus) => handleStatusChangeById(todo, newStatus)}
+          />
           <Link
             to={`/todo/${todo.id}`}
             className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${THEME_CLASSES.border.base} ${THEME_CLASSES.text.tertiary} ${THEME_CLASSES.button.hover} hover:text-[#4f8cff] hover:border-[#4f8cff]/30`}
@@ -388,38 +351,24 @@ const Home = () => {
           <p className={`text-xs sm:text-sm italic ${THEME_CLASSES.text.tertiary} line-clamp-1`}>"{quote}"</p>
         </div>
 
-        {/* ── Today's Progress — moved to top ── */}
+        {/* ── Progress bar only — top of page ── */}
         <div className="animate-fade-in-up" style={{ animationDelay: "40ms" }}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Total",       value: stats.total,      icon: <Target size={15} />,      color: "text-[#4f8cff] bg-[#4f8cff]/10" },
-              { label: "Completed",   value: stats.completed,   icon: <CheckCheck size={15} />,  color: "text-[#22c55e] bg-[#22c55e]/10" },
-              { label: "In Progress", value: stats.inProgress,  icon: <PlayCircle size={15} />,  color: "text-[#f59e0b] bg-[#f59e0b]/10" },
-              { label: "Pending",     value: stats.pending,     icon: <Flame size={15} />,       color: "text-[#a0a6b5] bg-white/5" },
-            ].map(({ label, value, icon, color }) => (
-              <div
-                key={label}
-                className={`flex items-center gap-3 p-3.5 rounded-xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
-              >
-                <div className={`p-2 rounded-lg ${color}`}>{icon}</div>
-                <div>
-                  <p className={`text-xl font-bold leading-none ${THEME_CLASSES.text.primary}`}>{value}</p>
-                  <p className={`text-[10px] mt-0.5 font-medium ${THEME_CLASSES.text.tertiary}`}>{label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Progress bar */}
-          <div className="mt-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className={`text-[11px] font-medium ${THEME_CLASSES.text.tertiary}`}>Today's progress</span>
+          <div className={`px-4 py-3 rounded-2xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className={`text-[11px] font-semibold ${THEME_CLASSES.text.tertiary}`}>Today's progress</span>
               <span className={`text-[11px] font-bold ${THEME_CLASSES.text.primary}`}>{stats.progressPercent}%</span>
             </div>
-            <div className="h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-[#4f8cff] to-[#22c55e] rounded-full transition-all duration-1000 ease-out"
                 style={{ width: `${stats.progressPercent}%` }}
               />
+            </div>
+            <div className="flex items-center justify-between mt-2 text-[10px] font-medium">
+              <span className={THEME_CLASSES.text.tertiary}>{stats.completed} of {stats.total} tasks done</span>
+              {stats.inProgress > 0 && (
+                <span className="text-[#f59e0b]">{stats.inProgress} in progress</span>
+              )}
             </div>
           </div>
         </div>
@@ -571,7 +520,26 @@ const Home = () => {
           </div>
         </div>
 
-
+        {/* ── Daily Stats — below task list ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in-up" style={{ animationDelay: "130ms" }}>
+          {[
+            { label: "Total",       value: stats.total,      icon: <Target size={15} />,      color: "text-[#4f8cff] bg-[#4f8cff]/10" },
+            { label: "Completed",   value: stats.completed,   icon: <CheckCheck size={15} />,  color: "text-[#22c55e] bg-[#22c55e]/10" },
+            { label: "In Progress", value: stats.inProgress,  icon: <PlayCircle size={15} />,  color: "text-[#f59e0b] bg-[#f59e0b]/10" },
+            { label: "Pending",     value: stats.pending,     icon: <Flame size={15} />,       color: "text-[#a0a6b5] bg-white/5" },
+          ].map(({ label, value, icon, color }) => (
+            <div
+              key={label}
+              className={`flex items-center gap-3 p-3.5 rounded-xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+            >
+              <div className={`p-2 rounded-lg ${color}`}>{icon}</div>
+              <div>
+                <p className={`text-xl font-bold leading-none ${THEME_CLASSES.text.primary}`}>{value}</p>
+                <p className={`text-[10px] mt-0.5 font-medium ${THEME_CLASSES.text.tertiary}`}>{label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* ── Upcoming & Scheduled Tasks ── */}
         <div className="animate-fade-in-up" style={{ animationDelay: "140ms" }}>
@@ -703,44 +671,13 @@ const Home = () => {
 
                             {/* Status dropdown + View */}
                             <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                              <div className="relative">
-                                <button
-                                  onClick={() => setStatusDropdownId(statusDropdownId === todo.id ? null : todo.id)}
-                                  disabled={isUpdating}
-                                  className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${cfg.className} ${THEME_CLASSES.border.base} hover:opacity-80`}
-                                >
-                                  {isUpdating ? <Loader2 size={9} className="animate-spin" /> : cfg.icon}
-                                  <ChevronDown size={9} className={`transition-transform ${statusDropdownId === todo.id ? "rotate-180" : ""}`} />
-                                </button>
-                                {statusDropdownId === todo.id && (
-                                  <div className={`absolute right-0 top-full mt-1 w-40 rounded-xl border shadow-xl z-50 overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-                                    {([
-                                      { value: "pending",    label: "To Do",       dot: "bg-[#606878]" },
-                                      { value: "inprogress", label: "In Progress", dot: "bg-[#f59e0b]" },
-                                      { value: "completed",  label: "Completed",   dot: "bg-[#22c55e]" },
-                                    ] as { value: TodoStatus; label: string; dot: string }[]).map((opt) => {
-                                      const blocked = opt.value === "completed" && (todo.subtasks?.some((st) => !st.completed) ?? false);
-                                      return (
-                                        <button
-                                          key={opt.value}
-                                          onClick={() => { if (!blocked) { handleStatusChangeById(todo, opt.value as TodoStatus); setStatusDropdownId(null); } }}
-                                          disabled={blocked}
-                                          title={blocked ? "Complete all subtasks first" : undefined}
-                                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold transition-all ${
-                                            blocked ? "opacity-40 cursor-not-allowed"
-                                            : todo.status === opt.value ? `${statusConfig[opt.value]?.className} opacity-80`
-                                            : `${THEME_CLASSES.text.secondary} ${THEME_CLASSES.button.hover}`
-                                          }`}
-                                        >
-                                          <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                                          {opt.label}
-                                          {todo.status === opt.value && <CheckCircle2 size={10} className="ml-auto" />}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                )}
-                              </div>
+                              <StatusDropdown
+                                currentStatus={todo.status as TodoStatus}
+                                isUpdating={isUpdating}
+                                blocked={todo.subtasks?.some((st) => !st.completed) ?? false}
+                                onChange={(newStatus) => handleStatusChangeById(todo, newStatus)}
+                                showLabel={false}
+                              />
                               <Link
                                 to={`/todo/${todo.id}`}
                                 className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${THEME_CLASSES.border.base} ${THEME_CLASSES.text.tertiary} ${THEME_CLASSES.button.hover} hover:text-[#4f8cff] hover:border-[#4f8cff]/30`}
