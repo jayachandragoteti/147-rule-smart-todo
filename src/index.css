@@ -25,35 +25,35 @@
   --text-tertiary: 156 163 175;        /* gray-400 */
   
   /* Accents */
-  --accent-primary: 59 130 246;        /* blue-500 */
-  --accent-hover: 37 99 235;           /* blue-600 */
+  --accent-primary: 79 140 255;        /* #4F8CFF */
+  --accent-hover: 60 120 240;          /* slightly darker */
   
   color-scheme: light;
 }
 
-/* Dark Theme */
+/* Dark Theme — TodoSpace Design System */
 .dark {
-  /* Backgrounds */
-  --bg-primary: 17 24 39;              /* gray-900 */
-  --bg-secondary: 15 23 42;            /* slate-900 */
-  --bg-tertiary: 31 41 55;             /* gray-800 */
+  /* Backgrounds — spec: #0F1117, #171A22 */
+  --bg-primary: 15 17 23;              /* #0F1117 */
+  --bg-secondary: 23 26 34;            /* #171A22 */
+  --bg-tertiary: 30 34 48;             /* #1E2230 */
   
-  /* Surfaces & Cards */
-  --surface-primary: 17 24 39;         /* gray-900 */
-  --surface-hover: 31 41 55;           /* gray-800 */
+  /* Surfaces & Cards — spec: #1E2230 */
+  --surface-primary: 15 17 23;         /* #0F1117 */
+  --surface-hover: 30 34 48;           /* #1E2230 */
   
-  /* Borders */
-  --border-primary: 31 41 55;          /* gray-800 */
-  --border-secondary: 55 65 81;        /* gray-700 */
+  /* Borders — subtle on dark bg */
+  --border-primary: 30 34 48;          /* #1E2230 */
+  --border-secondary: 40 45 65;        /* slightly lighter */
   
-  /* Text */
-  --text-primary: 243 244 246;         /* gray-100 */
-  --text-secondary: 209 213 219;       /* gray-300 */
-  --text-tertiary: 156 163 175;        /* gray-400 */
+  /* Text — spec: #FFFFFF, #A0A6B5 */
+  --text-primary: 255 255 255;         /* #FFFFFF */
+  --text-secondary: 160 166 181;       /* #A0A6B5 */
+  --text-tertiary: 100 110 130;        /* muted */
   
-  /* Accents */
-  --accent-primary: 96 165 250;        /* blue-400 */
-  --accent-hover: 59 130 246;          /* blue-500 */
+  /* Accents — spec: #4F8CFF */
+  --accent-primary: 79 140 255;        /* #4F8CFF */
+  --accent-hover: 60 120 240;          /* slightly darker */
   
   color-scheme: dark;
 }
@@ -80,8 +80,8 @@ body {
    ======================================== */
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -101,7 +101,7 @@ body {
    ======================================== */
 
 ::selection {
-  @apply bg-blue-500/20;
+  background-color: rgba(79, 140, 255, 0.2);
 }
 
 /* ========================================
@@ -119,4 +119,72 @@ select {
 input[type="date"],
 input[type="time"] {
   min-height: 2.5rem;
+}
+
+/* ========================================
+   ANIMATION UTILITIES
+   ======================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(79, 140, 255, 0); }
+  50%       { box-shadow: 0 0 0 6px rgba(79, 140, 255, 0.15); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.35s ease both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease both;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s ease both;
+}
+
+/* Staggered children animations */
+.stagger-children > * {
+  animation: fadeInUp 0.35s ease both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms;  }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+
+/* ========================================
+   CUSTOM SCROLLBAR (named class)
+   ======================================== */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-200 dark:bg-gray-800 rounded-full;
 }

@@ -1,116 +1,83 @@
 import { NavLink } from "react-router-dom";
-import { 
-  CalendarCheck, 
-  ListTodo, 
-  PlusCircle, 
-  Heart, 
-  Settings,
-  Shield,
+import {
+  LayoutDashboard,
+  ListTodo,
+  RotateCcw,
+  Heart,
   StickyNote,
-  Home,
-  BrainCircuit,
+  Settings,
 } from "lucide-react";
 import { THEME_CLASSES } from "../../utils/themeUtils";
-import { useAppSelector } from "../../app/hooks";
-import { isTodayDate } from "../../utils/dateUtils";
 
 interface SidebarProps {
   onNavigate?: () => void;
 }
 
 const navItems = [
-  { to: "/",           label: "Home",       icon: Home,          color: "text-blue-500",    group: "Main" },
-  { to: "/today",      label: "Today",      icon: CalendarCheck, color: "text-emerald-500", group: "Main" },
-  { to: "/todos",      label: "All Tasks",  icon: ListTodo,      color: "text-indigo-500",  group: "Tasks" },
-  { to: "/learning",   label: "Learning",   icon: BrainCircuit,  color: "text-purple-500",  group: "Tasks" },
-  { to: "/create-todo", label: "New Task",  icon: PlusCircle,    color: "text-blue-500",    group: "Tasks" },
-  { to: "/notes",      label: "Notes",      icon: StickyNote,    color: "text-amber-500",   group: "Personal" },
-  { to: "/heartspace", label: "Heartspace", icon: Heart,         color: "text-rose-400",    group: "Personal" },
-  { to: "/profile",    label: "Settings",   icon: Settings,      color: "text-blue-400",    group: "Personal" },
+  { to: "/",           label: "Dashboard",  icon: LayoutDashboard, end: true },
+  { to: "/todos",      label: "Tasks",       icon: ListTodo,        end: false },
+  { to: "/learning",   label: "Revisions",  icon: RotateCcw,       end: false },
+  { to: "/heartspace", label: "Heartspace", icon: Heart,           end: false },
+  { to: "/notes",      label: "Notes",       icon: StickyNote,      end: false },
+  { to: "/profile",    label: "Settings",   icon: Settings,        end: false },
 ];
 
-
 const Sidebar = ({ onNavigate }: SidebarProps) => {
-  const linkStyle = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 group relative overflow-hidden ${
-       isActive
-         ? `bg-blue-600 shadow-lg shadow-blue-500/20 text-white`
-         : `hover:bg-gray-100 dark:hover:bg-gray-800/50 ${THEME_CLASSES.text.primary}`
-    }`;
-
-  const todos = useAppSelector((state) => state.todo.todos);
-  const notes = useAppSelector((state) => state.notes.notes);
-  const activeTasksCount = todos.filter(t => 
-    t.status !== 'completed' && 
-    (t.seriesDates?.some(d => isTodayDate(d)) || isTodayDate(t.scheduledDate))
-  ).length;
-
-  const groups = Array.from(new Set(navItems.map(item => item.group)));
-
   return (
-    <div className="flex flex-col h-full py-8 space-y-8">
-      <div className="px-6 flex items-center gap-2 opacity-30 select-none">
-          <Shield size={14} className="text-gray-400" />
-          <div className="h-[1px] flex-1 bg-gray-400" />
+    <div className="flex flex-col h-full py-6">
+      {/* Logo mark */}
+      <div className="px-5 mb-6 flex items-center gap-2.5">
+        <div className="w-7 h-7 rounded-lg bg-[#4f8cff] flex items-center justify-center shadow-[0_0_16px_rgba(79,140,255,0.4)]">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h3l2-5 2 10 2-5h1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <span className={`text-sm font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>TodoSpace</span>
+          <span className={`block text-[9px] font-medium uppercase tracking-widest opacity-40 ${THEME_CLASSES.text.tertiary}`}>1 · 3 · 7</span>
+        </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-8 overflow-y-auto custom-scrollbar">
-        {groups.map(group => (
-            <div key={group} className="space-y-2">
-                <div className="px-4 text-[9px] font-bold uppercase tracking-wider opacity-40 mb-2">
-                    {group}
-                </div>
-                {navItems.filter(item => item.group === group).map(({ to, label, icon: Icon, color }) => (
-                  <NavLink key={to} to={to} end={to === "/"} className={linkStyle} onClick={onNavigate}>
-                    {({ isActive }) => (
-                        <>
-                            <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-blue-600 text-white shadow-lg' : `${color} bg-gray-100 dark:bg-gray-800 group-hover:scale-110`}`}>
-                                <Icon size={16} className="shrink-0" />
-                            </div>
-                            <span className="relative z-10">{label}</span>
-                            {isActive && (
-                                <div className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-                            )}
-                        </>
-                    )}
-                  </NavLink>
-                ))}
-            </div>
+      {/* Nav items */}
+      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto custom-scrollbar">
+        {navItems.map(({ to, label, icon: Icon, end }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={end}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              `group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                isActive
+                  ? `${THEME_CLASSES.surface.active} text-[#4f8cff] font-semibold`
+                  : `${THEME_CLASSES.text.secondary} hover:${THEME_CLASSES.surface.active} hover:text-gray-900 dark:hover:text-white`
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                {/* Active indicator */}
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#4f8cff] rounded-r-full" />
+                )}
+                <Icon
+                  size={17}
+                  className={`shrink-0 transition-colors ${
+                    isActive ? "text-[#4f8cff]" : "opacity-60 group-hover:opacity-100"
+                  }`}
+                />
+                <span>{label}</span>
+              </>
+            )}
+          </NavLink>
         ))}
       </nav>
-      
-      <div className="px-4 space-y-4">
-          <div className={`p-4 rounded-xl border group transition-all duration-300 hover:border-emerald-500/30 ${THEME_CLASSES.surface.secondary} ${THEME_CLASSES.border.base}`}>
-              <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wide opacity-50">Quick Stats</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-0.5">
-                          <div className={`text-lg font-bold ${THEME_CLASSES.text.primary}`}>
-                              {activeTasksCount > 0 ? `${activeTasksCount}` : "0"}
-                          </div>
-                          <div className={`text-[10px] font-medium opacity-50 tracking-tight ${THEME_CLASSES.text.tertiary}`}>
-                              Today Active
-                          </div>
-                      </div>
-                      <div className="space-y-0.5">
-                          <div className={`text-lg font-bold ${THEME_CLASSES.text.primary}`}>
-                              {notes.length}
-                          </div>
-                          <div className={`text-[10px] font-medium opacity-50 tracking-tight ${THEME_CLASSES.text.tertiary}`}>
-                              Notes
-                          </div>
-                      </div>
-                  </div>
-                  <div className={`h-1.5 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800`}>
-                      <div 
-                          className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-700"
-                          style={{ width: activeTasksCount > 0 ? `${Math.min(100, (todos.filter(t => t.status === 'completed').length / todos.length) * 100)}%` : '0%' }}
-                      />
-                  </div>
-              </div>
-          </div>
+
+      {/* Bottom hint */}
+      <div className="px-5 pt-4 border-t border-gray-100 dark:border-white/5">
+        <p className={`text-[10px] font-medium ${THEME_CLASSES.text.tertiary}`}>
+          Press <kbd className="px-1 py-0.5 text-[9px] rounded bg-gray-100 dark:bg-white/5 font-mono">N</kbd> for new task
+        </p>
       </div>
     </div>
   );

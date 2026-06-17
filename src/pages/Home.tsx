@@ -4,43 +4,86 @@ import {
   Circle,
   Clock,
   Plus,
-  Target,
   ArrowRight,
-  Calendar,
-  Bell,
+  RotateCcw,
+  Target,
+  Flame,
+  BookOpen,
+  StickyNote,
+  PlayCircle,
+  Edit,
+  CheckCheck,
+  Loader2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
-import NotesWidget from "../components/dashboard/NotesWidget";
-import HeartspaceWidget from "../components/dashboard/HeartspaceWidget";
-import LearningWidget from "../components/dashboard/LearningWidget";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
-import { fetchTodos, updateTodo, completeTodo, toggleSubtaskStatus } from "../features/todos/todoThunks";
-import { fetchNotes } from "../features/notes/notesSlice";
+import { fetchTodos, updateTodo, completeTodo } from "../features/todos/todoThunks";
+import { fetchNotes, createNote } from "../features/notes/notesSlice";
 import { fetchJournalEntries } from "../features/journal/journalSlice";
 import { THEME_CLASSES } from "../utils/themeUtils";
-import { isTodayDate, isFutureDate } from "../utils/dateUtils";
-import type { Todo, TodoStatus } from "../types/todo";
-import { isAfter } from "date-fns";
 import {
-  selectTaskStats,
-  selectTodayTasks,
+  selectExtendedTaskStats,
+  selectTodayRegularTasks,
+  selectTodayRevisions,
 } from "../features/todos/todoSelectors";
+import { get137Label } from "../utils/rule137";
+import type { Todo, TodoStatus } from "../types/todo";
+
+// ─── Motivational quotes ───────────────────────────────────────────────────
+const QUOTES = [
+  "Small steps every day lead to big results.",
+  "Discipline is choosing what you want most over what you want now.",
+  "Done is better than perfect.",
+  "One task at a time. One day at a time.",
+  "Progress, not perfection.",
+];
+
+// ─── Status pill styles ────────────────────────────────────────────────────
+const statusConfig: Record<
+  string,
+  { label: string; className: string; icon: React.ReactNode }
+> = {
+  pending:    { label: "To Do",       className: THEME_CLASSES.status.todo,       icon: <Circle size={11} /> },
+  inprogress: { label: "In Progress", className: THEME_CLASSES.status.inprogress, icon: <Clock size={11} /> },
+  completed:  { label: "Done",        className: THEME_CLASSES.status.success,    icon: <CheckCircle2 size={11} /> },
+};
+
+const priorityDot: Record<string, string> = {
+  urgent: "bg-[#ef4444]",
+  high:   "bg-orange-400",
+  medium: "bg-[#4f8cff]",
+  low:    "bg-[#606878]",
+};
+
+// ─── Quick-Add tab types ───────────────────────────────────────────────────
+type QuickAddTab = "task" | "note" | "journal";
 
 const Home = () => {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const toast = useToast();
+  const dispatch   = useAppDispatch();
+  const navigate   = useNavigate();
+  const toast      = useToast();
 
-  const todos = useAppSelector((state) => state.todo.todos);
-  const loading = useAppSelector((state) => state.todo.loading);
-  const notes = useAppSelector((state) => state.notes.notes);
-  const journal = useAppSelector((state) => state.journal.entries);
-  const user = useAppSelector((state) => state.auth.user);
-  const isAuthChecked = useAppSelector((state) => state.auth.isAuthChecked);
+  const loading        = useAppSelector((s) => s.todo.loading);
+  const notes          = useAppSelector((s) => s.notes.notes);
+  const journal        = useAppSelector((s) => s.journal.entries);
+  const user           = useAppSelector((s) => s.auth.user);
+  const isAuthChecked  = useAppSelector((s) => s.auth.isAuthChecked);
 
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [quickTitle, setQuickTitle] = useState("");
+  const stats          = useAppSelector(selectExtendedTaskStats);
+  const todayRegular   = useAppSelector(selectTodayRegularTasks);
+  const todayRevisions = useAppSelector(selectTodayRevisions);
+
+  const [updatingId, setUpdatingId]   = useState<string | null>(null);
+  const [quickTab, setQuickTab]       = useState<QuickAddTab>("task");
+  const [quickText, setQuickText]     = useState("");
+  const [savingNote, setSavingNote]   = useState(false);
+
+  const quote = useMemo(
+    () => QUOTES[Math.floor(Math.random() * QUOTES.length)],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   useEffect(() => {
     if (isAuthChecked && user) {
@@ -50,278 +93,407 @@ const Home = () => {
     }
   }, [isAuthChecked, user, dispatch]);
 
-  // Stats
-  const stats = useAppSelector(selectTaskStats);
-
-  // Today's tasks (show all)
-  const todayTasks = useAppSelector(selectTodayTasks);
-  const todayTodos = todayTasks;
-
-  // Upcoming reminders
-  const upcomingReminders = useMemo(() => {
-    const now = new Date();
-    return todos
-      .filter((t) => {
-        if (t.status === "completed" || !t.reminderEnabled || !t.scheduledTime) return false;
-        if (!isTodayDate(t.scheduledDate)) return false;
-        const [h, m] = t.scheduledTime.split(":").map(Number);
-        const taskTime = new Date();
-        taskTime.setHours(h, m, 0);
-        return isAfter(taskTime, now);
-      })
-      .sort((a, b) => (a.scheduledTime ?? "").localeCompare(b.scheduledTime ?? ""))
-      .slice(0, 3);
-  }, [todos]);
-
-  // 1-3-7 learning tasks due today (show all)
-  const learningDueToday = useMemo(() =>
-    todos.filter((t) => {
-      if (!t.apply137Rule) return false;
-      if (!t.seriesDates?.length) return isTodayDate(t.scheduledDate);
-      return t.seriesDates.some((d) => isTodayDate(d));
-    }).slice(0, 3),
-    [todos]
-  );
-
-  const latestDiaryEntry = useMemo(() =>
-    journal.length > 0 ? journal[0] : null,
+  const latestJournal = useMemo(
+    () => (journal.length > 0 ? journal[0] : null),
     [journal]
   );
 
-  const latestNote = useMemo(() =>
-    notes.find((n) => n.isPinned) || notes[0] || null,
-    [notes]
-  );
+  // ── Greeting ─────────────────────────────────────────────────────────────
+  const greeting = (() => {
+    const h = new Date().getHours();
+    return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+  })();
 
-  const handleToggleComplete = async (id: string, currentStatus: string) => {
-    setUpdatingId(id);
+  const firstName =
+    user?.displayName?.split(" ")[0] || user?.email?.split("@")[0] || "there";
+
+  const dateLabel = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  // ── Status cycle ──────────────────────────────────────────────────────────
+  const handleCycleStatus = async (todo: Todo) => {
+    setUpdatingId(todo.id);
     try {
-      if (currentStatus === "completed") {
-        const todoToUpdate = todos.find(t => t.id === id);
-        const resetSubtasks = todoToUpdate?.subtasks?.map(st => ({ ...st, completed: false })) || [];
-        await dispatch(updateTodo({ id, updates: { status: "pending" as TodoStatus, subtasks: resetSubtasks } })).unwrap();
-        toast.success("Task reopened");
+      if (todo.status === "pending") {
+        await dispatch(updateTodo({ id: todo.id, updates: { status: "inprogress" as TodoStatus } })).unwrap();
+      } else if (todo.status === "inprogress") {
+        await dispatch(completeTodo(todo.id)).unwrap();
+        toast.success("Task completed! 🎉");
       } else {
-        await dispatch(completeTodo(id)).unwrap();
-        toast.success("Task updated");
+        await dispatch(updateTodo({ id: todo.id, updates: { status: "pending" as TodoStatus } })).unwrap();
       }
     } catch {
-      toast.error("Failed to update status");
+      toast.error("Failed to update task");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const handleToggleSubtask = async (todoId: string, subtaskId: string) => {
-    try {
-      await dispatch(toggleSubtaskStatus({ todoId, subtaskId })).unwrap();
-    } catch {
-      toast.error("Failed to update subtask");
+  // ── Quick Add ─────────────────────────────────────────────────────────────
+  const handleQuickAdd = async () => {
+    if (!quickText.trim()) return;
+
+    if (quickTab === "task") {
+      navigate(`/create-todo?title=${encodeURIComponent(quickText.trim())}`);
+      setQuickText("");
+    } else if (quickTab === "note") {
+      setSavingNote(true);
+      try {
+        await dispatch(
+          createNote({ title: quickText.trim(), content: "", tags: [], isPinned: false })
+        ).unwrap();
+        toast.success("Note saved!");
+        setQuickText("");
+      } catch {
+        toast.error("Failed to save note");
+      } finally {
+        setSavingNote(false);
+      }
+    } else {
+      navigate("/heartspace");
+      setQuickText("");
     }
   };
 
-  const handleQuickAdd = () => {
-    if (quickTitle.trim()) {
-      navigate(`/create-todo?title=${encodeURIComponent(quickTitle.trim())}`);
-    }
-  };
+  // ── Task row ──────────────────────────────────────────────────────────────
+  const TaskRow = ({ todo, isRevision }: { todo: Todo; isRevision?: boolean }) => {
+    const isUpdating = updatingId === todo.id;
+    const isDone     = todo.status === "completed";
+    const cfg        = statusConfig[todo.status] ?? statusConfig.pending;
+    const revLabel   = isRevision && todo.seriesDates?.length
+      ? get137Label(todo.seriesDates, todo.scheduledDate)
+      : null;
 
-  const StatusIcon = ({ todo }: { todo: Todo }) => {
-    if (updatingId === todo.id) {
-      return <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />;
-    }
-    
-    const isDone = todo.status === "completed" || 
-                  (todo.seriesDates?.length ? isFutureDate(todo.scheduledDate) : false) ||
-                  (todo.recurrence !== "none" ? isFutureDate(todo.scheduledDate) : false);
+    return (
+      <div
+        className={`group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+          isDone
+            ? "opacity-50"
+            : `${THEME_CLASSES.surface.hover} hover:shadow-sm`
+        }`}
+      >
+        {/* Status cycle button */}
+        <button
+          onClick={() => handleCycleStatus(todo)}
+          disabled={isUpdating}
+          className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all active:scale-90 ${
+            isDone
+              ? "border-[#22c55e] bg-[#22c55e]/10 text-[#22c55e]"
+              : todo.status === "inprogress"
+              ? "border-[#f59e0b] bg-[#f59e0b]/10 text-[#f59e0b]"
+              : "border-gray-200 dark:border-white/10 hover:border-[#4f8cff] hover:bg-[#4f8cff]/10 text-transparent hover:text-[#4f8cff]"
+          }`}
+          title={`Status: ${cfg.label} — click to advance`}
+        >
+          {isUpdating ? (
+            <Loader2 size={12} className="animate-spin text-[#4f8cff]" />
+          ) : isDone ? (
+            <CheckCircle2 size={14} />
+          ) : todo.status === "inprogress" ? (
+            <Clock size={12} />
+          ) : (
+            <Circle size={13} />
+          )}
+        </button>
 
-    if (isDone) {
-      return <CheckCircle2 size={16} className="text-emerald-500" />;
-    }
-
-    switch (todo.status) {
-      case "inprogress":
-        return <Clock size={16} className="text-amber-500" />;
-      default:
-        return (
-          <button
-            onClick={() => handleToggleComplete(todo.id, todo.status)}
-            className="text-gray-300 hover:text-emerald-500 transition-colors"
-            title="Mark complete"
-          >
-            <Circle size={16} />
-          </button>
-        );
-    }
-  };
-
-  return (
-    <PageWrapper>
-      <div className="space-y-8 pb-12">
-        {/* Greeting Header */}
-        <div className="space-y-2">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className={`text-xs font-semibold uppercase tracking-widest opacity-40 ${THEME_CLASSES.text.tertiary}`}>
-                {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-              </p>
-              <h1 className={`text-2xl font-black tracking-tight leading-tight ${THEME_CLASSES.text.primary}`}>
-                {(() => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; })()},{" "}
-                <span className="text-blue-500">{user?.displayName?.split(" ")[0] || user?.email?.split("@")[0] || "there"}</span> 👋
-              </h1>
-            </div>
-            <span className={`text-2xl font-black tabular-nums ${THEME_CLASSES.text.primary}`}>{stats.progressPercent}%</span>
+        {/* Title + meta */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span
+              className={`text-sm font-medium truncate ${
+                isDone ? "line-through" : THEME_CLASSES.text.primary
+              }`}
+            >
+              {todo.title}
+            </span>
+            {/* Priority dot */}
+            <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${priorityDot[todo.priority] ?? priorityDot.medium}`} />
           </div>
-          {/* Today's Progress Bar */}
-          <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-1000 ease-out"
-              style={{ width: `${stats.progressPercent}%` }}
-            />
-          </div>
-          <p className={`text-[10px] font-medium opacity-40 ${THEME_CLASSES.text.tertiary}`}>
-            {stats.completedToday} of {stats.todayTotal} tasks done today
-          </p>
-        </div>
-
-        {/* Quick Task Capture — compact single row */}
-        <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-          <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
-            <Plus size={16} />
-          </div>
-          <div className="relative flex-1 group">
-            <input
-              type="text"
-              placeholder="Capture a task quickly…"
-              value={quickTitle}
-              onChange={(e) => setQuickTitle(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleQuickAdd()}
-              className={`w-full bg-transparent border-none p-0 focus:ring-0 text-sm placeholder:opacity-30 ${THEME_CLASSES.text.primary}`}
-            />
-            <div className="absolute bottom-0 left-0 w-0 h-px bg-blue-500 transition-all duration-300 group-focus-within:w-full" />
-          </div>
-          <button
-            onClick={handleQuickAdd}
-            disabled={!quickTitle.trim()}
-            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white rounded-xl font-bold text-xs transition-all active:scale-95 shadow-md shadow-blue-500/20 shrink-0"
-          >
-            Add
-          </button>
-        </div>
-
-        {/* Main Grid — Today's Tasks + Notifications (Todo) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Today's Tasks */}
-          <div className={`lg:col-span-2 border rounded-2xl shadow-sm overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-            <div className={`flex items-center justify-between px-5 py-4 border-b ${THEME_CLASSES.border.base}`}>
-              <div className="flex items-center gap-2">
-                <Calendar size={16} className="text-blue-500" />
-                <h2 className={`font-bold ${THEME_CLASSES.text.primary}`}>Today's Tasks</h2>
-              </div>
-              <Link to="/today" className={`text-xs font-bold flex items-center gap-1 hover:gap-2 transition-all ${THEME_CLASSES.text.link}`}>
-                View all <ArrowRight size={12} />
-              </Link>
-            </div>
-
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
-              {loading ? (
-                <div className="p-10 text-center opacity-50">Loading assignments...</div>
-              ) : todayTodos.length === 0 ? (
-                <div className="px-5 py-10 text-center space-y-3 opacity-50">
-                  <CheckCircle2 size={32} className="mx-auto text-emerald-400" />
-                  <p className="text-sm font-medium">All clear for today!</p>
-                </div>
-              ) : (
-                todayTodos.map((todo) => (
-                  <div key={todo.id} className="flex flex-col border-b last:border-b-0 border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
-                    <div className="px-5 py-4 flex items-center gap-4 group">
-                      <div className="flex-shrink-0">
-                        <StatusIcon todo={todo} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <Link to={`/todo/${todo.id}`}>
-                          <p className={`text-sm font-semibold truncate group-hover:text-blue-500 transition-colors ${THEME_CLASSES.text.primary} ${(todo.status === "completed" || (todo.seriesDates?.length && isFutureDate(todo.scheduledDate))) ? "line-through opacity-40" : ""}`}>
-                            {todo.title}
-                          </p>
-                        </Link>
-                        <p className={`text-[10px] mt-0.5 ${THEME_CLASSES.text.tertiary}`}>
-                          {todo.scheduledTime || "No time set"} · {todo.category}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Render Subtasks */}
-                    {todo.subtasks && todo.subtasks.length > 0 && (
-                      <div className="pl-14 pr-5 pb-3 space-y-1">
-                         {todo.subtasks.map(subtask => (
-                           <div key={subtask.id} className="flex items-center gap-3">
-                             <button
-                               onClick={() => handleToggleSubtask(todo.id, subtask.id)}
-                               className={`transition-colors flex-shrink-0 ${subtask.completed ? "text-emerald-500" : "text-gray-300 hover:text-emerald-500"}`}
-                             >
-                               {subtask.completed ? <CheckCircle2 size={14} /> : <Circle size={14} />}
-                             </button>
-                             <span className={`text-xs truncate ${subtask.completed ? "line-through opacity-40 " + THEME_CLASSES.text.tertiary : THEME_CLASSES.text.secondary}`}>
-                               {subtask.title}
-                             </span>
-                           </div>
-                         ))}
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Notifications */}
-          <div className="space-y-6">
-            {upcomingReminders.length > 0 && (
-              <div className={`border rounded-2xl shadow-sm overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-                <div className={`flex items-center gap-2 px-4 py-3 border-b ${THEME_CLASSES.border.base}`}>
-                  <Bell size={14} className="text-amber-500" />
-                  <h3 className={`font-bold text-sm ${THEME_CLASSES.text.primary}`}>Notifications</h3>
-                </div>
-                <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {upcomingReminders.map((todo) => (
-                    <div key={todo.id} className="px-4 py-3">
-                      <p className={`text-xs font-semibold truncate ${THEME_CLASSES.text.primary}`}>{todo.title}</p>
-                      <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 mt-0.5">{todo.scheduledTime}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            {todo.scheduledTime && (
+              <span className={`text-[10px] flex items-center gap-1 ${THEME_CLASSES.text.tertiary}`}>
+                <Clock size={9} /> {todo.scheduledTime}
+              </span>
+            )}
+            {todo.category && (
+              <span className={`text-[10px] ${THEME_CLASSES.text.tertiary}`}>{todo.category}</span>
+            )}
+            {revLabel && (
+              <span className="text-[10px] font-semibold text-[#818cf8] bg-[#818cf8]/10 px-1.5 py-0.5 rounded-full">
+                {revLabel} Revision
+              </span>
             )}
           </div>
         </div>
 
-        {/* Task Summary */}
-        <div className="grid grid-cols-2 gap-3 pb-2">
-          {[
-            { label: "Total Tasks", value: todos.length, icon: Target, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
-            { label: "Completed", value: todos.filter(t => t.status === "completed").length, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-          ].map(({ label, value, icon: Icon, color, bg }) => (
-            <div key={label} className={`p-4 rounded-xl border flex items-center gap-3 ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-              <div className={`p-2 rounded-xl ${bg}`}><Icon size={14} className={color} /></div>
-              <div>
-                <p className={`text-xs font-bold uppercase tracking-widest opacity-50 ${THEME_CLASSES.text.tertiary}`}>{label}</p>
-                <p className={`text-xl font-black leading-tight ${THEME_CLASSES.text.primary}`}>{value}</p>
-              </div>
-            </div>
-          ))}
+        {/* Right actions */}
+        <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Status pill */}
+          <span className={`status-pill ${cfg.className} gap-1`}>
+            {cfg.icon} {cfg.label}
+          </span>
+          <Link
+            to={`/todo/${todo.id}`}
+            className={`p-1.5 rounded-lg ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.tertiary} hover:text-[#4f8cff] transition-colors`}
+            title="Edit task"
+          >
+            <Edit size={13} />
+          </Link>
         </div>
 
-        {/* Learning */}
-        <LearningWidget learningDueToday={learningDueToday} />
+        {/* Always-visible actions for mobile */}
+        <div className="sm:hidden flex items-center gap-1 shrink-0">
+          <span className={`status-pill ${cfg.className}`}>{cfg.label}</span>
+        </div>
+      </div>
+    );
+  };
 
-        {/* Notes */}
-        <NotesWidget latestNote={latestNote} />
+  // ── Section wrapper ────────────────────────────────────────────────────────
+  const Section = ({
+    title, icon, href, hrefLabel, children, empty, emptyText,
+  }: {
+    title: string;
+    icon: React.ReactNode;
+    href?: string;
+    hrefLabel?: string;
+    children: React.ReactNode;
+    empty?: boolean;
+    emptyText?: string;
+  }) => (
+    <div className={`rounded-2xl border overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+      <div className={`flex items-center justify-between px-5 py-3.5 border-b ${THEME_CLASSES.border.base}`}>
+        <div className="flex items-center gap-2">
+          <span className="text-[#4f8cff]">{icon}</span>
+          <h2 className={`text-sm font-semibold ${THEME_CLASSES.text.primary}`}>{title}</h2>
+        </div>
+        {href && (
+          <Link
+            to={href}
+            className={`text-[11px] font-medium flex items-center gap-1 transition-all ${THEME_CLASSES.text.link} hover:gap-1.5`}
+          >
+            {hrefLabel ?? "View all"} <ArrowRight size={11} />
+          </Link>
+        )}
+      </div>
+      {empty ? (
+        <div className="px-5 py-10 text-center">
+          <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>{emptyText ?? "Nothing here yet"}</p>
+        </div>
+      ) : (
+        <div className="p-2">{children}</div>
+      )}
+    </div>
+  );
 
+  return (
+    <PageWrapper>
+      <div className="space-y-6 pb-12 animate-fade-in">
+        {/* ── Welcome Header ── */}
+        <div className="space-y-1 animate-fade-in-up">
+          <p className={`text-xs font-semibold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
+            {dateLabel}
+          </p>
+          <h1 className={`text-2xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
+            {greeting},{" "}
+            <span className="text-[#4f8cff]">{firstName}</span> 👋
+          </h1>
+          <p className={`text-sm italic ${THEME_CLASSES.text.tertiary}`}>"{quote}"</p>
+        </div>
 
+        {/* ── Daily Summary Strip ── */}
+        <div className="animate-fade-in-up" style={{ animationDelay: "60ms" }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Total",       value: stats.total,      icon: <Target size={15} />,      color: "text-[#4f8cff] bg-[#4f8cff]/10" },
+              { label: "Completed",   value: stats.completed,   icon: <CheckCheck size={15} />,  color: "text-[#22c55e] bg-[#22c55e]/10" },
+              { label: "In Progress", value: stats.inProgress,  icon: <PlayCircle size={15} />,  color: "text-[#f59e0b] bg-[#f59e0b]/10" },
+              { label: "Pending",     value: stats.pending,     icon: <Flame size={15} />,       color: "text-[#a0a6b5] bg-white/5" },
+            ].map(({ label, value, icon, color }) => (
+              <div
+                key={label}
+                className={`flex items-center gap-3 p-3.5 rounded-xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+              >
+                <div className={`p-2 rounded-lg ${color}`}>{icon}</div>
+                <div>
+                  <p className={`text-xl font-bold leading-none ${THEME_CLASSES.text.primary}`}>{value}</p>
+                  <p className={`text-[10px] mt-0.5 font-medium ${THEME_CLASSES.text.tertiary}`}>{label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
 
+          {/* Progress bar */}
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className={`text-[11px] font-medium ${THEME_CLASSES.text.tertiary}`}>
+                Today's progress
+              </span>
+              <span className={`text-[11px] font-bold ${THEME_CLASSES.text.primary}`}>
+                {stats.progressPercent}%
+              </span>
+            </div>
+            <div className="h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#4f8cff] to-[#22c55e] rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${stats.progressPercent}%` }}
+              />
+            </div>
+          </div>
+        </div>
 
+        {/* ── Quick Add Area ── */}
+        <div
+          className={`rounded-2xl border p-4 space-y-3 animate-fade-in-up ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
+          style={{ animationDelay: "120ms" }}
+        >
+          {/* Tabs */}
+          <div className="flex gap-1">
+            {(["task", "note", "journal"] as QuickAddTab[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => { setQuickTab(tab); setQuickText(""); }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
+                  quickTab === tab
+                    ? "bg-[#4f8cff] text-white shadow-[0_0_12px_rgba(79,140,255,0.3)]"
+                    : `${THEME_CLASSES.text.tertiary} ${THEME_CLASSES.button.hover}`
+                }`}
+              >
+                {tab === "task"    && <Target size={11} />}
+                {tab === "note"    && <StickyNote size={11} />}
+                {tab === "journal" && <BookOpen size={11} />}
+                {tab}
+              </button>
+            ))}
+          </div>
 
-        {/* Heartspace - Moved to Bottom Area */}
-        <HeartspaceWidget latestDiaryEntry={latestDiaryEntry} />
+          {/* Input row */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Plus size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${THEME_CLASSES.text.tertiary}`} />
+              <input
+                type="text"
+                placeholder={
+                  quickTab === "task"
+                    ? "What do you need to do today?"
+                    : quickTab === "note"
+                    ? "Capture a quick note…"
+                    : "Start today's journal entry…"
+                }
+                value={quickText}
+                onChange={(e) => setQuickText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleQuickAdd()}
+                className={`w-full pl-8 pr-4 py-2.5 rounded-xl text-sm ${THEME_CLASSES.input.base}`}
+              />
+            </div>
+            <button
+              onClick={handleQuickAdd}
+              disabled={!quickText.trim() || savingNote}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 disabled:opacity-40 ${THEME_CLASSES.button.primary}`}
+            >
+              {savingNote ? <Loader2 size={14} className="animate-spin" /> : "Add"}
+            </button>
+          </div>
+        </div>
+
+        {/* ── Today's Tasks ── */}
+        <div className="animate-fade-in-up" style={{ animationDelay: "180ms" }}>
+          <Section
+            title="Today's Tasks"
+            icon={<Target size={15} />}
+            href="/todos"
+            hrefLabel="All tasks"
+            empty={!loading && todayRegular.length === 0}
+            emptyText="No regular tasks scheduled for today. Add one above!"
+          >
+            {loading ? (
+              <div className="space-y-2 p-1">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-14 rounded-xl bg-gray-100 dark:bg-white/3 animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50 dark:divide-white/3">
+                {todayRegular.map((todo) => (
+                  <TaskRow key={todo.id} todo={todo} />
+                ))}
+              </div>
+            )}
+          </Section>
+        </div>
+
+        {/* ── Today's Revisions ── */}
+        <div className="animate-fade-in-up" style={{ animationDelay: "240ms" }}>
+          <Section
+            title="Today's Revisions (1-3-7)"
+            icon={<RotateCcw size={15} />}
+            href="/learning"
+            hrefLabel="All revisions"
+            empty={!loading && todayRevisions.length === 0}
+            emptyText="No revisions scheduled for today. Great — enjoy the break!"
+          >
+            {loading ? (
+              <div className="space-y-2 p-1">
+                {[1, 2].map((i) => (
+                  <div key={i} className="h-14 rounded-xl bg-gray-100 dark:bg-white/3 animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50 dark:divide-white/3">
+                {todayRevisions.map((todo) => (
+                  <TaskRow key={todo.id} todo={todo} isRevision />
+                ))}
+              </div>
+            )}
+          </Section>
+        </div>
+
+        {/* ── Recent Journal Entry ── */}
+        {latestJournal && (
+          <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+            <Section
+              title="Recent Journal Entry"
+              icon={<BookOpen size={15} />}
+              href="/heartspace"
+              hrefLabel="Open Heartspace"
+            >
+              <div className="px-2 py-1">
+                <p className={`text-xs font-semibold mb-1 ${THEME_CLASSES.text.primary}`}>
+                  {latestJournal.title || "Untitled entry"}
+                </p>
+                <p className={`text-xs leading-relaxed line-clamp-2 ${THEME_CLASSES.text.secondary}`}>
+                  {latestJournal.content || "No content."}
+                </p>
+                <p className={`text-[10px] mt-2 ${THEME_CLASSES.text.tertiary}`}>
+                  {new Date(latestJournal.date).toLocaleDateString("en-US", {
+                    weekday: "short", month: "short", day: "numeric",
+                  })}
+                </p>
+              </div>
+            </Section>
+          </div>
+        )}
+
+        {/* ── Quick note to visit Notes ── */}
+        {notes.length > 0 && (
+          <div className="animate-fade-in-up" style={{ animationDelay: "360ms" }}>
+            <Link
+              to="/notes"
+              className={`flex items-center justify-between px-5 py-3.5 rounded-2xl border transition-all group ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base} hover:border-[#4f8cff]/30`}
+            >
+              <div className="flex items-center gap-3">
+                <StickyNote size={15} className="text-[#f59e0b]" />
+                <span className={`text-sm font-medium ${THEME_CLASSES.text.secondary}`}>
+                  {notes.length} note{notes.length !== 1 ? "s" : ""} saved
+                </span>
+              </div>
+              <ArrowRight size={14} className={`${THEME_CLASSES.text.tertiary} group-hover:text-[#4f8cff] group-hover:translate-x-0.5 transition-all`} />
+            </Link>
+          </div>
+        )}
       </div>
     </PageWrapper>
   );

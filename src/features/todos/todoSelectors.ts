@@ -28,12 +28,24 @@ export const selectTodayTasks = createSelector(
       })
       .sort((a, b) => {
         const aDone = a.status === "completed" || (a.seriesDates?.length ? isFutureDate(a.scheduledDate) : false);
-        const bDone = b.status === "completed" || (b.seriesDates?.length ? isFutureDate(b.scheduledDate) : false);
+        const bDone = b.status === "completed" || (b.seriesDates?.length ? isFutureDate(a.scheduledDate) : false);
         
         if (!aDone && bDone) return -1;
         if (aDone && !bDone) return 1;
         return 0;
       })
+);
+
+// Today's regular (non-revision) tasks
+export const selectTodayRegularTasks = createSelector(
+  [selectTodayTasks],
+  (todayTasks) => todayTasks.filter((t) => !t.apply137Rule)
+);
+
+// Today's revision tasks (apply137Rule = true, due today)
+export const selectTodayRevisions = createSelector(
+  [selectTodayTasks],
+  (todayTasks) => todayTasks.filter((t) => t.apply137Rule)
 );
 
 // Stats for dashboard
@@ -57,5 +69,19 @@ export const selectTaskStats = createSelector(
       pendingToday: todayTasks.length - completedToday,
       progressPercent,
     };
+  }
+);
+
+// Extended stats including in-progress count for the dashboard summary strip
+export const selectExtendedTaskStats = createSelector(
+  [selectTodayTasks],
+  (todayTasks) => {
+    const completed  = todayTasks.filter((t) => t.status === "completed").length;
+    const inProgress = todayTasks.filter((t) => t.status === "inprogress").length;
+    const pending    = todayTasks.filter((t) => t.status === "pending").length;
+    const total      = todayTasks.length;
+    const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    return { total, completed, inProgress, pending, progressPercent };
   }
 );
