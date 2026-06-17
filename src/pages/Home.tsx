@@ -5,7 +5,6 @@ import {
   Clock,
   Plus,
   ArrowRight,
-  RotateCcw,
   Target,
   Flame,
   BookOpen,
@@ -488,31 +487,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* ── Today's Revisions (1-3-7) ── */}
-        <div className="animate-fade-in-up" style={{ animationDelay: "120ms" }}>
-          <Section
-            title="Today's Revisions (1-3-7)"
-            icon={<RotateCcw size={15} />}
-            href="/learning"
-            hrefLabel="All revisions"
-            empty={!loading && todayRevisions.length === 0}
-            emptyText="No revisions scheduled for today. Great — enjoy the break!"
-          >
-            {loading ? (
-              <div className="space-y-2 p-1">
-                {[1, 2].map((i) => (
-                  <div key={i} className="h-14 rounded-xl bg-gray-100 dark:bg-white/3 animate-pulse" />
-                ))}
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-50 dark:divide-white/3">
-                {todayRevisions.map((todo) => (
-                  <TaskRow key={todo.id} todo={todo} isRevision />
-                ))}
-              </div>
-            )}
-          </Section>
-        </div>
+
 
         {/* ── Upcoming & Scheduled Tasks ── */}
         <div className="animate-fade-in-up" style={{ animationDelay: "140ms" }}>

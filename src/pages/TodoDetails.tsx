@@ -45,7 +45,6 @@ const TodoDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const todos   = useAppSelector((state) => state.todo.todos);
-  const loading = useAppSelector((state) => state.todo.loading);
   const todo    = todos.find((t) => t.id === id);
   const dispatch = useAppDispatch();
   const toast    = useToast();
