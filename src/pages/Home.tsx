@@ -26,7 +26,6 @@ import { THEME_CLASSES } from "../utils/themeUtils";
 import {
   selectExtendedTaskStats,
   selectTodayTasks,
-  selectTodayRevisions,
   selectUpcomingTasks,
 } from "../features/todos/todoSelectors";
 import { get137Label } from "../utils/rule137";
@@ -73,9 +72,8 @@ const Home = () => {
   const isAuthChecked  = useAppSelector((s) => s.auth.isAuthChecked);
 
   const stats          = useAppSelector(selectExtendedTaskStats);
-  // Show ALL today's tasks including completed
+  // Show ALL today's tasks including completed (regular + 1-3-7 revisions merged)
   const allTodayTasks   = useAppSelector(selectTodayTasks);
-  const todayRevisions  = useAppSelector(selectTodayRevisions);
   const upcomingTasks   = useAppSelector(selectUpcomingTasks);
 
   const [updatingId,       setUpdatingId]       = useState<string | null>(null);
@@ -104,12 +102,11 @@ const Home = () => {
     [journal]
   );
 
-  // Filter today's tasks by search (non-revision only shown here)
+  // Filter today's tasks by search — includes BOTH regular and 1-3-7 revision tasks
   const filteredTodayTasks = useMemo(() => {
-    const regularTasks = allTodayTasks.filter((t) => !t.apply137Rule);
-    if (!taskSearch.trim()) return regularTasks;
+    if (!taskSearch.trim()) return allTodayTasks;
     const q = taskSearch.toLowerCase();
-    return regularTasks.filter(
+    return allTodayTasks.filter(
       (t) => t.title.toLowerCase().includes(q) || t.category?.toLowerCase().includes(q)
     );
   }, [allTodayTasks, taskSearch]);
@@ -334,14 +331,14 @@ const Home = () => {
 
         {/* ── Welcome Header ── */}
         <div className="space-y-0.5 animate-fade-in-up">
-          <p className={`text-xs font-semibold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
+          <p className={`text-[10px] sm:text-xs font-semibold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
             {dateLabel}
           </p>
-          <h1 className={`text-2xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
+          <h1 className={`text-lg sm:text-xl md:text-2xl font-bold tracking-tight leading-snug ${THEME_CLASSES.text.primary}`}>
             {greeting},{" "}
             <span className="text-[#4f8cff]">{firstName}</span> 👋
           </h1>
-          <p className={`text-sm italic ${THEME_CLASSES.text.tertiary}`}>"{quote}"</p>
+          <p className={`text-xs sm:text-sm italic ${THEME_CLASSES.text.tertiary} line-clamp-1`}>"{quote}"</p>
         </div>
 
         {/* ── Quick Add Area ── */}

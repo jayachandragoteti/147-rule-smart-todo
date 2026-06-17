@@ -18,6 +18,7 @@ import {
   ListFilter,
 } from "lucide-react";
 import type { Todo, TodoPriority, TodoStatus } from "../types/todo";
+import { Eye } from "lucide-react";
 
 type FilterStatus   = "all" | TodoStatus;
 type FilterPriority = "all" | TodoPriority;
@@ -43,9 +44,10 @@ const Todos = () => {
   const [filterStatus,    setFilterStatus]    = useState<FilterStatus>("all");
   const [filterPriority,  setFilterPriority]  = useState<FilterPriority>("all");
   const [sortKey,         setSortKey]         = useState<SortKey>("date");
-  const [updatingId,      setUpdatingId]      = useState<string | null>(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [showFilters,     setShowFilters]     = useState(false);
+  const [updatingId,       setUpdatingId]       = useState<string | null>(null);
+  const [deleteConfirmId,  setDeleteConfirmId]  = useState<string | null>(null);
+  const [showFilters,      setShowFilters]      = useState(false);
+  const [statusDropdownId, setStatusDropdownId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthChecked) dispatch(fetchTodos());
@@ -88,6 +90,28 @@ const Todos = () => {
     } finally {
       setUpdatingId(null);
     }
+  };
+
+  const handleStatusChange = async (todo: Todo, newStatus: TodoStatus) => {
+    setStatusDropdownId(null);
+    if (newStatus === "completed") {
+      const pendingSubtasks = todo.subtasks?.filter((st) => !st.completed) ?? [];
+      if (pendingSubtasks.length > 0) {
+        toast.error(`Complete all subtasks first (${pendingSubtasks.length} remaining)`);
+        return;
+      }
+      setUpdatingId(todo.id);
+      try {
+        await dispatch(completeTodo(todo.id)).unwrap();
+        toast.success("Task completed! 🎉");
+      } catch { toast.error("Failed to update"); } finally { setUpdatingId(null); }
+      return;
+    }
+    if (todo.status === newStatus) return;
+    setUpdatingId(todo.id);
+    try {
+      await dispatch(updateTodo({ id: todo.id, updates: { status: newStatus } })).unwrap();
+    } catch { toast.error("Failed to update task"); } finally { setUpdatingId(null); }
   };
 
   const handleDelete = async (id: string) => {
@@ -302,14 +326,71 @@ const Todos = () => {
                       </div>
                     </div>
 
-                    {/* Status + actions */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className={`hidden sm:flex status-pill ${cfg.className}`}>{cfg.label}</span>
+                    {/* Status dropdown + actions */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {/* Status dropdown */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setStatusDropdownId(statusDropdownId === todo.id ? null : todo.id)}
+                          disabled={updatingId === todo.id}
+                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${cfg.className} ${THEME_CLASSES.border.base} hover:opacity-80`}
+                        >
+                          {updatingId === todo.id ? (
+                            <Loader2 size={10} className="animate-spin" />
+                          ) : isDone ? (
+                            <CheckCircle2 size={10} />
+                          ) : todo.status === "inprogress" ? (
+                            <Clock size={10} />
+                          ) : (
+                            <Circle size={10} />
+                          )}
+                          <span className="hidden sm:inline">{cfg.label}</span>
+                          <ChevronDown size={9} />
+                        </button>
+                        {statusDropdownId === todo.id && (
+                          <div className={`absolute right-0 top-full mt-1 w-40 rounded-xl border shadow-xl z-50 overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base} animate-fade-in`}>
+                            {([
+                              { value: "pending",    label: "To Do",       dot: "bg-[#606878]" },
+                              { value: "inprogress", label: "In Progress", dot: "bg-[#f59e0b]" },
+                              { value: "completed",  label: "Completed",   dot: "bg-[#22c55e]" },
+                            ] as { value: TodoStatus; label: string; dot: string }[]).map((opt) => {
+                              const blocked = opt.value === "completed" && (todo.subtasks?.some((st) => !st.completed) ?? false);
+                              return (
+                                <button
+                                  key={opt.value}
+                                  onClick={() => !blocked && handleStatusChange(todo, opt.value)}
+                                  disabled={blocked}
+                                  title={blocked ? "Complete all subtasks first" : undefined}
+                                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold transition-all ${
+                                    blocked
+                                      ? "opacity-40 cursor-not-allowed"
+                                      : todo.status === opt.value
+                                      ? `${statusCfg[opt.value]?.className} bg-current/5`
+                                      : `${THEME_CLASSES.text.secondary} ${THEME_CLASSES.button.hover}`
+                                  }`}
+                                >
+                                  <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                                  {opt.label}
+                                  {todo.status === opt.value && <CheckCircle2 size={10} className="ml-auto" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
 
+                      {/* hover actions */}
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Link
+                          to={`/todo/${todo.id}`}
+                          className={`p-1.5 rounded-lg ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.tertiary} hover:text-[#4f8cff] transition-colors`}
+                          title="View details"
+                        >
+                          <Eye size={13} />
+                        </Link>
+                        <Link
                           to={`/edit-todo/${todo.id}`}
-                          className={`p-1.5 rounded-lg ${THEME_CLASSES.button.hover} text-[#4f8cff] transition-colors`}
+                          className={`p-1.5 rounded-lg ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.tertiary} hover:text-[#4f8cff] transition-colors`}
                           title="Edit"
                         >
                           <Edit size={13} />
@@ -332,7 +413,7 @@ const Todos = () => {
                         ) : (
                           <button
                             onClick={() => setDeleteConfirmId(todo.id)}
-                            className={`p-1.5 rounded-lg ${THEME_CLASSES.button.hover} text-[#606878] hover:text-[#ef4444] transition-colors`}
+                            className={`p-1.5 rounded-lg ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.tertiary} hover:text-[#ef4444] transition-colors`}
                             title="Delete"
                           >
                             <Trash2 size={13} />

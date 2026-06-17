@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import { createTodo, updateTodo } from "../features/todos/todoThunks";
@@ -17,6 +17,7 @@ import {
 
 const CreateTodo = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const toast = useToast();
@@ -93,8 +94,12 @@ const CreateTodo = () => {
       if (editModeTodo.posterImage) {
           handleImageUrlChange(editModeTodo.posterImage);
       }
+    } else {
+      // Pre-populate title from ?title= query param (set by Home quick-add)
+      const titleParam = searchParams.get("title");
+      if (titleParam) setValue("title", titleParam);
     }
-  }, [editModeTodo, reset]);
+  }, [editModeTodo, reset, searchParams, setValue]);
 
   const posterImageUrl = useWatch({ control, name: "posterImage" });
 

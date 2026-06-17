@@ -15,10 +15,10 @@ interface SidebarProps {
 
 const navItems = [
   { to: "/",           label: "Dashboard",  icon: LayoutDashboard, end: true },
-  { to: "/todos",      label: "Tasks",       icon: ListTodo,        end: false },
+  { to: "/todos",      label: "Tasks",      icon: ListTodo,        end: false },
+  { to: "/notes",      label: "Notes",      icon: StickyNote,      end: false },
   { to: "/learning",   label: "Revisions",  icon: RotateCcw,       end: false },
   { to: "/heartspace", label: "Heartspace", icon: Heart,           end: false },
-  { to: "/notes",      label: "Notes",       icon: StickyNote,      end: false },
   { to: "/profile",    label: "Settings",   icon: Settings,        end: false },
 ];
 
