@@ -512,7 +512,7 @@ const CreateTodo = () => {
                       <p className={`text-[10px] font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
                         Repeat weekly on
                       </p>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-[repeat(auto-fit,minmax(82px,1fr))] gap-2">
                         {WEEKDAYS.map((day) => {
                           const selected = weeklyDaysValue?.includes(day.value) ?? false;
                           return (
@@ -520,7 +520,7 @@ const CreateTodo = () => {
                               key={day.value}
                               type="button"
                               onClick={() => toggleWeeklyDay(day.value)}
-                              className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all select-none ${
+                              className={`px-2 py-2 rounded-lg text-[10px] font-semibold border text-center min-w-0 whitespace-normal break-words transition-all select-none ${
                                 selected
                                   ? "bg-blue-500/10 border-blue-500 text-blue-600 ring-1 ring-blue-500"
                                   : `${THEME_CLASSES.border.base} ${THEME_CLASSES.text.secondary}`

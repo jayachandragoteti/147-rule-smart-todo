@@ -81,22 +81,22 @@ const TodoCard = ({ todo }: Props) => {
 
       <div className="p-4 space-y-3">
         {/* Top row: category + priority */}
-        <div className="flex items-center justify-between gap-2">
-          <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${THEME_CLASSES.status.todo}`}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${THEME_CLASSES.status.todo} whitespace-normal break-words`}>
             {todo.category || "General"}
           </span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {todo.recurrence !== "none" && (
-              <span className="flex items-center gap-1 text-[10px] font-semibold text-[#4f8cff] bg-[#4f8cff]/10 px-2 py-0.5 rounded-md">
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-[#4f8cff] bg-[#4f8cff]/10 px-2 py-0.5 rounded-md whitespace-normal break-words">
                 <RefreshCcw size={9} /> {todo.recurrence}
               </span>
             )}
             {todo.recurrence === "weekly" && todo.weeklyDays && todo.weeklyDays.length > 0 && (
-              <span className="text-[10px] text-[#4f8cff] bg-[#4f8cff]/10 px-2 py-0.5 rounded-md">
+              <span className="text-[10px] text-[#4f8cff] bg-[#4f8cff]/10 px-2 py-0.5 rounded-md whitespace-normal break-words max-w-full">
                 {`Every ${todo.weeklyDays.map((d) => d.charAt(0).toUpperCase() + d.slice(1)).join(", ")}`}
               </span>
             )}
-            <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${priorityLabel[todo.priority] ?? priorityLabel.medium}`}>
+            <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${priorityLabel[todo.priority] ?? priorityLabel.medium} whitespace-normal break-words`}>
               {todo.priority}
             </span>
           </div>

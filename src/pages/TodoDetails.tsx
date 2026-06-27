@@ -278,25 +278,25 @@ const TodoDetails = () => {
                 )}
 
                 {/* Status + Category badges */}
-                <div className="flex gap-2 flex-wrap">
-                  <span className={`status-pill text-[10px] ${currentStatus.color}`}>
+                <div className="flex flex-wrap gap-2">
+                  <span className={`status-pill text-[10px] ${currentStatus.color} whitespace-normal break-words`}>
                     <StatusIcon size={10} /> {currentStatus.label}
                   </span>
-                  <span className={`status-pill text-[10px] ${THEME_CLASSES.status.todo}`}>
+                  <span className={`status-pill text-[10px] ${THEME_CLASSES.status.todo} whitespace-normal break-words`}>
                     {todo.category}
                   </span>
                   {todo.apply137Rule && (
-                    <span className="status-pill text-[10px] text-[#818cf8] bg-[#818cf8]/10">
+                    <span className="status-pill text-[10px] text-[#818cf8] bg-[#818cf8]/10 whitespace-normal break-words">
                       1-3-7 Rule
                     </span>
                   )}
                   {todo.recurrence !== "none" && (
-                    <span className="status-pill text-[10px] text-[#4f8cff] bg-[#4f8cff]/10">
+                    <span className="status-pill text-[10px] text-[#4f8cff] bg-[#4f8cff]/10 whitespace-normal break-words">
                       <Repeat size={9} /> {todo.recurrence}
                     </span>
                   )}
                   {todo.recurrence === "weekly" && todo.weeklyDays && todo.weeklyDays.length > 0 && (
-                    <span className="status-pill text-[10px] text-[#4f8cff] bg-[#4f8cff]/10">
+                    <span className="status-pill text-[10px] text-[#4f8cff] bg-[#4f8cff]/10 whitespace-normal break-words max-w-full">
                       {`Every ${todo.weeklyDays.map((d) => d.charAt(0).toUpperCase() + d.slice(1)).join(", ")}`}
                     </span>
                   )}
