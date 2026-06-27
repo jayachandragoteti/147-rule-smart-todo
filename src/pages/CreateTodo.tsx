@@ -9,6 +9,7 @@ import type { CreateTodoFormValues, TodoPriority, TodoRecurrence, WeeklyDay, Not
 import { SOUND_OPTIONS, previewSound } from "../utils/soundEngine";
 import { useState, useEffect, type ReactNode } from "react";
 import { THEME_CLASSES } from "../utils/themeUtils";
+import { toTitleCase } from "../utils/textUtils";
 import { generate137Dates, RULE_137_LABELS } from "../utils/rule137";
 import { 
   Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, Volume2, ImageIcon,
@@ -109,7 +110,7 @@ const CreateTodo = () => {
     } else {
       // Pre-populate title from ?title= query param (set by Home quick-add)
       const titleParam = searchParams.get("title");
-      if (titleParam) setValue("title", titleParam);
+      if (titleParam) setValue("title", toTitleCase(titleParam));
     }
   }, [editModeTodo, reset, searchParams, setValue]);
 
@@ -147,13 +148,13 @@ const CreateTodo = () => {
     const todoData = {
         scheduledDate: data.scheduledDate,
         scheduledTime: data.scheduledTime,
-        title: data.title.trim(),
+        title: toTitleCase(data.title.trim()),
         descriptions: data.descriptions
           .map((d) => d.value)
           .filter((d) => d.trim() !== ""),
         subtasks: data.subtasks.filter((st) => st.title.trim() !== "").map((st, index) => ({
              id: st.id || `${timestamp}-sub-${index}`,
-             title: st.title.trim(),
+             title: toTitleCase(st.title.trim()),
              completed: st.completed || false
         })),
         posterImage: data.posterImage && data.posterImage.trim() ? data.posterImage.trim() : "",
@@ -161,7 +162,7 @@ const CreateTodo = () => {
           .filter((l) => l.title.trim() && l.url.trim())
           .map((link, index) => ({
             id: `${timestamp}-${index}`,
-            title: link.title.trim(),
+            title: toTitleCase(link.title.trim()),
             url: link.url.trim(),
           })),
         apply137Rule: data.apply137Rule,

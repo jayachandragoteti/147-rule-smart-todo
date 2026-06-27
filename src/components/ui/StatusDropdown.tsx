@@ -119,7 +119,7 @@ export const StatusDropdown = ({
           : STATUS_ICON[currentStatus]
         }
         {showLabel && (
-          <span className="hidden sm:inline">
+          <span className="inline">
             {STATUS_OPTIONS.find(o => o.value === currentStatus)?.label}
           </span>
         )}

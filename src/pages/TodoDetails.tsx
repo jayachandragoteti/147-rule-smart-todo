@@ -29,6 +29,7 @@ import {
 import StatusDropdown from "../components/ui/StatusDropdown";
 import { TODO_STATUS } from "../utils/todoConstants";
 import { THEME_CLASSES } from "../utils/themeUtils";
+import { toTitleCase } from "../utils/textUtils";
 import { get137Label } from "../utils/rule137";
 import { formatDate } from "../utils/dateUtils";
 import type { TodoStatus } from "../types/todo";
@@ -237,7 +238,7 @@ const TodoDetails = () => {
                 </div>
                 <h3 className={`text-lg font-bold ${THEME_CLASSES.text.primary}`}>Delete Task?</h3>
                 <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>
-                  "{todo.title}" will be permanently removed.
+                  "{toTitleCase(todo.title)}" will be permanently removed.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -266,15 +267,15 @@ const TodoDetails = () => {
               {/* Poster image */}
               {todo.posterImage && (
                 <div className="w-full h-56 relative">
-                  <img src={todo.posterImage} alt={todo.title} className="w-full h-full object-cover" />
+                  <img src={todo.posterImage} alt={toTitleCase(todo.title)} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                  <h1 className="absolute bottom-5 left-6 text-2xl font-black text-white">{todo.title}</h1>
+                  <h1 className="absolute bottom-5 left-6 text-2xl font-black text-white">{toTitleCase(todo.title)}</h1>
                 </div>
               )}
 
               <div className="p-6 space-y-6">
                 {!todo.posterImage && (
-                  <h1 className={`text-2xl font-bold ${THEME_CLASSES.text.primary}`}>{todo.title}</h1>
+                  <h1 className={`text-2xl font-bold ${THEME_CLASSES.text.primary}`}>{toTitleCase(todo.title)}</h1>
                 )}
 
                 {/* Status + Category badges */}
@@ -296,9 +297,16 @@ const TodoDetails = () => {
                     </span>
                   )}
                   {todo.recurrence === "weekly" && todo.weeklyDays && todo.weeklyDays.length > 0 && (
-                    <span className="status-pill text-[10px] text-[#4f8cff] bg-[#4f8cff]/10 whitespace-normal break-words max-w-full">
-                      {`Every ${todo.weeklyDays.map((d) => d.charAt(0).toUpperCase() + d.slice(1)).join(", ")}`}
-                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {todo.weeklyDays.map((day) => (
+                        <span
+                          key={day}
+                          className="text-[10px] text-[#4f8cff] bg-[#4f8cff]/10 px-2 py-1 rounded-full whitespace-nowrap"
+                        >
+                          {day.charAt(0).toUpperCase() + day.slice(1)}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
 

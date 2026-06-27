@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
 import { fetchTodos, updateTodo, completeTodo } from "../features/todos/todoThunks";
 import { deleteTodo } from "../features/todos/todoThunks";
 import { THEME_CLASSES } from "../utils/themeUtils";
+import { toTitleCase } from "../utils/textUtils";
 import {
   Plus,
   Search,
@@ -287,7 +288,7 @@ const Todos = () => {
                             isDone ? THEME_CLASSES.text.tertiary : THEME_CLASSES.text.primary
                           }`}
                         >
-                          {todo.title}
+                          {toTitleCase(todo.title)}
                         </Link>
                         <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${priorityDot[todo.priority] ?? priorityDot.medium}`} />
                         {todo.apply137Rule && (
