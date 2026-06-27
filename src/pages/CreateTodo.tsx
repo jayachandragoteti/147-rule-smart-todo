@@ -495,7 +495,7 @@ const CreateTodo = () => {
                         key={r.value}
                         type="button"
                         onClick={() => setValue("recurrence", r.value)}
-                        className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
+                        className={`flex items-center gap-2 p-2 rounded-lg border transition-all select-none ${
                           recurrenceValue === r.value
                             ? "bg-blue-500/10 border-blue-500 text-blue-600 ring-1 ring-blue-500"
                             : THEME_CLASSES.border.base
@@ -520,7 +520,7 @@ const CreateTodo = () => {
                               key={day.value}
                               type="button"
                               onClick={() => toggleWeeklyDay(day.value)}
-                              className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                              className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all select-none ${
                                 selected
                                   ? "bg-blue-500/10 border-blue-500 text-blue-600 ring-1 ring-blue-500"
                                   : `${THEME_CLASSES.border.base} ${THEME_CLASSES.text.secondary}`

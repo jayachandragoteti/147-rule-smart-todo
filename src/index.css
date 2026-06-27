@@ -104,6 +104,18 @@ body {
   background-color: rgba(79, 140, 255, 0.2);
 }
 
+button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* ========================================
    GLOBAL INPUT FIXES
    ======================================== */

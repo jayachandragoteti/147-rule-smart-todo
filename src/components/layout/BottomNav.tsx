@@ -9,7 +9,6 @@ import {
   StickyNote,
   RotateCcw,
   Heart,
-  Settings,
 } from "lucide-react";
 import { THEME_CLASSES } from "../../utils/themeUtils";
 
@@ -34,7 +33,7 @@ const BottomNav = () => (
           end={end}
           className={({ isActive }) =>
             `flex-1 flex flex-col items-center justify-center gap-0.5 transition-all duration-150 relative ${
-              isActive ? "text-[#4f8cff]" : THEME_CLASSES.text.tertiary
+              isActive ? "text-[#4f8cff]" : "text-slate-400 dark:text-[#606878]"
             }`
           }
         >
