@@ -10,9 +10,6 @@ import {
   Plus,
   Search,
   CheckCircle2,
-  Circle,
-  Clock,
-  Loader2,
   Trash2,
   Edit,
   ChevronDown,
@@ -246,7 +243,6 @@ const Todos = () => {
           <div className={`rounded-2xl border overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
             <div className="divide-y divide-gray-50 dark:divide-white/3">
               {filtered.map((todo) => {
-                const isUpdating = updatingId === todo.id;
                 const isDone     = todo.status === "completed";
 
                 return (
@@ -256,29 +252,6 @@ const Todos = () => {
                       isDone ? "opacity-50" : ""
                     }`}
                   >
-                    {/* Status toggle */}
-                    <button
-                      onClick={() => handleStatusChange(todo, todo.status === "pending" ? "inprogress" : todo.status === "inprogress" ? "completed" : "pending")}
-                      disabled={isUpdating}
-                      className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all active:scale-90 ${
-                        isDone
-                          ? "border-[#22c55e] bg-[#22c55e]/10 text-[#22c55e]"
-                          : todo.status === "inprogress"
-                          ? "border-[#f59e0b] bg-[#f59e0b]/10 text-[#f59e0b]"
-                          : "border-gray-200 dark:border-white/10 hover:border-[#4f8cff] hover:bg-[#4f8cff]/10 hover:text-[#4f8cff] text-transparent"
-                      }`}
-                    >
-                      {isUpdating ? (
-                        <Loader2 size={12} className="animate-spin text-[#4f8cff]" />
-                      ) : isDone ? (
-                        <CheckCircle2 size={13} />
-                      ) : todo.status === "inprogress" ? (
-                        <Clock size={12} />
-                      ) : (
-                        <Circle size={12} />
-                      )}
-                    </button>
-
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">

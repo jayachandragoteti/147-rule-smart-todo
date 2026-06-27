@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2,
-  Circle,
   Clock,
   Plus,
   ArrowRight,
@@ -18,7 +17,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
 import { useAppDispatch, useAppSelector, useToast } from "../app/hooks";
-import { fetchTodos, updateTodo, completeTodo } from "../features/todos/todoThunks";
+import { fetchTodos, updateTodo } from "../features/todos/todoThunks";
 import { fetchNotes, createNote } from "../features/notes/notesSlice";
 import { fetchJournalEntries } from "../features/journal/journalSlice";
 import { THEME_CLASSES } from "../utils/themeUtils";
@@ -40,16 +39,6 @@ const QUOTES = [
   "One task at a time. One day at a time.",
   "Progress, not perfection.",
 ];
-
-// ─── Status pill styles ────────────────────────────────────────────────────
-const statusConfig: Record<
-  string,
-  { label: string; className: string; icon: React.ReactNode }
-> = {
-  pending:    { label: "To Do",       className: THEME_CLASSES.status.todo,       icon: <Circle size={11} /> },
-  inprogress: { label: "In Progress", className: THEME_CLASSES.status.inprogress, icon: <Clock size={11} /> },
-  completed:  { label: "Done",        className: THEME_CLASSES.status.success,    icon: <CheckCircle2 size={11} /> },
-};
 
 const priorityDot: Record<string, string> = {
   urgent: "bg-[#ef4444]",
@@ -151,25 +140,6 @@ const Home = () => {
     day: "numeric",
   });
 
-  // ── Status cycle ──────────────────────────────────────────────────────────
-  const handleCycleStatus = async (todo: Todo) => {
-    setUpdatingId(todo.id);
-    try {
-      if (todo.status === "pending") {
-        await dispatch(updateTodo({ id: todo.id, updates: { status: "inprogress" as TodoStatus } })).unwrap();
-      } else if (todo.status === "inprogress") {
-        await dispatch(completeTodo(todo.id)).unwrap();
-        toast.success("Task completed! 🎉");
-      } else {
-        await dispatch(updateTodo({ id: todo.id, updates: { status: "pending" as TodoStatus } })).unwrap();
-      }
-    } catch {
-      toast.error("Failed to update task");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
   const handleStatusChangeById = async (todo: Todo, newStatus: TodoStatus) => {
     setUpdatingId(todo.id);
     try {
@@ -223,30 +193,6 @@ const Home = () => {
             : `${THEME_CLASSES.surface.hover} hover:shadow-sm`
         }`}
       >
-        {/* Status indicator circle */}
-        <button
-          onClick={(e) => { e.stopPropagation(); handleCycleStatus(todo); }}
-          disabled={isUpdating}
-          className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all active:scale-90 ${
-            isDone
-              ? "border-[#22c55e] bg-[#22c55e]/10 text-[#22c55e]"
-              : todo.status === "inprogress"
-              ? "border-[#f59e0b] bg-[#f59e0b]/10 text-[#f59e0b]"
-              : "border-gray-200 dark:border-white/10 hover:border-[#4f8cff] hover:bg-[#4f8cff]/10 hover:text-[#4f8cff] text-transparent"
-          }`}
-          title="Quick complete"
-        >
-          {isUpdating ? (
-            <Loader2 size={12} className="animate-spin text-[#4f8cff]" />
-          ) : isDone ? (
-            <CheckCircle2 size={14} />
-          ) : todo.status === "inprogress" ? (
-            <Clock size={12} />
-          ) : (
-            <Circle size={13} />
-          )}
-        </button>
-
         {/* Title + meta */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -600,8 +546,6 @@ const Home = () => {
                       {tasks.map((todo) => {
                         const isUpdating = updatingId === todo.id;
                         const isDone     = todo.status === "completed";
-                        const cfg        = statusConfig[todo.status] ?? statusConfig.pending;
-
                         // Schedule type badge
                         const scheduleBadge = todo.apply137Rule
                           ? { label: "1-3-7", color: "text-[#818cf8] bg-[#818cf8]/10" }
@@ -620,30 +564,6 @@ const Home = () => {
                               isDone ? "opacity-50" : THEME_CLASSES.surface.hover
                             }`}
                           >
-                            {/* Status toggle */}
-                            <button
-                              onClick={() => handleCycleStatus(todo)}
-                              disabled={isUpdating}
-                              className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all active:scale-90 ${
-                                isDone
-                                  ? "border-[#22c55e] bg-[#22c55e]/10 text-[#22c55e]"
-                                  : todo.status === "inprogress"
-                                  ? "border-[#f59e0b] bg-[#f59e0b]/10 text-[#f59e0b]"
-                                  : "border-gray-200 dark:border-white/10 hover:border-[#4f8cff] hover:bg-[#4f8cff]/10 hover:text-[#4f8cff] text-transparent"
-                              }`}
-                              title={`${cfg.label} — click to advance`}
-                            >
-                              {isUpdating ? (
-                                <Loader2 size={11} className="animate-spin text-[#4f8cff]" />
-                              ) : isDone ? (
-                                <CheckCircle2 size={12} />
-                              ) : todo.status === "inprogress" ? (
-                                <Clock size={11} />
-                              ) : (
-                                <Circle size={11} />
-                              )}
-                            </button>
-
                             {/* Info */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
