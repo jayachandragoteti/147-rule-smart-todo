@@ -12,7 +12,7 @@ import { THEME_CLASSES } from "../utils/themeUtils";
 import { toTitleCase } from "../utils/textUtils";
 import { generate137Dates, RULE_137_LABELS } from "../utils/rule137";
 import { 
-  Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, Volume2, ImageIcon,
+  Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, Volume2, ImageIcon, Edit3, Save,
   type LucideIcon 
 } from "lucide-react";
 
@@ -144,6 +144,11 @@ const CreateTodo = () => {
   };
 
   const onSubmit = async (data: CreateTodoFormValues) => {
+    if (data.reminderEnabled && !data.scheduledTime?.trim()) {
+      toast.error("Set an exact time before enabling notifications.");
+      return;
+    }
+
     const timestamp = Date.now();
     const todoData = {
         scheduledDate: data.scheduledDate,
@@ -252,15 +257,41 @@ const CreateTodo = () => {
   const watchPriority = useWatch({ control, name: "priority" });
   const watchReminder = useWatch({ control, name: "reminderEnabled" });
   const watchSound = useWatch({ control, name: "notificationSound" });
+  const watchScheduledTime = useWatch({ control, name: "scheduledTime" });
+
+  const setExactTime = () => {
+    const now = new Date();
+    const timeValue = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    setValue("scheduledTime", timeValue, { shouldValidate: true });
+    if (!scheduledDateValue) {
+      setValue("scheduledDate", new Date().toISOString().split("T")[0], { shouldValidate: true });
+    }
+  };
 
   return (
     <PageWrapper>
       <div className="max-w-4xl mx-auto space-y-8">
-        <div className="flex flex-col gap-2">
-            <h2 className={`text-2xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
-              {id ? "Edit Task" : "Create New Task"}
-            </h2>
-            <p className={`text-sm ${THEME_CLASSES.text.secondary}`}>{id ? "Update your task details below." : "Fill in the details to add a task to your schedule."}</p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="grid place-items-center w-12 h-12 rounded-3xl bg-blue-500/10 text-blue-600">
+              {id ? <Edit3 size={20} /> : <Plus size={20} />}
+            </div>
+            <div className="space-y-1">
+              <h2 className={`text-2xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
+                {id ? "Edit Task" : "Create New Task"}
+              </h2>
+              <p className={`text-sm ${THEME_CLASSES.text.secondary}`}>{id ? "Update your task details below." : "Fill in the details to add a task to your schedule."}</p>
+            </div>
+          </div>
+          {id && (
+            <button
+              type="button"
+              onClick={handleSubmit(onSubmit)}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm"
+            >
+              <Save size={16} /> Save
+            </button>
+          )}
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -301,12 +332,27 @@ const CreateTodo = () => {
                   <label htmlFor="todo-time" className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-2 ${THEME_CLASSES.text.tertiary}`}>
                     <Clock size={14} /> Time
                   </label>
+                  <div className="flex gap-2 items-center">
                   <input
                     id="todo-time"
                     type="time"
                     {...register("scheduledTime")}
-                    className={`w-full px-4 py-2.5 rounded-xl border text-sm shadow-sm focus:ring-[3px] focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base}`}
+                    className={`flex-1 px-4 py-2.5 rounded-xl border text-sm shadow-sm focus:ring-[3px] focus:ring-blue-500/10 transition-all ${THEME_CLASSES.input.base}`}
                   />
+                  <button
+                    type="button"
+                    onClick={setExactTime}
+                    className="inline-flex items-center gap-1 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all text-blue-600 border-blue-200 hover:border-blue-300 hover:bg-blue-50"
+                  >
+                    <Clock size={13} />
+                    Exact
+                  </button>
+                </div>
+                {watchReminder && !watchScheduledTime && (
+                  <p className="text-[10px] text-amber-600 mt-2">
+                    Set an exact time before enabling notifications so reminders fire correctly.
+                  </p>
+                )}
                 </div>
             </div>
 
