@@ -19,7 +19,6 @@ const tabs = [
   { to: "/notes",      label: "Notes",     icon: StickyNote,      end: false },
   { to: "/learning",   label: "Revisions", icon: RotateCcw,       end: false },
   { to: "/heartspace", label: "Heart",     icon: Heart,           end: false },
-  { to: "/profile",    label: "Settings",  icon: Settings,        end: false },
 ];
 
 const BottomNav = () => (
