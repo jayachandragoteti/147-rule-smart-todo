@@ -51,15 +51,43 @@ export const isPastDate = (dateString: string): boolean => {
 /**
  * Calculate the next recurrence date
  */
-export const getNextRecurrenceDate = (currentDate: string, recurrence: "daily" | "weekly" | "monthly"): string => {
+const WEEKDAY_INDEX: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
+export const getNextRecurrenceDate = (
+  currentDate: string,
+  recurrence: "daily" | "weekly" | "monthly",
+  weeklyDays?: string[]
+): string => {
   const date = new Date(currentDate);
   switch (recurrence) {
     case "daily":
       date.setDate(date.getDate() + 1);
       break;
-    case "weekly":
-      date.setDate(date.getDate() + 7);
+    case "weekly": {
+      const selectedDays = (weeklyDays ?? [])
+        .map((day) => WEEKDAY_INDEX[day.toLowerCase()] ?? -1)
+        .filter((dayIndex) => dayIndex >= 0)
+        .sort((a, b) => a - b);
+
+      if (selectedDays.length > 0) {
+        const currentDay = date.getDay();
+        const nextDay = selectedDays.find((day) => day > currentDay) ?? selectedDays[0];
+        let delta = (nextDay - currentDay + 7) % 7;
+        if (delta === 0) delta = 7;
+        date.setDate(date.getDate() + delta);
+      } else {
+        date.setDate(date.getDate() + 7);
+      }
       break;
+    }
     case "monthly":
       date.setMonth(date.getMonth() + 1);
       break;

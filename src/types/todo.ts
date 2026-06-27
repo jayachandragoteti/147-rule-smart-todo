@@ -3,6 +3,15 @@ export type TodoActionType = "learning" | "project" | "revision";
 export type TodoPriority = "low" | "medium" | "high" | "urgent";
 export type TodoRecurrence = "none" | "daily" | "weekly" | "monthly";
 
+export type WeeklyDay =
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday";
+
 /**
  * Notification sound options for task reminders.
  * All sounds are generated via the Web Audio API — no external audio files needed.
@@ -41,6 +50,7 @@ export interface Todo {
   category: string;
   apply137Rule: boolean;
   recurrence: TodoRecurrence;
+  weeklyDays?: WeeklyDay[];
   seriesDates?: string[];
   createdAt: string;
   scheduledDate: string;
@@ -65,6 +75,7 @@ export type CreateTodoFormValues = {
   priority: TodoPriority;
   category: string;
   recurrence: TodoRecurrence;
+  weeklyDays?: WeeklyDay[];
   reminderEnabled: boolean;
   notificationSound: NotificationSound;
   assignTo?: string;

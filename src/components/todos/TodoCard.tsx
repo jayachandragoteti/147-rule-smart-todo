@@ -91,6 +91,11 @@ const TodoCard = ({ todo }: Props) => {
                 <RefreshCcw size={9} /> {todo.recurrence}
               </span>
             )}
+            {todo.recurrence === "weekly" && todo.weeklyDays && todo.weeklyDays.length > 0 && (
+              <span className="text-[10px] text-[#4f8cff] bg-[#4f8cff]/10 px-2 py-0.5 rounded-md">
+                {`Every ${todo.weeklyDays.map((d) => d.charAt(0).toUpperCase() + d.slice(1)).join(", ")}`}
+              </span>
+            )}
             <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${priorityLabel[todo.priority] ?? priorityLabel.medium}`}>
               {todo.priority}
             </span>

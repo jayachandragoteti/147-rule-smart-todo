@@ -134,7 +134,7 @@ export const completeTodo = createAsyncThunk<
     } 
     // 2. Handle Recurrence (Daily, Weekly, Monthly)
     else if (todo.recurrence && todo.recurrence !== "none") {
-      const nextDate = getNextRecurrenceDate(todo.scheduledDate, todo.recurrence as any);
+      const nextDate = getNextRecurrenceDate(todo.scheduledDate, todo.recurrence as any, todo.weeklyDays);
       updates.scheduledDate = nextDate;
       updates.status = TODO_STATUS.PENDING;
       return await updateTodoInFirestore(uid, todoId, updates);
@@ -191,7 +191,7 @@ export const toggleSubtaskStatus = createAsyncThunk<
            updates.apply137Rule = false;
          }
        } else if (todo.recurrence && todo.recurrence !== "none") {
-         const nextDate = getNextRecurrenceDate(todo.scheduledDate, todo.recurrence as any);
+         const nextDate = getNextRecurrenceDate(todo.scheduledDate, todo.recurrence as any, todo.weeklyDays);
          updates.scheduledDate = nextDate;
          updates.status = TODO_STATUS.PENDING;
        } else {

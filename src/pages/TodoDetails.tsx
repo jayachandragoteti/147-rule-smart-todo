@@ -14,9 +14,6 @@ import {
   Bell,
   ExternalLink,
   Circle,
-  ChevronDown,
-  CheckCircle2,
-  AlertCircle,
   type LucideIcon,
 } from "lucide-react";
 import { SOUND_OPTIONS } from "../utils/soundEngine";
@@ -29,17 +26,12 @@ import {
   completeTodo,
   toggleSubtaskStatus,
 } from "../features/todos/todoThunks";
+import StatusDropdown from "../components/ui/StatusDropdown";
 import { TODO_STATUS } from "../utils/todoConstants";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import { get137Label } from "../utils/rule137";
 import { formatDate } from "../utils/dateUtils";
 import type { TodoStatus } from "../types/todo";
-
-const STATUS_OPTIONS: { value: TodoStatus; label: string; color: string }[] = [
-  { value: "pending",    label: "To Do",       color: "text-[#a0a6b5]" },
-  { value: "inprogress", label: "In Progress",  color: "text-[#f59e0b]" },
-  { value: "completed",  label: "Completed",    color: "text-[#22c55e]" },
-];
 
 const TodoDetails = () => {
   const { id } = useParams();
@@ -50,13 +42,11 @@ const TodoDetails = () => {
   const toast    = useToast();
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // ── Status change ──────────────────────────────────────────────────────────
   const handleStatusChange = async (newStatus: TodoStatus) => {
     if (!todo) return;
-    setShowStatusDropdown(false);
 
     // Subtask guard: can't complete if subtasks are pending
     if (newStatus === "completed") {
@@ -198,48 +188,12 @@ const TodoDetails = () => {
           </button>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {/* ── Status dropdown ── */}
-            <div className="relative">
-              <button
-                onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                disabled={updatingStatus}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${currentStatus.color} ${THEME_CLASSES.border.base} ${THEME_CLASSES.button.hover}`}
-              >
-                <StatusIcon size={13} />
-                {currentStatus.label}
-                <ChevronDown size={12} className={`transition-transform ${showStatusDropdown ? "rotate-180" : ""}`} />
-              </button>
-              {showStatusDropdown && (
-                <div className={`absolute right-0 top-full mt-1 w-44 rounded-xl border shadow-lg z-50 overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base} animate-fade-in`}>
-                  {STATUS_OPTIONS.map((opt) => {
-                    const blocked = opt.value === "completed" && !allSubtasksDone;
-                    return (
-                      <button
-                        key={opt.value}
-                        onClick={() => !blocked && handleStatusChange(opt.value)}
-                        disabled={blocked}
-                        title={blocked ? `Complete all ${subtasksTotal - subtasksDone} subtasks first` : undefined}
-                        className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold transition-all ${
-                          blocked
-                            ? "opacity-40 cursor-not-allowed"
-                            : todo.status === opt.value
-                            ? `${opt.color} bg-current/5`
-                            : `${THEME_CLASSES.text.secondary} ${THEME_CLASSES.button.hover}`
-                        }`}
-                      >
-                        <span className={`w-2 h-2 rounded-full ${
-                          opt.value === "completed" ? "bg-[#22c55e]" :
-                          opt.value === "inprogress" ? "bg-[#f59e0b]" : "bg-[#606878]"
-                        }`} />
-                        {opt.label}
-                        {blocked && <AlertCircle size={10} className="ml-auto text-amber-400" />}
-                        {todo.status === opt.value && <CheckCircle2 size={11} className="ml-auto" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <StatusDropdown
+              currentStatus={todo.status}
+              isUpdating={updatingStatus}
+              blocked={todo.subtasks?.some((st) => !st.completed) ?? false}
+              onChange={handleStatusChange}
+            />
 
             <button
               title="Duplicate task"
@@ -339,6 +293,11 @@ const TodoDetails = () => {
                   {todo.recurrence !== "none" && (
                     <span className="status-pill text-[10px] text-[#4f8cff] bg-[#4f8cff]/10">
                       <Repeat size={9} /> {todo.recurrence}
+                    </span>
+                  )}
+                  {todo.recurrence === "weekly" && todo.weeklyDays && todo.weeklyDays.length > 0 && (
+                    <span className="status-pill text-[10px] text-[#4f8cff] bg-[#4f8cff]/10">
+                      {`Every ${todo.weeklyDays.map((d) => d.charAt(0).toUpperCase() + d.slice(1)).join(", ")}`}
                     </span>
                   )}
                 </div>

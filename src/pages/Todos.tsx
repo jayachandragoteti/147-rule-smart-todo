@@ -18,6 +18,7 @@ import {
   ListFilter,
   Eye,
 } from "lucide-react";
+import StatusDropdown from "../components/ui/StatusDropdown";
 import type { Todo, TodoPriority, TodoStatus } from "../types/todo";
 
 type FilterStatus   = "all" | TodoStatus;
@@ -26,12 +27,6 @@ type SortKey        = "date" | "priority" | "status";
 
 const priorityOrder: Record<TodoPriority, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
 const statusOrder:   Record<TodoStatus, number>   = { inprogress: 0, pending: 1, completed: 2 };
-
-const statusCfg: Record<string, { label: string; className: string }> = {
-  pending:    { label: "To Do",       className: THEME_CLASSES.status.todo },
-  inprogress: { label: "In Progress", className: THEME_CLASSES.status.inprogress },
-  completed:  { label: "Done",        className: THEME_CLASSES.status.success },
-};
 
 const Todos = () => {
   const dispatch  = useAppDispatch();
@@ -47,7 +42,6 @@ const Todos = () => {
   const [updatingId,       setUpdatingId]       = useState<string | null>(null);
   const [deleteConfirmId,  setDeleteConfirmId]  = useState<string | null>(null);
   const [showFilters,      setShowFilters]      = useState(false);
-  const [statusDropdownId, setStatusDropdownId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthChecked) dispatch(fetchTodos());
@@ -77,7 +71,6 @@ const Todos = () => {
 
 
   const handleStatusChange = async (todo: Todo, newStatus: TodoStatus) => {
-    setStatusDropdownId(null);
     if (newStatus === "completed") {
       const pendingSubtasks = todo.subtasks?.filter((st) => !st.completed) ?? [];
       if (pendingSubtasks.length > 0) {
@@ -254,7 +247,6 @@ const Todos = () => {
               {filtered.map((todo) => {
                 const isUpdating = updatingId === todo.id;
                 const isDone     = todo.status === "completed";
-                const cfg        = statusCfg[todo.status] ?? statusCfg.pending;
 
                 return (
                   <div
@@ -314,55 +306,12 @@ const Todos = () => {
                     {/* Status dropdown + actions */}
                     <div className="flex items-center gap-1.5 shrink-0">
                       {/* Status dropdown */}
-                      <div className="relative">
-                        <button
-                          onClick={() => setStatusDropdownId(statusDropdownId === todo.id ? null : todo.id)}
-                          disabled={updatingId === todo.id}
-                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${cfg.className} ${THEME_CLASSES.border.base} hover:opacity-80`}
-                        >
-                          {updatingId === todo.id ? (
-                            <Loader2 size={10} className="animate-spin" />
-                          ) : isDone ? (
-                            <CheckCircle2 size={10} />
-                          ) : todo.status === "inprogress" ? (
-                            <Clock size={10} />
-                          ) : (
-                            <Circle size={10} />
-                          )}
-                          <span className="hidden sm:inline">{cfg.label}</span>
-                          <ChevronDown size={9} />
-                        </button>
-                        {statusDropdownId === todo.id && (
-                          <div className={`absolute right-0 top-full mt-1 w-40 rounded-xl border shadow-xl z-50 overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base} animate-fade-in`}>
-                            {([
-                              { value: "pending",    label: "To Do",       dot: "bg-[#606878]" },
-                              { value: "inprogress", label: "In Progress", dot: "bg-[#f59e0b]" },
-                              { value: "completed",  label: "Completed",   dot: "bg-[#22c55e]" },
-                            ] as { value: TodoStatus; label: string; dot: string }[]).map((opt) => {
-                              const blocked = opt.value === "completed" && (todo.subtasks?.some((st) => !st.completed) ?? false);
-                              return (
-                                <button
-                                  key={opt.value}
-                                  onClick={() => !blocked && handleStatusChange(todo, opt.value)}
-                                  disabled={blocked}
-                                  title={blocked ? "Complete all subtasks first" : undefined}
-                                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold transition-all ${
-                                    blocked
-                                      ? "opacity-40 cursor-not-allowed"
-                                      : todo.status === opt.value
-                                      ? `${statusCfg[opt.value]?.className} bg-current/5`
-                                      : `${THEME_CLASSES.text.secondary} ${THEME_CLASSES.button.hover}`
-                                  }`}
-                                >
-                                  <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                                  {opt.label}
-                                  {todo.status === opt.value && <CheckCircle2 size={10} className="ml-auto" />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
+                      <StatusDropdown
+                        currentStatus={todo.status}
+                        isUpdating={updatingId === todo.id}
+                        blocked={todo.subtasks?.some((st) => !st.completed) ?? false}
+                        onChange={(status) => handleStatusChange(todo, status)}
+                      />
 
                       {/* hover actions */}
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

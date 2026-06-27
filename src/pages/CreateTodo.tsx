@@ -5,7 +5,7 @@ import { createTodo, updateTodo } from "../features/todos/todoThunks";
 import { TODO_ACTION_TYPE, TODO_STATUS } from "../utils/todoConstants";
 import { VALIDATION, FORM_MESSAGES } from "../utils/constants";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
-import type { CreateTodoFormValues, TodoPriority, TodoRecurrence, NotificationSound, TodoStatus, TodoActionType } from "../types/todo";
+import type { CreateTodoFormValues, TodoPriority, TodoRecurrence, WeeklyDay, NotificationSound, TodoStatus, TodoActionType } from "../types/todo";
 import { SOUND_OPTIONS, previewSound } from "../utils/soundEngine";
 import { useState, useEffect, type ReactNode } from "react";
 import { THEME_CLASSES } from "../utils/themeUtils";
@@ -14,6 +14,16 @@ import {
   Clock, Tag, Flag, Bell, Repeat, Plus, Trash2, Calendar, RefreshCcw, AlertCircle, Volume2, ImageIcon,
   type LucideIcon 
 } from "lucide-react";
+
+const WEEKDAYS: { value: WeeklyDay; label: string }[] = [
+  { value: "sunday", label: "Sunday" },
+  { value: "monday", label: "Monday" },
+  { value: "tuesday", label: "Tuesday" },
+  { value: "wednesday", label: "Wednesday" },
+  { value: "thursday", label: "Thursday" },
+  { value: "friday", label: "Friday" },
+  { value: "saturday", label: "Saturday" },
+];
 
 const CreateTodo = () => {
   const { id } = useParams();
@@ -52,6 +62,7 @@ const CreateTodo = () => {
       reminderEnabled: true,
       notificationSound: "bell" as NotificationSound,
       assignTo: "",
+      weeklyDays: [],
     },
   });
 
@@ -90,6 +101,7 @@ const CreateTodo = () => {
         reminderEnabled: editModeTodo.reminderEnabled ?? true,
         notificationSound: editModeTodo.notificationSound ?? "bell",
         assignTo: editModeTodo.assignTo || "",
+        weeklyDays: editModeTodo.weeklyDays || [],
       });
       if (editModeTodo.posterImage) {
           handleImageUrlChange(editModeTodo.posterImage);
@@ -158,6 +170,7 @@ const CreateTodo = () => {
         recurrence: data.recurrence,
         reminderEnabled: data.reminderEnabled,
         notificationSound: data.notificationSound ?? "bell",
+        weeklyDays: data.weeklyDays || [],
         assignTo: data.assignTo?.trim() || "",
     };
 
@@ -192,6 +205,7 @@ const CreateTodo = () => {
   const scheduledDateValue = useWatch({ control, name: "scheduledDate" });
   const apply137Value = useWatch({ control, name: "apply137Rule" });
   const recurrenceValue = useWatch({ control, name: "recurrence" });
+  const weeklyDaysValue = useWatch({ control, name: "weeklyDays" }) as WeeklyDay[] | undefined;
 
   let previewDates: { label: string; date: string }[] = [];
   if (apply137Value && scheduledDateValue) {
@@ -217,6 +231,22 @@ const CreateTodo = () => {
     { value: "weekly", label: "Weekly", icon: RefreshCcw, color: "bg-blue-500" },
     { value: "monthly", label: "Monthly", icon: RefreshCcw, color: "bg-purple-500" },
   ];
+
+  const toggleWeeklyDay = (day: WeeklyDay) => {
+    const current = weeklyDaysValue ?? [];
+    const nextDays = current.includes(day)
+      ? current.filter((selected) => selected !== day)
+      : [...current, day];
+    setValue("weeklyDays", nextDays);
+  };
+
+  useEffect(() => {
+    if (recurrenceValue === "weekly" && (!weeklyDaysValue || weeklyDaysValue.length === 0)) {
+      const activeDate = scheduledDateValue ? new Date(scheduledDateValue) : new Date();
+      const weekdayIndex = activeDate.getDay();
+      setValue("weeklyDays", [WEEKDAYS[weekdayIndex].value]);
+    }
+  }, [recurrenceValue, scheduledDateValue, weeklyDaysValue, setValue]);
 
   const watchPriority = useWatch({ control, name: "priority" });
   const watchReminder = useWatch({ control, name: "reminderEnabled" });
@@ -476,6 +506,38 @@ const CreateTodo = () => {
                       </button>
                     ))}
                   </div>
+
+                  {recurrenceValue === "weekly" && (
+                    <div className="space-y-3 pt-2">
+                      <p className={`text-[10px] font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
+                        Repeat weekly on
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {WEEKDAYS.map((day) => {
+                          const selected = weeklyDaysValue?.includes(day.value) ?? false;
+                          return (
+                            <button
+                              key={day.value}
+                              type="button"
+                              onClick={() => toggleWeeklyDay(day.value)}
+                              className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                                selected
+                                  ? "bg-blue-500/10 border-blue-500 text-blue-600 ring-1 ring-blue-500"
+                                  : `${THEME_CLASSES.border.base} ${THEME_CLASSES.text.secondary}`
+                              }`}
+                            >
+                              {day.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {weeklyDaysValue && weeklyDaysValue.length > 0 && (
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                          Repeats on {weeklyDaysValue.map((day) => WEEKDAYS.find((w) => w.value === day)?.label ?? day).join(", ")}.
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* 137 Rule */}
