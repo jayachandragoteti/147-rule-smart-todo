@@ -6,8 +6,15 @@ import {
   updateTodoInFirestore,
   deleteTodoFromFirestore,
 } from "../../services/todoService";
-import { generate137Dates, getNextSeriesDate } from "../../utils/rule137";
-import { getNextRecurrenceDate } from "../../utils/dateUtils";
+import {
+  generate137Dates,
+  getNextValidSeriesDate,
+} from "../../utils/rule137";
+import {
+  getNextValidRecurrenceDate,
+  isPastDate,
+  isTodayDate,
+} from "../../utils/dateUtils";
 import { TODO_STATUS } from "../../utils/todoConstants";
 import type { RootState } from "../../app/store";
 
@@ -24,6 +31,78 @@ const getUidOrReject = (
   return uid;
 };
 
+const isTodoDueToday = (todo: Todo): boolean => {
+  if (todo.seriesDates?.length) {
+    return todo.seriesDates.some((date) => isTodayDate(date));
+  }
+  return isTodayDate(todo.scheduledDate);
+};
+
+const getRecurringCompletionUpdate = (todo: Todo): PartialTodoUpdate => {
+  if (todo.apply137Rule && todo.seriesDates && todo.seriesDates.length > 0) {
+    if (isTodoDueToday(todo)) {
+      return { status: TODO_STATUS.COMPLETED };
+    }
+    const nextDate = getNextValidSeriesDate(todo.seriesDates, todo.scheduledDate);
+    if (nextDate) {
+      return { scheduledDate: nextDate, status: TODO_STATUS.PENDING };
+    }
+    return { status: TODO_STATUS.COMPLETED, apply137Rule: false };
+  }
+
+  if (todo.recurrence && todo.recurrence !== "none") {
+    if (isTodoDueToday(todo)) {
+      return { status: TODO_STATUS.COMPLETED };
+    }
+    return {
+      scheduledDate: getNextValidRecurrenceDate(
+        todo.scheduledDate,
+        todo.recurrence as any,
+        todo.weeklyDays
+      ),
+      status: TODO_STATUS.PENDING,
+    };
+  }
+
+  return { status: TODO_STATUS.COMPLETED };
+};
+
+const normalizeCompletedRecurringTodo = async (
+  uid: string,
+  todo: Todo
+): Promise<Todo> => {
+  if (todo.status !== TODO_STATUS.COMPLETED || isTodoDueToday(todo)) {
+    return todo;
+  }
+
+  if (todo.apply137Rule && todo.seriesDates && todo.seriesDates.length > 0) {
+    const nextDate = getNextValidSeriesDate(todo.seriesDates, todo.scheduledDate);
+    if (nextDate && nextDate !== todo.scheduledDate) {
+      return await updateTodoInFirestore(uid, todo.id, {
+        scheduledDate: nextDate,
+        status: TODO_STATUS.PENDING,
+      });
+    }
+    return todo;
+  }
+
+  if (todo.recurrence && todo.recurrence !== "none" && isPastDate(todo.scheduledDate)) {
+    const nextDate = getNextValidRecurrenceDate(
+      todo.scheduledDate,
+      todo.recurrence as any,
+      todo.weeklyDays
+    );
+    if (nextDate !== todo.scheduledDate) {
+      return await updateTodoInFirestore(uid, todo.id, {
+        scheduledDate: nextDate,
+        status: TODO_STATUS.PENDING,
+      });
+    }
+  }
+
+  return todo;
+};
+
 export const fetchTodos = createAsyncThunk<
   Todo[],
   { limit?: number; startAfterId?: string } | void,
@@ -31,7 +110,14 @@ export const fetchTodos = createAsyncThunk<
 >("todo/fetchTodos", async (opts, thunkAPI) => {
   try {
     const uid = getUidOrReject(thunkAPI);
-    return await fetchTodosFromFirestore(uid, opts as any);
+    const todos = await fetchTodosFromFirestore(uid, opts as any);
+    const normalizedTodos: Todo[] = [];
+
+    for (const todo of todos) {
+      normalizedTodos.push(await normalizeCompletedRecurringTodo(uid, todo));
+    }
+
+    return normalizedTodos;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to fetch todos";
     return thunkAPI.rejectWithValue(message);
@@ -118,35 +204,11 @@ export const completeTodo = createAsyncThunk<
     
     if (!todo) throw new Error("Todo not found");
 
-    const updates: any = {};
+    const updates: any = getRecurringCompletionUpdate(todo);
 
-    // 1. Handle 1-3-7 Rule Series
-    if (todo.apply137Rule && todo.seriesDates && todo.seriesDates.length > 0) {
-      const nextDate = getNextSeriesDate(todo.seriesDates, todo.scheduledDate);
-      if (nextDate) {
-        updates.scheduledDate = nextDate;
-        updates.status = TODO_STATUS.PENDING;
-        return await updateTodoInFirestore(uid, todoId, updates);
-      }
-      // If series finished, complete it
-      updates.status = TODO_STATUS.COMPLETED;
-      updates.apply137Rule = false;
-    } 
-    // 2. Handle Recurrence (Daily, Weekly, Monthly)
-    else if (todo.recurrence && todo.recurrence !== "none") {
-      const nextDate = getNextRecurrenceDate(todo.scheduledDate, todo.recurrence as any, todo.weeklyDays);
-      updates.scheduledDate = nextDate;
-      updates.status = TODO_STATUS.PENDING;
-      return await updateTodoInFirestore(uid, todoId, updates);
-    } 
-    // 3. Normal Completion
-    else {
-      updates.status = TODO_STATUS.COMPLETED;
-    }
-    
-    // 4. Handle subtasks (mark all as completed)
+    // Handle subtasks (mark all as completed)
     if (todo.subtasks && todo.subtasks.length > 0) {
-      const updatedSubtasks = todo.subtasks.map(st => ({ ...st, completed: true }));
+      const updatedSubtasks = todo.subtasks.map((st) => ({ ...st, completed: true }));
       updates.subtasks = updatedSubtasks;
     }
 
@@ -180,25 +242,9 @@ export const toggleSubtaskStatus = createAsyncThunk<
     const updates: any = { subtasks: updatedSubtasks };
 
     if (allSubtasksCompleted && todo.status !== TODO_STATUS.COMPLETED) {
-       // Re-use complete logic
-       if (todo.apply137Rule && todo.seriesDates && todo.seriesDates.length > 0) {
-         const nextDate = getNextSeriesDate(todo.seriesDates, todo.scheduledDate);
-         if (nextDate) {
-           updates.scheduledDate = nextDate;
-           updates.status = TODO_STATUS.PENDING;
-         } else {
-           updates.status = TODO_STATUS.COMPLETED;
-           updates.apply137Rule = false;
-         }
-       } else if (todo.recurrence && todo.recurrence !== "none") {
-         const nextDate = getNextRecurrenceDate(todo.scheduledDate, todo.recurrence as any, todo.weeklyDays);
-         updates.scheduledDate = nextDate;
-         updates.status = TODO_STATUS.PENDING;
-       } else {
-         updates.status = TODO_STATUS.COMPLETED;
-       }
+      Object.assign(updates, getRecurringCompletionUpdate(todo));
     } else if (anySubtaskUnchecked && todo.status === TODO_STATUS.COMPLETED) {
-       updates.status = TODO_STATUS.PENDING;
+      updates.status = TODO_STATUS.PENDING;
     }
 
     return await updateTodoInFirestore(uid, todoId, updates);

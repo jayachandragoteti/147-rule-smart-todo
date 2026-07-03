@@ -1,4 +1,4 @@
-import { toDateOnlyString } from "./dateUtils";
+import { toDateOnlyString, isPastDate } from "./dateUtils";
 
 /**
  * 137 Rule Utility
@@ -77,4 +77,18 @@ export const getNextSeriesDate = (
     return seriesDates[idx + 1];
   }
   return null;
+};
+
+/**
+ * Advance through the 1-3-7 series until the next valid review date is today or in the future.
+ */
+export const getNextValidSeriesDate = (
+  seriesDates: string[],
+  currentDate: string
+): string | null => {
+  let nextDate = getNextSeriesDate(seriesDates, currentDate);
+  while (nextDate && isPastDate(nextDate)) {
+    nextDate = getNextSeriesDate(seriesDates, nextDate);
+  }
+  return nextDate;
 };

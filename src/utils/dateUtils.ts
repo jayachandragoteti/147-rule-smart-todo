@@ -94,3 +94,19 @@ export const getNextRecurrenceDate = (
   }
   return date.toISOString();
 };
+
+/**
+ * Advance the recurrence until the resulting scheduled date is today or in the future.
+ * This ensures completed recurring tasks are rolled forward after the due day has passed.
+ */
+export const getNextValidRecurrenceDate = (
+  currentDate: string,
+  recurrence: "daily" | "weekly" | "monthly",
+  weeklyDays?: string[]
+): string => {
+  let nextDate = getNextRecurrenceDate(currentDate, recurrence, weeklyDays);
+  while (isPastDate(nextDate)) {
+    nextDate = getNextRecurrenceDate(nextDate, recurrence, weeklyDays);
+  }
+  return nextDate;
+};
