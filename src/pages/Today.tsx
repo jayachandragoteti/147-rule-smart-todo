@@ -5,6 +5,7 @@ import TodoCard from "../components/todos/TodoCard";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { fetchTodos } from "../features/todos/todoThunks";
 import { selectTodayTasks, selectTaskStats } from "../features/todos/todoSelectors";
+import { getOverdueDays } from "../utils/dateUtils";
 import { THEME_CLASSES } from "../utils/themeUtils";
 import {
   Sparkles,
@@ -12,7 +13,8 @@ import {
   Zap,
   CheckCircle2,
   AlertCircle,
-  Plus
+  Plus,
+  AlertTriangle,
 } from "lucide-react";
 
 const Today = () => {
@@ -125,10 +127,22 @@ const Today = () => {
 
           </div>
         ) : (
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {todayTodos.map((todo) => (
-              <TodoCard key={todo.id} todo={todo} />
-            ))}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-red-600">
+              <AlertTriangle size={16} />
+              <span>Overdue and active tasks are highlighted below.</span>
+            </div>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {todayTodos.map((todo) => {
+                const overdueDays = getOverdueDays(todo);
+                const isOverdue = overdueDays > 0;
+                return (
+                  <div key={todo.id} className={isOverdue ? "rounded-2xl border border-red-300/70 bg-red-50/70 p-1 dark:bg-red-950/20" : ""}>
+                    <TodoCard todo={todo} />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

@@ -15,8 +15,10 @@ import {
   ChevronDown,
   ListFilter,
   Eye,
+  AlertTriangle,
 } from "lucide-react";
 import StatusDropdown from "../components/ui/StatusDropdown";
+import { getOverdueDays } from "../utils/dateUtils";
 import type { Todo, TodoPriority, TodoStatus } from "../types/todo";
 
 type FilterStatus   = "all" | TodoStatus;
@@ -244,13 +246,15 @@ const Todos = () => {
             <div className="divide-y divide-gray-50 dark:divide-white/3">
               {filtered.map((todo) => {
                 const isDone     = todo.status === "completed";
+                const overdueDays = getOverdueDays(todo);
+                const isOverdue = overdueDays > 0;
 
                 return (
                   <div
                     key={todo.id}
                     className={`group flex items-center gap-3 px-4 py-3.5 transition-all hover:bg-gray-50 dark:hover:bg-white/2 ${
                       isDone ? "opacity-50" : ""
-                    }`}
+                    } ${isOverdue ? "bg-red-50/70 dark:bg-red-950/20" : ""}`}
                   >
                     {/* Info */}
                     <div className="flex-1 min-w-0">
@@ -267,6 +271,11 @@ const Todos = () => {
                         {todo.apply137Rule && (
                           <span className="shrink-0 text-[10px] font-semibold text-[#818cf8] bg-[#818cf8]/10 px-1.5 py-0.5 rounded-full">
                             1-3-7
+                          </span>
+                        )}
+                        {isOverdue && (
+                          <span className="shrink-0 text-[10px] font-semibold text-red-600 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded-full">
+                            <AlertTriangle size={10} className="inline mr-1" /> Overdue by {overdueDays} day{overdueDays === 1 ? "" : "s"}
                           </span>
                         )}
                       </div>
