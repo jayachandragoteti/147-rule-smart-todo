@@ -1,7 +1,8 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { Todo } from "../../types/todo";
 import type { RootState } from "../../app/store";
-import { getOverdueDays, getTaskBusinessDate, getTaskSection, isTodayDate, isFutureDate } from "../../utils/dateUtils";
+import { getOverdueDays, getTaskSection, isTodayDate, isFutureDate } from "../../utils/dateUtils";
+import { compareTodosByDateTime, getTaskProgressInfo } from "./taskProgress";
 
 // Base Selector
 export const selectAllTodos = (state: RootState) => state.todo.todos;
@@ -28,10 +29,19 @@ export const selectLearningTodos = createSelector(
 );
 
 export const selectHomeTaskSections = createSelector([selectAllTodos], (todos) => {
-  const overdue = todos.filter((todo) => getTaskSection(todo) === "overdue").sort((a,b)=>getOverdueDays(b)-getOverdueDays(a));
-  const today = todos.filter((todo) => getTaskSection(todo) === "today").sort((a,b)=>Number(a.status === "completed") - Number(b.status === "completed"));
-  const upcoming = todos.filter((todo) => getTaskSection(todo) === "upcoming").sort((a,b)=>new Date(getTaskBusinessDate(a)).getTime() - new Date(getTaskBusinessDate(b)).getTime());
-  const backlog = todos.filter((todo) => getTaskSection(todo) === "backlog").sort((a,b)=>new Date(getTaskBusinessDate(a)).getTime() - new Date(getTaskBusinessDate(b)).getTime());
+  const overdue = todos.filter((todo) => getTaskSection(todo) === "overdue").sort((a,b)=>{
+    const overdueDiff = getOverdueDays(b) - getOverdueDays(a);
+    if (overdueDiff !== 0) return overdueDiff;
+    return compareTodosByDateTime(a, b);
+  });
+  const today = todos.filter((todo) => getTaskSection(todo) === "today").sort((a,b)=>{
+    const aProgress = getTaskProgressInfo(a).progressPercent;
+    const bProgress = getTaskProgressInfo(b).progressPercent;
+    if (aProgress !== bProgress) return aProgress - bProgress;
+    return compareTodosByDateTime(a, b);
+  });
+  const upcoming = todos.filter((todo) => getTaskSection(todo) === "upcoming").sort(compareTodosByDateTime);
+  const backlog = todos.filter((todo) => getTaskSection(todo) === "backlog").sort(compareTodosByDateTime);
   const completed = todos.filter((todo) => getTaskSection(todo) === "completed").sort((a,b)=>new Date(b.completedAt ?? b.createdAt).getTime() - new Date(a.completedAt ?? a.createdAt).getTime());
 
   return { overdue, today, upcoming, backlog, completed };
@@ -93,11 +103,14 @@ export const selectTaskStats = createSelector(
 export const selectExtendedTaskStats = createSelector(
   [selectTodayTasks],
   (todayTasks) => {
-    const completed  = todayTasks.filter((t) => t.status === "completed").length;
-    const inProgress = todayTasks.filter((t) => t.status === "inprogress").length;
-    const pending    = todayTasks.filter((t) => t.status === "pending").length;
-    const total      = todayTasks.length;
-    const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const progressEntries = todayTasks.map((todo) => getTaskProgressInfo(todo));
+    const completedUnits = progressEntries.reduce((sum, entry) => sum + entry.completedUnits, 0);
+    const totalUnits = progressEntries.reduce((sum, entry) => sum + entry.totalUnits, 0);
+    const completed = todayTasks.filter((t) => getTaskProgressInfo(t).isCompleted).length;
+    const inProgress = todayTasks.filter((t) => !getTaskProgressInfo(t).isCompleted && (t.status === "inprogress" || (t.subtasks?.some((subtask) => subtask.completed) ?? false))).length;
+    const pending = todayTasks.filter((t) => !getTaskProgressInfo(t).isCompleted && t.status === "pending" && !(t.subtasks?.some((subtask) => subtask.completed) ?? false)).length;
+    const total = todayTasks.length;
+    const progressPercent = totalUnits > 0 ? Math.round((completedUnits / totalUnits) * 100) : 0;
 
     return { total, completed, inProgress, pending, progressPercent };
   }
