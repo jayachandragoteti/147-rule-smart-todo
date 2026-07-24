@@ -1,7 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { Todo } from "../../types/todo";
 import type { RootState } from "../../app/store";
-import { isTodayDate, isFutureDate } from "../../utils/dateUtils";
+import { getOverdueDays, getTaskBusinessDate, getTaskSection, isTodayDate, isFutureDate } from "../../utils/dateUtils";
 
 // Base Selector
 export const selectAllTodos = (state: RootState) => state.todo.todos;
@@ -15,11 +15,6 @@ const isTodoScheduledToday = (todo: Todo): boolean => {
 
 const isTodoScheduledInFuture = (todo: Todo): boolean => isFutureDate(todo.scheduledDate);
 
-const isTodoCompletedOrAdvanced = (todo: Todo): boolean =>
-  todo.status === "completed" ||
-  (todo.apply137Rule && isTodoScheduledInFuture(todo)) ||
-  (todo.recurrence && todo.recurrence !== "none" && isTodoScheduledInFuture(todo));
-
 // Standard action items
 export const selectStandardTodos = createSelector(
   [selectAllTodos],
@@ -32,15 +27,25 @@ export const selectLearningTodos = createSelector(
   (todos) => todos.filter((t) => t.apply137Rule)
 );
 
+export const selectHomeTaskSections = createSelector([selectAllTodos], (todos) => {
+  const overdue = todos.filter((todo) => getTaskSection(todo) === "overdue").sort((a,b)=>getOverdueDays(b)-getOverdueDays(a));
+  const today = todos.filter((todo) => getTaskSection(todo) === "today").sort((a,b)=>Number(a.status === "completed") - Number(b.status === "completed"));
+  const upcoming = todos.filter((todo) => getTaskSection(todo) === "upcoming").sort((a,b)=>new Date(getTaskBusinessDate(a)).getTime() - new Date(getTaskBusinessDate(b)).getTime());
+  const backlog = todos.filter((todo) => getTaskSection(todo) === "backlog").sort((a,b)=>new Date(getTaskBusinessDate(a)).getTime() - new Date(getTaskBusinessDate(b)).getTime());
+  const completed = todos.filter((todo) => getTaskSection(todo) === "completed").sort((a,b)=>new Date(b.completedAt ?? b.createdAt).getTime() - new Date(a.completedAt ?? a.createdAt).getTime());
+
+  return { overdue, today, upcoming, backlog, completed };
+});
+
 // Today's specific tasks - show all tasks due today, including completed items, and keep future-scheduled tasks out of upcoming.
 export const selectTodayTasks = createSelector(
   [selectAllTodos],
   (todos) =>
     todos
-      .filter(isTodoScheduledToday)
+      .filter((todo) => getTaskSection(todo) === "today" || getTaskSection(todo) === "overdue")
       .sort((a, b) => {
-        const aDone = isTodoCompletedOrAdvanced(a);
-        const bDone = isTodoCompletedOrAdvanced(b);
+        const aDone = a.status === "completed";
+        const bDone = b.status === "completed";
 
         if (!aDone && bDone) return -1;
         if (aDone && !bDone) return 1;

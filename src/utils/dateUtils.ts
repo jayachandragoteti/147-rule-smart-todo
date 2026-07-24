@@ -1,3 +1,5 @@
+import type { Todo } from "../types/todo";
+
 /**
  * Check if a date string is today's date
  */
@@ -46,6 +48,46 @@ export const isPastDate = (dateString: string): boolean => {
   const target = toDateOnlyString(dateString);
   const today = toDateOnlyString(new Date().toISOString());
   return target < today;
+};
+
+export const getTaskBusinessDate = (todo: Todo): string => {
+  return todo.occurrenceDate || todo.dueDate || todo.scheduledDate || "";
+};
+
+export const getOverdueDays = (todo: Todo): number => {
+  const businessDate = getTaskBusinessDate(todo);
+  if (!businessDate || todo.status === "completed") {
+    return 0;
+  }
+
+  const today = toDateOnlyString(new Date().toISOString());
+  const target = toDateOnlyString(businessDate);
+  if (target >= today) {
+    return 0;
+  }
+
+  const start = new Date(target);
+  const end = new Date(today);
+  const diffMs = end.getTime() - start.getTime();
+  return Math.max(0, Math.floor(diffMs / 86400000));
+};
+
+export const getTaskSection = (todo: Todo): "overdue" | "today" | "upcoming" | "backlog" | "completed" => {
+  if (todo.status === "completed") return "completed";
+
+  const businessDate = getTaskBusinessDate(todo);
+  const isRecurring = Boolean(todo.recurrence && todo.recurrence !== "none");
+
+  if (todo.isBacklog || (isRecurring && businessDate && isPastDate(businessDate))) {
+    return "backlog";
+  }
+
+  const isOverdue = getOverdueDays(todo) > 0;
+  if (isOverdue) return "overdue";
+
+  if (isTodayDate(businessDate)) return "today";
+  if (isFutureDate(businessDate)) return "upcoming";
+  return "backlog";
 };
 
 /**

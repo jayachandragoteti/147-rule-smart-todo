@@ -56,6 +56,13 @@ export interface Todo {
   scheduledDate: string;
   scheduledTime?: string;
   dueDate?: string;
+  occurrenceDate?: string;
+  parentTaskId?: string;
+  completedAt?: string;
+  isBacklog?: boolean;
+  overdueDays?: number;
+  priorityScore?: number;
+  showOnHome?: boolean;
   reminderEnabled: boolean;
   /** Sound to play when this task's reminder fires. Defaults to 'bell'. */
   notificationSound: NotificationSound;

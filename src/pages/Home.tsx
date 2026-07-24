@@ -13,6 +13,7 @@ import {
   CheckCheck,
   Loader2,
   Search,
+  AlertTriangle,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
@@ -24,10 +25,11 @@ import { THEME_CLASSES } from "../utils/themeUtils";
 import { toTitleCase } from "../utils/textUtils";
 import {
   selectExtendedTaskStats,
-  selectTodayTasks,
+  selectHomeTaskSections,
   selectUpcomingTasks,
 } from "../features/todos/todoSelectors";
 import { get137Label } from "../utils/rule137";
+import { getOverdueDays } from "../utils/dateUtils";
 import type { Todo, TodoStatus } from "../types/todo";
 import StatusDropdown from "../components/ui/StatusDropdown";
 
@@ -62,8 +64,7 @@ const Home = () => {
   const isAuthChecked  = useAppSelector((s) => s.auth.isAuthChecked);
 
   const stats          = useAppSelector(selectExtendedTaskStats);
-  // Show ALL today's tasks including completed (regular + 1-3-7 revisions merged)
-  const allTodayTasks   = useAppSelector(selectTodayTasks);
+  const taskSections   = useAppSelector(selectHomeTaskSections);
   const upcomingTasks   = useAppSelector(selectUpcomingTasks);
 
   const [updatingId,       setUpdatingId]       = useState<string | null>(null);
@@ -91,15 +92,6 @@ const Home = () => {
     () => (journal.length > 0 ? journal[0] : null),
     [journal]
   );
-
-  // Filter today's tasks by search — includes BOTH regular and 1-3-7 revision tasks
-  const filteredTodayTasks = useMemo(() => {
-    if (!taskSearch.trim()) return allTodayTasks;
-    const q = taskSearch.toLowerCase();
-    return allTodayTasks.filter(
-      (t) => t.title.toLowerCase().includes(q) || t.category?.toLowerCase().includes(q)
-    );
-  }, [allTodayTasks, taskSearch]);
 
   // ── Date group label for upcoming tasks ────────────────────────────────────
   const getDateGroupLabel = (dateStr: string): string => {
@@ -181,6 +173,8 @@ const Home = () => {
   const TaskRow = ({ todo, isRevision }: { todo: Todo; isRevision?: boolean }) => {
     const isUpdating = updatingId === todo.id;
     const isDone     = todo.status === "completed";
+    const overdueDays = getOverdueDays(todo);
+    const isOverdue = overdueDays > 0;
     const revLabel   = isRevision && todo.seriesDates?.length
       ? get137Label(todo.seriesDates, todo.scheduledDate)
       : null;
@@ -191,7 +185,7 @@ const Home = () => {
           isDone
             ? `opacity-60 ${THEME_CLASSES.surface.hover}`
             : `${THEME_CLASSES.surface.hover} hover:shadow-sm`
-        }`}
+        } ${isOverdue ? "border border-red-300/70 bg-red-50/70 dark:bg-red-950/20" : ""}`}
       >
         {/* Title + meta */}
         <div className="flex-1 min-w-0">
@@ -218,6 +212,11 @@ const Home = () => {
             {revLabel && (
               <span className="text-[10px] font-semibold text-[#818cf8] bg-[#818cf8]/10 px-1.5 py-0.5 rounded-full">
                 {revLabel} Revision
+              </span>
+            )}
+            {isOverdue && (
+              <span className="text-[10px] font-semibold text-red-600 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded-full">
+                <AlertTriangle size={10} className="inline mr-1" /> Overdue by {overdueDays} day{overdueDays === 1 ? "" : "s"}
               </span>
             )}
           </div>
@@ -376,97 +375,58 @@ const Home = () => {
           </div>
         </div>
 
-        {/* ── Today's Tasks (ALL including completed) ── */}
-        <div className="animate-fade-in-up" style={{ animationDelay: "120ms" }}>
-          <div className={`rounded-2xl border overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-            {/* Section header */}
-            <div className={`flex items-center justify-between px-5 py-3.5 border-b ${THEME_CLASSES.border.base}`}>
-              <div className="flex items-center gap-2">
-                <span className="text-[#4f8cff]"><Target size={15} /></span>
-                <h2 className={`text-sm font-semibold ${THEME_CLASSES.text.primary}`}>Today's Tasks</h2>
-                {/* Count badges */}
-                <div className="flex items-center gap-1 ml-1">
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${THEME_CLASSES.status.todo}`}>
-                    {filteredTodayTasks.filter(t => t.status === "pending").length} pending
-                  </span>
-                  {filteredTodayTasks.filter(t => t.status === "inprogress").length > 0 && (
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${THEME_CLASSES.status.inprogress}`}>
-                      {filteredTodayTasks.filter(t => t.status === "inprogress").length} active
+        {/* ── Home task sections ── */}
+        <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: "120ms" }}>
+          {[{ key: "overdue", title: "Overdue Tasks", icon: <AlertTriangle size={15} />, tasks: taskSections.overdue, accent: "text-red-500" }, { key: "today", title: "Today's Tasks", icon: <Target size={15} />, tasks: taskSections.today, accent: "text-[#4f8cff]" }, { key: "upcoming", title: "Upcoming Tasks", icon: <Clock size={15} />, tasks: taskSections.upcoming, accent: "text-[#818cf8]" }, { key: "backlog", title: "Incomplete Backlog", icon: <Flame size={15} />, tasks: taskSections.backlog, accent: "text-[#f59e0b]" }, { key: "completed", title: "Completed Today", icon: <CheckCircle2 size={15} />, tasks: taskSections.completed, accent: "text-[#22c55e]" }].map((section) => {
+            const sectionTasks = section.tasks.filter((todo) => !taskSearch || todo.title.toLowerCase().includes(taskSearch.toLowerCase()) || todo.category?.toLowerCase().includes(taskSearch.toLowerCase()));
+            return (
+              <div key={section.key} className={`rounded-2xl border overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+                <div className={`flex items-center justify-between px-5 py-3.5 border-b ${THEME_CLASSES.border.base}`}>
+                  <div className="flex items-center gap-2">
+                    <span className={section.accent}>{section.icon}</span>
+                    <h2 className={`text-sm font-semibold ${THEME_CLASSES.text.primary}`}>{section.title}</h2>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${section.key === "overdue" ? "bg-red-100 text-red-600" : section.key === "completed" ? "bg-emerald-100 text-emerald-600" : "bg-[#4f8cff]/10 text-[#4f8cff]"}`}>
+                      {sectionTasks.length}
                     </span>
-                  )}
-                  {filteredTodayTasks.filter(t => t.status === "completed").length > 0 && (
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${THEME_CLASSES.status.success}`}>
-                      {filteredTodayTasks.filter(t => t.status === "completed").length} done
-                    </span>
-                  )}
+                  </div>
+                  <Link to="/todos" className={`text-[11px] font-medium flex items-center gap-1 transition-all ${THEME_CLASSES.text.link} hover:gap-1.5`}>
+                    All tasks <ArrowRight size={11} />
+                  </Link>
                 </div>
-              </div>
-              <Link
-                to="/todos"
-                className={`text-[11px] font-medium flex items-center gap-1 transition-all ${THEME_CLASSES.text.link} hover:gap-1.5`}
-              >
-                All tasks <ArrowRight size={11} />
-              </Link>
-            </div>
 
-            {/* Search bar — always visible */}
-            <div className={`px-4 py-2.5 border-b ${THEME_CLASSES.border.base}`}>
-              <div className="relative">
-                <Search size={13} className={`absolute left-3 top-1/2 -translate-y-1/2 ${THEME_CLASSES.text.tertiary}`} />
-                <input
-                  type="text"
-                  placeholder="Search today's tasks…"
-                  value={taskSearch}
-                  onChange={(e) => setTaskSearch(e.target.value)}
-                  className={`w-full pl-8 pr-4 py-2 rounded-xl text-xs ${THEME_CLASSES.input.base}`}
-                />
-              </div>
-            </div>
+                <div className={`px-4 py-2.5 border-b ${THEME_CLASSES.border.base}`}>
+                  <div className="relative">
+                    <Search size={13} className={`absolute left-3 top-1/2 -translate-y-1/2 ${THEME_CLASSES.text.tertiary}`} />
+                    <input
+                      type="text"
+                      placeholder={`Search ${section.title.toLowerCase()}…`}
+                      value={taskSearch}
+                      onChange={(e) => setTaskSearch(e.target.value)}
+                      className={`w-full pl-8 pr-4 py-2 rounded-xl text-xs ${THEME_CLASSES.input.base}`}
+                    />
+                  </div>
+                </div>
 
-            {/* Task list */}
-            {loading ? (
-              <div className="space-y-2 p-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-14 rounded-xl bg-gray-100 dark:bg-white/3 animate-pulse" />
-                ))}
-              </div>
-            ) : filteredTodayTasks.length === 0 ? (
-              <div className="px-5 py-10 text-center">
-                <CheckCircle2 size={28} className="mx-auto mb-2 text-[#22c55e] opacity-40" />
-                <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>
-                  {taskSearch ? "No tasks match your search" : "No tasks scheduled for today. Add one above!"}
-                </p>
-              </div>
-            ) : (
-              <div className="p-2 divide-y divide-gray-50 dark:divide-white/3">
-                {/* Active tasks first */}
-                {filteredTodayTasks
-                  .filter((t) => t.status !== "completed")
-                  .map((todo) => (
-                    <TaskRow key={todo.id} todo={todo} />
-                  ))}
-                {/* Completed tasks below with subtle separator */}
-                {filteredTodayTasks.filter((t) => t.status === "completed").length > 0 && (
-                  <>
-                    {filteredTodayTasks.filter((t) => t.status !== "completed").length > 0 && (
-                      <div className={`flex items-center gap-2 px-4 py-2`}>
-                        <div className="flex-1 h-px bg-gray-100 dark:bg-white/5" />
-                        <span className={`text-[10px] font-semibold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
-                          Completed
-                        </span>
-                        <div className="flex-1 h-px bg-gray-100 dark:bg-white/5" />
-                      </div>
-                    )}
-                    {filteredTodayTasks
-                      .filter((t) => t.status === "completed")
-                      .map((todo) => (
-                        <TaskRow key={todo.id} todo={todo} />
-                      ))}
-                  </>
+                {loading ? (
+                  <div className="space-y-2 p-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-14 rounded-xl bg-gray-100 dark:bg-white/3 animate-pulse" />
+                    ))}
+                  </div>
+                ) : sectionTasks.length === 0 ? (
+                  <div className="px-5 py-10 text-center">
+                    <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>{section.key === "completed" ? "No completed tasks yet" : "Nothing here yet"}</p>
+                  </div>
+                ) : (
+                  <div className="p-2 divide-y divide-gray-50 dark:divide-white/3">
+                    {sectionTasks.map((todo) => (
+                      <TaskRow key={todo.id} todo={todo} />
+                    ))}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
+            );
+          })}
         </div>
 
         {/* ── Stats section — including upcoming / scheduled ── */}
