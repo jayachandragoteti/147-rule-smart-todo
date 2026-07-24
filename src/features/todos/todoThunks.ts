@@ -10,6 +10,7 @@ import {
   generate137Dates,
   getNextValidSeriesDate,
 } from "../../utils/rule137";
+import { getParentTodoStatusFromSubtasks } from "./subtaskStatus";
 import {
   getNextValidRecurrenceDate,
   isPastDate,
@@ -236,15 +237,13 @@ export const toggleSubtaskStatus = createAsyncThunk<
       st.id === subtaskId ? { ...st, completed: !st.completed } : st
     );
 
-    const allSubtasksCompleted = updatedSubtasks.length > 0 && updatedSubtasks.every(st => st.completed);
-    const anySubtaskUnchecked = updatedSubtasks.some(st => !st.completed);
-
+    const nextStatus = getParentTodoStatusFromSubtasks(updatedSubtasks, todo.status);
     const updates: any = { subtasks: updatedSubtasks };
 
-    if (allSubtasksCompleted && todo.status !== TODO_STATUS.COMPLETED) {
+    if (nextStatus === TODO_STATUS.COMPLETED && todo.status !== TODO_STATUS.COMPLETED) {
       Object.assign(updates, getRecurringCompletionUpdate(todo));
-    } else if (anySubtaskUnchecked && todo.status === TODO_STATUS.COMPLETED) {
-      updates.status = TODO_STATUS.PENDING;
+    } else if (nextStatus !== TODO_STATUS.COMPLETED) {
+      updates.status = nextStatus;
     }
 
     return await updateTodoInFirestore(uid, todoId, updates);

@@ -355,7 +355,7 @@ const Home = () => {
               ? [{ key: "overdue", title: "Overdue Tasks", icon: <AlertTriangle size={15} />, tasks: taskSections.overdue, accent: "text-red-500" }]
               : []),
             { key: "backlog", title: "Incomplete Backlog", icon: <Flame size={15} />, tasks: taskSections.backlog, accent: "text-[#f59e0b]" },
-          ].map((section) => {
+          ].filter((section) => section.tasks.length > 0).map((section) => {
             const sectionTasks = section.tasks.filter((todo) => !taskSearch || todo.title.toLowerCase().includes(taskSearch.toLowerCase()) || todo.category?.toLowerCase().includes(taskSearch.toLowerCase()));
             return (
               <div key={section.key} className={`rounded-2xl border overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
@@ -408,25 +408,33 @@ const Home = () => {
         </div>
 
         {/* ── Stats section ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)] gap-3 animate-fade-in-up" style={{ animationDelay: "130ms" }}>
-            {[
-              { label: "Total",       value: stats.total,      icon: <Target size={15} />,      color: "text-[#4f8cff] bg-[#4f8cff]/10" },
-              { label: "Completed",   value: stats.completed,   icon: <CheckCheck size={15} />,  color: "text-[#22c55e] bg-[#22c55e]/10" },
-              { label: "In Progress", value: stats.inProgress,  icon: <PlayCircle size={15} />,  color: "text-[#f59e0b] bg-[#f59e0b]/10" },
-              { label: "Pending",     value: stats.pending,     icon: <Flame size={15} />,       color: "text-[#a0a6b5] bg-white/5" },
-            ].map(({ label, value, icon, color }) => (
-              <div
-                key={label}
-                className={`flex items-center gap-3 p-3.5 rounded-xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}
-              >
-                <div className={`p-2 rounded-lg ${color}`}>{icon}</div>
-                <div>
-                  <p className={`text-xl font-bold leading-none ${THEME_CLASSES.text.primary}`}>{value}</p>
-                  <p className={`text-[10px] mt-0.5 font-medium ${THEME_CLASSES.text.tertiary}`}>{label}</p>
-                </div>
+        <div className="animate-fade-in-up" style={{ animationDelay: "130ms" }}>
+          <div className={`rounded-2xl border overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+            <div className={`flex items-center justify-between px-5 py-3.5 border-b ${THEME_CLASSES.border.base}`}>
+              <div className="flex items-center gap-2">
+                <span className="text-[#4f8cff]"><Target size={15} /></span>
+                <h2 className={`text-sm font-semibold ${THEME_CLASSES.text.primary}`}>Task Summary</h2>
               </div>
-            ))}
+              <span className={`text-[11px] font-medium ${THEME_CLASSES.text.tertiary}`}>{stats.total} total</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3">
+              {[
+                { label: "Total", value: stats.total, icon: <Target size={15} />, color: "text-[#4f8cff] bg-[#4f8cff]/10" },
+                { label: "Completed", value: stats.completed, icon: <CheckCheck size={15} />, color: "text-[#22c55e] bg-[#22c55e]/10" },
+                { label: "In Progress", value: stats.inProgress, icon: <PlayCircle size={15} />, color: "text-[#f59e0b] bg-[#f59e0b]/10" },
+                { label: "Pending", value: stats.pending, icon: <Flame size={15} />, color: "text-[#a0a6b5] bg-white/5" },
+              ].map(({ label, value, icon, color }) => (
+                <div key={label} className="flex items-center gap-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] p-3">
+                  <div className={`p-2 rounded-lg ${color}`}>{icon}</div>
+                  <div>
+                    <p className={`text-lg font-bold leading-none ${THEME_CLASSES.text.primary}`}>{value}</p>
+                    <p className={`text-[10px] mt-0.5 font-medium ${THEME_CLASSES.text.tertiary}`}>{label}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
 
         {/* ── Recent Journal Entry ── */}
         {latestJournal && (
