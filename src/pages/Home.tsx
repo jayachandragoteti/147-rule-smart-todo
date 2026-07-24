@@ -187,8 +187,8 @@ const Home = () => {
               </span>
             )}
             {isOverdue && (
-              <span className="text-[10px] font-semibold text-red-600 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded-full">
-                <AlertTriangle size={10} className="inline mr-1" /> Overdue by {overdueDays} day{overdueDays === 1 ? "" : "s"}
+              <span className="text-[8px] sm:text-[9px] font-semibold text-red-600 bg-red-100 dark:bg-red-900/30 px-1.25 py-0.5 rounded-full">
+                <AlertTriangle size={8} className="inline mr-1" /> Overdue by {overdueDays} day{overdueDays === 1 ? "" : "s"}
               </span>
             )}
           </div>
