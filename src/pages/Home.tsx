@@ -271,7 +271,7 @@ const Home = () => {
 
         {/* ── Progress bar only — top of page ── */}
         <div className="animate-fade-in-up" style={{ animationDelay: "40ms" }}>
-          <div className={`rounded-2xl border ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
+          <div>
             <div className="px-3 py-3">
               <div className="flex items-center justify-between mb-2">
                 <span className={`text-[11px] font-semibold ${THEME_CLASSES.text.tertiary}`}>Today's progress</span>
