@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  CheckCircle2,
   Clock,
   Plus,
   ArrowRight,
@@ -26,7 +25,6 @@ import { toTitleCase } from "../utils/textUtils";
 import {
   selectExtendedTaskStats,
   selectHomeTaskSections,
-  selectUpcomingTasks,
 } from "../features/todos/todoSelectors";
 import { get137Label } from "../utils/rule137";
 import { getOverdueDays } from "../utils/dateUtils";
@@ -65,14 +63,12 @@ const Home = () => {
 
   const stats          = useAppSelector(selectExtendedTaskStats);
   const taskSections   = useAppSelector(selectHomeTaskSections);
-  const upcomingTasks   = useAppSelector(selectUpcomingTasks);
 
   const [updatingId,       setUpdatingId]       = useState<string | null>(null);
   const [quickTab,         setQuickTab]         = useState<QuickAddTab>("task");
   const [quickText,        setQuickText]        = useState("");
   const [savingNote,       setSavingNote]       = useState(false);
   const [taskSearch,       setTaskSearch]       = useState("");
-  const [showAllUpcoming,  setShowAllUpcoming]  = useState(false);
 
   const quote = useMemo(
     () => QUOTES[Math.floor(Math.random() * QUOTES.length)],
@@ -92,30 +88,6 @@ const Home = () => {
     () => (journal.length > 0 ? journal[0] : null),
     [journal]
   );
-
-  // ── Date group label for upcoming tasks ────────────────────────────────────
-  const getDateGroupLabel = (dateStr: string): string => {
-    const today    = new Date(); today.setHours(0,0,0,0);
-    const target   = new Date(dateStr); target.setHours(0,0,0,0);
-    const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000);
-    if (diffDays === 1) return "Tomorrow";
-    if (diffDays <= 7)  return target.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
-    if (diffDays <= 30) return "Next " + target.toLocaleDateString("en-US", { weekday: "long" });
-    return target.toLocaleDateString("en-US", { month: "long", day: "numeric" });
-  };
-
-  // Group upcoming tasks by date label
-  const groupedUpcoming = useMemo(() => {
-    const map: Record<string, typeof upcomingTasks> = {};
-    const displayList = showAllUpcoming ? upcomingTasks : upcomingTasks.slice(0, 10);
-    for (const t of displayList) {
-      const label = getDateGroupLabel(t.scheduledDate);
-      if (!map[label]) map[label] = [];
-      map[label].push(t);
-    }
-    return map;
-  }, [upcomingTasks, showAllUpcoming]);
-
 
   // ── Greeting ─────────────────────────────────────────────────────────────
   const greeting = (() => {
@@ -377,7 +349,13 @@ const Home = () => {
 
         {/* ── Home task sections ── */}
         <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: "120ms" }}>
-          {[{ key: "overdue", title: "Overdue Tasks", icon: <AlertTriangle size={15} />, tasks: taskSections.overdue, accent: "text-red-500" }, { key: "today", title: "Today's Tasks", icon: <Target size={15} />, tasks: taskSections.today, accent: "text-[#4f8cff]" }, { key: "upcoming", title: "Upcoming Tasks", icon: <Clock size={15} />, tasks: taskSections.upcoming, accent: "text-[#818cf8]" }, { key: "backlog", title: "Incomplete Backlog", icon: <Flame size={15} />, tasks: taskSections.backlog, accent: "text-[#f59e0b]" }, { key: "completed", title: "Completed Today", icon: <CheckCircle2 size={15} />, tasks: taskSections.completed, accent: "text-[#22c55e]" }].map((section) => {
+          {[
+            { key: "today", title: "Today's Tasks", icon: <Target size={15} />, tasks: taskSections.today, accent: "text-[#4f8cff]" },
+            ...(taskSections.overdue.length > 0
+              ? [{ key: "overdue", title: "Overdue Tasks", icon: <AlertTriangle size={15} />, tasks: taskSections.overdue, accent: "text-red-500" }]
+              : []),
+            { key: "backlog", title: "Incomplete Backlog", icon: <Flame size={15} />, tasks: taskSections.backlog, accent: "text-[#f59e0b]" },
+          ].map((section) => {
             const sectionTasks = section.tasks.filter((todo) => !taskSearch || todo.title.toLowerCase().includes(taskSearch.toLowerCase()) || todo.category?.toLowerCase().includes(taskSearch.toLowerCase()));
             return (
               <div key={section.key} className={`rounded-2xl border overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
@@ -385,7 +363,7 @@ const Home = () => {
                   <div className="flex items-center gap-2">
                     <span className={section.accent}>{section.icon}</span>
                     <h2 className={`text-sm font-semibold ${THEME_CLASSES.text.primary}`}>{section.title}</h2>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${section.key === "overdue" ? "bg-red-100 text-red-600" : section.key === "completed" ? "bg-emerald-100 text-emerald-600" : "bg-[#4f8cff]/10 text-[#4f8cff]"}`}>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${section.key === "overdue" ? "bg-red-100 text-red-600" : "bg-[#4f8cff]/10 text-[#4f8cff]"}`}>
                       {sectionTasks.length}
                     </span>
                   </div>
@@ -415,7 +393,7 @@ const Home = () => {
                   </div>
                 ) : sectionTasks.length === 0 ? (
                   <div className="px-5 py-10 text-center">
-                    <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>{section.key === "completed" ? "No completed tasks yet" : "Nothing here yet"}</p>
+                    <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>Nothing here yet</p>
                   </div>
                 ) : (
                   <div className="p-2 divide-y divide-gray-50 dark:divide-white/3">
@@ -429,9 +407,8 @@ const Home = () => {
           })}
         </div>
 
-        {/* ── Stats section — including upcoming / scheduled ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-3 animate-fade-in-up" style={{ animationDelay: "130ms" }}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {/* ── Stats section ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)] gap-3 animate-fade-in-up" style={{ animationDelay: "130ms" }}>
             {[
               { label: "Total",       value: stats.total,      icon: <Target size={15} />,      color: "text-[#4f8cff] bg-[#4f8cff]/10" },
               { label: "Completed",   value: stats.completed,   icon: <CheckCheck size={15} />,  color: "text-[#22c55e] bg-[#22c55e]/10" },
@@ -450,150 +427,6 @@ const Home = () => {
               </div>
             ))}
           </div>
-
-          <div className="animate-fade-in-up" style={{ animationDelay: "140ms" }}>
-          <div className={`rounded-2xl border overflow-hidden ${THEME_CLASSES.surface.card} ${THEME_CLASSES.border.base}`}>
-            {/* Header */}
-            <div className={`flex items-center justify-between px-5 py-3.5 border-b ${THEME_CLASSES.border.base}`}>
-              <div className="flex items-center gap-2">
-                <span className="text-[#818cf8]">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                  </svg>
-                </span>
-                <h2 className={`text-sm font-semibold ${THEME_CLASSES.text.primary}`}>Upcoming &amp; Scheduled</h2>
-                {upcomingTasks.length > 0 && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#818cf8]/10 text-[#818cf8]">
-                    {upcomingTasks.length}
-                  </span>
-                )}
-              </div>
-              <Link
-                to="/todos"
-                className={`text-[11px] font-medium flex items-center gap-1 transition-all ${THEME_CLASSES.text.link} hover:gap-1.5`}
-              >
-                All tasks <ArrowRight size={11} />
-              </Link>
-            </div>
-
-            {loading ? (
-              <div className="space-y-2 p-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-12 rounded-xl bg-gray-100 dark:bg-white/3 animate-pulse" />
-                ))}
-              </div>
-            ) : upcomingTasks.length === 0 ? (
-              <div className="px-5 py-8 text-center">
-                <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>No upcoming scheduled tasks.</p>
-              </div>
-            ) : (
-              <div className="p-3 space-y-4">
-                {Object.entries(groupedUpcoming).map(([dateLabel, tasks]) => (
-                  <div key={dateLabel}>
-                    {/* Date group label */}
-                    <div className="flex items-center gap-2 mb-1.5 px-1">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest ${THEME_CLASSES.text.tertiary}`}>
-                        {dateLabel}
-                      </span>
-                      <div className="flex-1 h-px bg-gray-100 dark:bg-white/5" />
-                    </div>
-
-                    {/* Tasks under this date */}
-                    <div className="space-y-0.5">
-                      {tasks.map((todo) => {
-                        const isUpdating = updatingId === todo.id;
-                        const isDone     = todo.status === "completed";
-                        // Schedule type badge
-                        const scheduleBadge = todo.apply137Rule
-                          ? { label: "1-3-7", color: "text-[#818cf8] bg-[#818cf8]/10" }
-                          : todo.recurrence === "daily"
-                          ? { label: "Daily", color: "text-[#22c55e] bg-[#22c55e]/10" }
-                          : todo.recurrence === "weekly"
-                          ? { label: "Weekly", color: "text-[#4f8cff] bg-[#4f8cff]/10" }
-                          : todo.recurrence === "monthly"
-                          ? { label: "Monthly", color: "text-[#f59e0b] bg-[#f59e0b]/10" }
-                          : null;
-
-                        return (
-                          <div
-                            key={todo.id}
-                            className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
-                              isDone ? "opacity-50" : THEME_CLASSES.surface.hover
-                            }`}
-                          >
-                            {/* Info */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <Link
-                                  to={`/todo/${todo.id}`}
-                                  className={`text-sm font-medium truncate hover:text-[#4f8cff] transition-colors ${
-                                    isDone ? THEME_CLASSES.text.tertiary : THEME_CLASSES.text.primary
-                                  }`}
-                                >
-                                  {toTitleCase(todo.title)}
-                                </Link>
-                                {scheduleBadge && (
-                                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${scheduleBadge.color}`}>
-                                    {scheduleBadge.label}
-                                  </span>
-                                )}
-                                <span className={`shrink-0 w-1 h-1 rounded-full ${priorityDot[todo.priority] ?? priorityDot.medium}`} />
-                              </div>
-                              {(todo.scheduledTime || todo.category) && (
-                                <div className={`flex items-center gap-1.5 mt-0.5 text-[10px] ${THEME_CLASSES.text.tertiary}`}>
-                                  {todo.scheduledTime && (
-                                    <span className="flex items-center gap-0.5"><Clock size={9} /> {todo.scheduledTime}</span>
-                                  )}
-                                  {todo.category && <span>· {todo.category}</span>}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Status dropdown + View */}
-                            <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                              <StatusDropdown
-                                currentStatus={todo.status as TodoStatus}
-                                isUpdating={isUpdating}
-                                blocked={todo.subtasks?.some((st) => !st.completed) ?? false}
-                                onChange={(newStatus) => handleStatusChangeById(todo, newStatus)}
-                                showLabel={false}
-                              />
-                              <Link
-                                to={`/todo/${todo.id}`}
-                                className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[10px] font-semibold border transition-all ${THEME_CLASSES.border.base} ${THEME_CLASSES.text.tertiary} ${THEME_CLASSES.button.hover} hover:text-[#4f8cff] hover:border-[#4f8cff]/30`}
-                                title="View task"
-                              >
-                                <Eye size={11} />
-                              </Link>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-
-                {/* Show more/less toggle */}
-                {upcomingTasks.length > 10 && (
-                  <button
-                    onClick={() => setShowAllUpcoming(!showAllUpcoming)}
-                    className={`w-full py-2 text-xs font-semibold rounded-xl transition-all ${THEME_CLASSES.button.hover} ${THEME_CLASSES.text.tertiary} hover:text-[#4f8cff]`}
-                  >
-                    {showAllUpcoming
-                      ? "Show less ↑"
-                      : `Show all ${upcomingTasks.length} upcoming tasks ↓`}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-
 
         {/* ── Recent Journal Entry ── */}
         {latestJournal && (
