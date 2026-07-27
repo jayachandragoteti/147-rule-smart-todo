@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { Todo, PartialTodoUpdate } from "../../types/todo";
+import type { Todo, PartialTodoUpdate, TodoStatus } from "../../types/todo";
 import {
   createTodoInFirestore,
   fetchTodosFromFirestore,
@@ -10,7 +10,7 @@ import {
   generate137Dates,
   getNextValidSeriesDate,
 } from "../../utils/rule137";
-import { getParentTodoStatusFromSubtasks } from "./subtaskStatus";
+import { getParentTodoStatusFromSubtasks, shouldAutoCompleteTask } from "./subtaskStatus";
 import {
   getNextValidRecurrenceDate,
   isPastDate,
@@ -39,21 +39,45 @@ const isTodoDueToday = (todo: Todo): boolean => {
   return isTodayDate(todo.scheduledDate);
 };
 
+const appendHistoryEntry = (todo: Todo, status: TodoStatus, scheduledDate: string): PartialTodoUpdate => {
+  const history = [...(todo.history ?? [])];
+  history.push({
+    completedAt: new Date().toISOString(),
+    status,
+    scheduledDate,
+  });
+
+  return {
+    history: history.slice(-20),
+    completedAt: new Date().toISOString(),
+  };
+};
+
 const getRecurringCompletionUpdate = (todo: Todo): PartialTodoUpdate => {
   if (todo.apply137Rule && todo.seriesDates && todo.seriesDates.length > 0) {
     if (isTodoDueToday(todo)) {
-      return { status: TODO_STATUS.COMPLETED };
+      return {
+        status: TODO_STATUS.COMPLETED,
+        ...appendHistoryEntry(todo, TODO_STATUS.COMPLETED, todo.scheduledDate),
+      };
     }
     const nextDate = getNextValidSeriesDate(todo.seriesDates, todo.scheduledDate);
     if (nextDate) {
       return { scheduledDate: nextDate, status: TODO_STATUS.PENDING };
     }
-    return { status: TODO_STATUS.COMPLETED, apply137Rule: false };
+    return {
+      status: TODO_STATUS.COMPLETED,
+      apply137Rule: false,
+      ...appendHistoryEntry(todo, TODO_STATUS.COMPLETED, todo.scheduledDate),
+    };
   }
 
   if (todo.recurrence && todo.recurrence !== "none") {
     if (isTodoDueToday(todo)) {
-      return { status: TODO_STATUS.COMPLETED };
+      return {
+        status: TODO_STATUS.COMPLETED,
+        ...appendHistoryEntry(todo, TODO_STATUS.COMPLETED, todo.scheduledDate),
+      };
     }
     return {
       scheduledDate: getNextValidRecurrenceDate(
@@ -65,13 +89,23 @@ const getRecurringCompletionUpdate = (todo: Todo): PartialTodoUpdate => {
     };
   }
 
-  return { status: TODO_STATUS.COMPLETED };
+  return {
+    status: TODO_STATUS.COMPLETED,
+    ...appendHistoryEntry(todo, TODO_STATUS.COMPLETED, todo.scheduledDate),
+  };
 };
 
 const normalizeCompletedRecurringTodo = async (
   uid: string,
   todo: Todo
 ): Promise<Todo> => {
+  if (todo.status === TODO_STATUS.IN_PROGRESS && shouldAutoCompleteTask(todo)) {
+    return await updateTodoInFirestore(uid, todo.id, {
+      status: TODO_STATUS.COMPLETED,
+      ...appendHistoryEntry(todo, TODO_STATUS.COMPLETED, todo.scheduledDate),
+    });
+  }
+
   if (todo.status !== TODO_STATUS.COMPLETED || isTodoDueToday(todo)) {
     return todo;
   }
@@ -244,6 +278,9 @@ export const toggleSubtaskStatus = createAsyncThunk<
       Object.assign(updates, getRecurringCompletionUpdate(todo));
     } else if (nextStatus !== TODO_STATUS.COMPLETED) {
       updates.status = nextStatus;
+      if (nextStatus === TODO_STATUS.IN_PROGRESS) {
+        Object.assign(updates, appendHistoryEntry(todo, TODO_STATUS.IN_PROGRESS, todo.scheduledDate));
+      }
     }
 
     return await updateTodoInFirestore(uid, todoId, updates);

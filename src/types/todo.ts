@@ -59,6 +59,11 @@ export interface Todo {
   occurrenceDate?: string;
   parentTaskId?: string;
   completedAt?: string;
+  history?: Array<{
+    completedAt: string;
+    status: TodoStatus;
+    scheduledDate: string;
+  }>;
   isBacklog?: boolean;
   overdueDays?: number;
   priorityScore?: number;

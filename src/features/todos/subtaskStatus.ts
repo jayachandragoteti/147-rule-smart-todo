@@ -1,5 +1,5 @@
 import { TODO_STATUS } from "../../utils/todoConstants";
-import type { TodoStatus } from "../../types/todo";
+import type { TodoStatus, Todo } from "../../types/todo";
 
 export const getParentTodoStatusFromSubtasks = (
   subtasks: Array<{ completed: boolean }>,
@@ -9,15 +9,20 @@ export const getParentTodoStatusFromSubtasks = (
     return currentStatus;
   }
 
-  const allCompleted = subtasks.every((subtask) => subtask.completed);
-  if (allCompleted) {
-    return TODO_STATUS.COMPLETED;
-  }
-
   const hasAnyCompleted = subtasks.some((subtask) => subtask.completed);
   if (hasAnyCompleted) {
     return TODO_STATUS.IN_PROGRESS;
   }
 
   return TODO_STATUS.PENDING;
+};
+
+export const shouldAutoCompleteTask = (todo: Partial<Todo>, now: Date = new Date()): boolean => {
+  if (!todo.scheduledDate) return false;
+  if (todo.status === TODO_STATUS.COMPLETED) return false;
+
+  const scheduledDay = new Date(todo.scheduledDate).toISOString().split("T")[0];
+  const currentDay = now.toISOString().split("T")[0];
+
+  return scheduledDay < currentDay && todo.status === TODO_STATUS.IN_PROGRESS;
 };
