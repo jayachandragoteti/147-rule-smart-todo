@@ -47,15 +47,22 @@ export const selectHomeTaskSections = createSelector([selectAllTodos], (todos) =
   return { overdue, today, upcoming, backlog, completed };
 });
 
-// Today's specific tasks - show all tasks due today, including completed items, and keep future-scheduled tasks out of upcoming.
+const isTodoVisibleOnToday = (todo: Todo): boolean => {
+  const section = getTaskSection(todo);
+  if (section === "today" || section === "overdue") return true;
+  if (section === "completed") return isTodoScheduledToday(todo);
+  return false;
+};
+
+// Today's specific tasks - include tasks due today, overdue items, and completed items that were scheduled for today.
 export const selectTodayTasks = createSelector(
   [selectAllTodos],
   (todos) =>
     todos
-      .filter((todo) => getTaskSection(todo) === "today" || getTaskSection(todo) === "overdue")
+      .filter((todo) => isTodoVisibleOnToday(todo))
       .sort((a, b) => {
-        const aDone = a.status === "completed";
-        const bDone = b.status === "completed";
+        const aDone = getTaskProgressInfo(a).isCompleted;
+        const bDone = getTaskProgressInfo(b).isCompleted;
 
         if (!aDone && bDone) return -1;
         if (aDone && !bDone) return 1;
@@ -79,13 +86,8 @@ export const selectTodayRevisions = createSelector(
 export const selectTaskStats = createSelector(
   [selectTodayTasks],
   (todayTasks) => {
-    const completedToday = todayTasks.filter((t) => {
-      if (t.status === "completed") return true;
-      if (t.seriesDates?.length) return isFutureDate(t.scheduledDate);
-      if (t.recurrence && t.recurrence !== "none") return isFutureDate(t.scheduledDate);
-      return false;
-    }).length;
-    
+    const completedToday = todayTasks.filter((t) => getTaskProgressInfo(t).isCompleted).length;
+
     const progressPercent = todayTasks.length > 0
       ? Math.round((completedToday / todayTasks.length) * 100)
       : 0;
