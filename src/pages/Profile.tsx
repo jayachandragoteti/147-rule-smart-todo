@@ -120,9 +120,9 @@ const Profile = () => {
         notificationsEnabled: notifications,
         email: user.email || "",
       });
-      toast.success("Profile updated successfully");
+      toast.success("Profile updated successfully.");
     } catch {
-      toast.error("Failed to update profile");
+      toast.error("Unable to update profile.");
     } finally {
       setSaving(false);
     }
@@ -130,7 +130,7 @@ const Profile = () => {
 
   const handleLogout = () => {
     dispatch(logoutThunk());
-    toast.success("Logged out successfully");
+    toast.success("Logged out successfully.");
   };
 
   if (loading) {

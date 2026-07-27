@@ -38,7 +38,7 @@ const Register = () => {
           
           <div className="space-y-1">
             <h2 className={`text-3xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
-                Create Account
+                Create an account
             </h2>
             <p className={`text-sm font-medium ${THEME_CLASSES.text.tertiary}`}>
                 Start your journey with TodoSpace.
@@ -118,7 +118,7 @@ const Register = () => {
               to="/login"
               className="text-emerald-500 font-bold hover:underline"
             >
-              Login instead
+              Sign in instead
             </Link>
           </p>
           <div className={`text-[9px] font-bold uppercase tracking-wider opacity-30 ${THEME_CLASSES.text.tertiary}`}>

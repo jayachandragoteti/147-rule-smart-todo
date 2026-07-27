@@ -13,11 +13,11 @@ export const VALIDATION = {
    Form Messages
 ---------------------------- */
 export const FORM_MESSAGES = {
-  REQUIRED_TITLE: "Title is required",
-  MIN_TITLE: `Title must be at least ${VALIDATION.TITLE_MIN_LENGTH} characters`,
-  REQUIRED_DATE: "Task Date is required",
-  INVALID_URL: "Please enter a valid URL",
-  MIN_LINK_TITLE: `Title must be at least ${VALIDATION.LINK_TITLE_MIN_LENGTH} characters`,
-  INVALID_IMAGE_TYPE: "Please upload a valid image (JPEG, PNG, WebP, or GIF)",
-  IMAGE_TOO_LARGE: "Image must be less than 5MB",
+  REQUIRED_TITLE: "A title is required.",
+  MIN_TITLE: `Title must be at least ${VALIDATION.TITLE_MIN_LENGTH} characters.`,
+  REQUIRED_DATE: "Please select a task date.",
+  INVALID_URL: "Please enter a valid URL.",
+  MIN_LINK_TITLE: `Title must be at least ${VALIDATION.LINK_TITLE_MIN_LENGTH} characters.`,
+  INVALID_IMAGE_TYPE: "Please upload a valid image (JPEG, PNG, WebP, or GIF).",
+  IMAGE_TOO_LARGE: "Image must be less than 5MB.",
 } as const;

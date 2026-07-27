@@ -51,10 +51,10 @@ const Today = () => {
             
             <div className="space-y-2">
                 <h2 className={`text-4xl md:text-5xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
-                  Today's Tasks
+                  Today&apos;s Tasks
                 </h2>
                 <p className={`text-lg font-medium leading-relaxed ${THEME_CLASSES.text.tertiary}`}>
-                  Your focus for <span className="text-blue-500 font-bold">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</span>. 
+                  Your plan for <span className="text-blue-500 font-bold">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</span>.
                 </p>
             </div>
           </div>
@@ -113,9 +113,9 @@ const Today = () => {
                 </div>
             </div>
             <div className="space-y-2">
-                <h3 className={`text-2xl font-bold ${THEME_CLASSES.text.primary}`}>All Caught Up!</h3>
+                <h3 className={`text-2xl font-bold ${THEME_CLASSES.text.primary}`}>You&apos;re all caught up!</h3>
                 <p className={`text-sm font-medium max-w-sm leading-relaxed ${THEME_CLASSES.text.tertiary}`}>
-                  You've completed all your tasks for today.
+                  You have completed all your tasks for today.
                 </p>
             </div>
             <Link

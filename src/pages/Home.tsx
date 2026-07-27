@@ -109,7 +109,7 @@ const Home = () => {
     try {
       await dispatch(updateTodo({ id: todo.id, updates: { status: newStatus } })).unwrap();
     } catch {
-      toast.error("Failed to update status");
+      toast.error("Unable to update status.");
     } finally {
       setUpdatingId(null);
     }
@@ -128,10 +128,10 @@ const Home = () => {
         await dispatch(
           createNote({ title: quickText.trim(), content: "", tags: [], isPinned: false })
         ).unwrap();
-        toast.success("Note saved!");
+        toast.success("Note saved successfully.");
         setQuickText("");
       } catch {
-        toast.error("Failed to save note");
+        toast.error("Unable to save note.");
       } finally {
         setSavingNote(false);
       }
@@ -239,13 +239,13 @@ const Home = () => {
             to={href}
             className={`text-[11px] font-medium flex items-center gap-1 transition-all ${THEME_CLASSES.text.link} hover:gap-1.5`}
           >
-            {hrefLabel ?? "View all"} <ArrowRight size={11} />
+            {hrefLabel ?? "View All"} <ArrowRight size={11} />
           </Link>
         )}
       </div>
       {empty ? (
         <div className="px-5 py-10 text-center">
-          <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>{emptyText ?? "Nothing here yet"}</p>
+          <p className={`text-sm ${THEME_CLASSES.text.tertiary}`}>{emptyText ?? "Nothing here yet."}</p>
         </div>
       ) : (
         <div className="p-2">{children}</div>

@@ -66,7 +66,7 @@ const TodoDetails = () => {
           todo.seriesDates?.length ? "Revision advanced! ✨" : "Task completed! 🎉"
         );
       } catch {
-        toast.error("Failed to update task");
+        toast.error("Unable to update task.");
       } finally {
         setUpdatingStatus(false);
       }
@@ -104,9 +104,9 @@ const TodoDetails = () => {
       await dispatch(
         updateTodo({ id: todo.id, updates: { status: TODO_STATUS.PENDING, subtasks: resetSubtasks } })
       ).unwrap();
-      toast.success("Task reopened!");
+      toast.success("Task reopened successfully.");
     } catch {
-      toast.error("Failed to reopen task");
+      toast.error("Unable to reopen task.");
     }
   };
 
@@ -122,10 +122,10 @@ const TodoDetails = () => {
           status: TODO_STATUS.PENDING,
         })
       ).unwrap();
-      toast.success("Task duplicated for today!");
+      toast.success("Task duplicated for today.");
       navigate("/todos");
     } catch {
-      toast.error("Failed to duplicate task");
+      toast.error("Unable to duplicate task.");
     }
   };
 
@@ -134,7 +134,7 @@ const TodoDetails = () => {
     if (!todo) return;
     try {
       await dispatch(deleteTodo(todo.id)).unwrap();
-      toast.success("Task deleted");
+      toast.success("Task deleted successfully.");
       navigate("/todos");
     } catch {
       toast.error("Failed to delete task");

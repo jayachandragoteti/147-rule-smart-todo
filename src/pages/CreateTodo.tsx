@@ -145,7 +145,7 @@ const CreateTodo = () => {
 
   const onSubmit = async (data: CreateTodoFormValues) => {
     if (data.reminderEnabled && !data.scheduledTime?.trim()) {
-      toast.error("Set an exact time before enabling notifications.");
+      toast.error("Please set a time before enabling reminders.");
       return;
     }
 
@@ -184,10 +184,10 @@ const CreateTodo = () => {
        // Update mode
        const resultAction = await dispatch(updateTodo({ id, updates: todoData }));
        if (updateTodo.fulfilled.match(resultAction)) {
-           toast.success("Task updated successfully!");
+           toast.success("Task updated successfully.");
            navigate(`/todo/${id}`);
        } else {
-           toast.error("Failed to update task");
+           toast.error("Unable to update task.");
        }
     } else {
        // Create mode
@@ -200,10 +200,10 @@ const CreateTodo = () => {
         };
        const resultAction = await dispatch(createTodo(createPayload));
        if (createTodo.fulfilled.match(resultAction)) {
-         toast.success("Task created successfully!");
+         toast.success("Task created successfully.");
          navigate("/todos");
        } else {
-         toast.error("Failed to create task");
+         toast.error("Unable to create task.");
        }
     }
   };

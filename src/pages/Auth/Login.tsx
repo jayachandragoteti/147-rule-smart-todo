@@ -42,7 +42,7 @@ const Login = () => {
           
           <div className="space-y-1">
             <h2 className={`text-2xl font-bold tracking-tight ${THEME_CLASSES.text.primary}`}>
-                Welcome Back
+                Welcome back
             </h2>
             <p className={`text-sm font-medium ${THEME_CLASSES.text.tertiary}`}>
                 Sign in to access your tasks.
@@ -98,7 +98,7 @@ const Login = () => {
           >
             {loading ? "Logging in..." : (
                 <>
-                    Login
+                    Sign In
                     <ArrowRight size={18} />
                 </>
             )}

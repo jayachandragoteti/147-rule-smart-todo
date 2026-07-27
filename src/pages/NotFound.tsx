@@ -19,10 +19,10 @@ const NotFound = () => {
 
         <div className="space-y-4">
             <h1 className={`text-4xl font-black tracking-tight ${THEME_CLASSES.text.primary}`}>
-              Page Not Found
+              Page not found
             </h1>
             <p className={`text-lg font-medium leading-relaxed max-w-sm mx-auto ${THEME_CLASSES.text.tertiary}`}>
-              The page you are looking for doesn't exist or has been moved.
+              The page you are looking for does not exist or may have been moved.
             </p>
         </div>
 

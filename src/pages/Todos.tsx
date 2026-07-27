@@ -80,7 +80,7 @@ const Todos = () => {
       setUpdatingId(todo.id);
       try {
         await dispatch(completeTodo(todo.id)).unwrap();
-        toast.success("Task completed! 🎉");
+        toast.success("Task completed successfully. 🎉");
       } catch { toast.error("Failed to update"); } finally { setUpdatingId(null); }
       return;
     }
@@ -94,10 +94,10 @@ const Todos = () => {
   const handleDelete = async (id: string) => {
     try {
       await dispatch(deleteTodo(id)).unwrap();
-      toast.success("Task deleted");
+      toast.success("Task deleted successfully.");
       setDeleteConfirmId(null);
     } catch {
-      toast.error("Failed to delete task");
+      toast.error("Unable to delete task.");
     }
   };
 
@@ -229,8 +229,8 @@ const Todos = () => {
             <CheckCircle2 size={36} className="mx-auto mb-3 text-[#22c55e] opacity-40" />
             <p className={`text-sm font-medium ${THEME_CLASSES.text.tertiary}`}>
               {search || filterStatus !== "all" || filterPriority !== "all"
-                ? "No tasks match your filters"
-                : "No tasks yet. Create your first one!"}
+                ? "No tasks match your current filters."
+                : "No tasks yet. Create your first one."}
             </p>
             {!(search || filterStatus !== "all" || filterPriority !== "all") && (
               <Link
