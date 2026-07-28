@@ -53,6 +53,22 @@ const appendHistoryEntry = (todo: Todo, status: TodoStatus, scheduledDate: strin
   };
 };
 
+export const buildNextRecurringOccurrenceUpdate = (
+  todo: Todo,
+  nextDate: string
+): PartialTodoUpdate => {
+  const resetSubtasks = (todo.subtasks ?? []).map((subtask) => ({
+    ...subtask,
+    completed: false,
+  }));
+
+  return {
+    scheduledDate: nextDate,
+    status: TODO_STATUS.PENDING,
+    subtasks: resetSubtasks,
+  };
+};
+
 const getRecurringCompletionUpdate = (todo: Todo): PartialTodoUpdate => {
   if (todo.apply137Rule && todo.seriesDates && todo.seriesDates.length > 0) {
     if (isTodoDueToday(todo)) {
@@ -63,7 +79,7 @@ const getRecurringCompletionUpdate = (todo: Todo): PartialTodoUpdate => {
     }
     const nextDate = getNextValidSeriesDate(todo.seriesDates, todo.scheduledDate);
     if (nextDate) {
-      return { scheduledDate: nextDate, status: TODO_STATUS.PENDING };
+      return buildNextRecurringOccurrenceUpdate(todo, nextDate);
     }
     return {
       status: TODO_STATUS.COMPLETED,
@@ -79,14 +95,12 @@ const getRecurringCompletionUpdate = (todo: Todo): PartialTodoUpdate => {
         ...appendHistoryEntry(todo, TODO_STATUS.COMPLETED, todo.scheduledDate),
       };
     }
-    return {
-      scheduledDate: getNextValidRecurrenceDate(
-        todo.scheduledDate,
-        todo.recurrence as any,
-        todo.weeklyDays
-      ),
-      status: TODO_STATUS.PENDING,
-    };
+    const nextDate = getNextValidRecurrenceDate(
+      todo.scheduledDate,
+      todo.recurrence as any,
+      todo.weeklyDays
+    );
+    return buildNextRecurringOccurrenceUpdate(todo, nextDate);
   }
 
   return {
@@ -113,10 +127,7 @@ const normalizeCompletedRecurringTodo = async (
   if (todo.apply137Rule && todo.seriesDates && todo.seriesDates.length > 0) {
     const nextDate = getNextValidSeriesDate(todo.seriesDates, todo.scheduledDate);
     if (nextDate && nextDate !== todo.scheduledDate) {
-      return await updateTodoInFirestore(uid, todo.id, {
-        scheduledDate: nextDate,
-        status: TODO_STATUS.PENDING,
-      });
+      return await updateTodoInFirestore(uid, todo.id, buildNextRecurringOccurrenceUpdate(todo, nextDate));
     }
     return todo;
   }
@@ -128,10 +139,7 @@ const normalizeCompletedRecurringTodo = async (
       todo.weeklyDays
     );
     if (nextDate !== todo.scheduledDate) {
-      return await updateTodoInFirestore(uid, todo.id, {
-        scheduledDate: nextDate,
-        status: TODO_STATUS.PENDING,
-      });
+      return await updateTodoInFirestore(uid, todo.id, buildNextRecurringOccurrenceUpdate(todo, nextDate));
     }
   }
 
